@@ -1,9 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import "tailwindcss";
 
 /* Plugins */
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-main: "Inter Tight", sans-serif;
+  --transition-duration: 250ms;
+}
 
 :root {
   --background: oklch(1 0 0);
@@ -116,10 +123,53 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *, *::before, *::after {
+    @apply box-border m-0 p-0 border-border outline-ring/50;
   }
+
+  html {
+    @apply text-[62.5%] scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen text-base antialiased font-main;
+  }
+
+  img, picture, video, canvas, svg {
+    @apply block max-w-full;
+  }
+
+  input, button, textarea, select {
+    @apply text-inherit;
+  }
+
+  p, h1, h2, h3, h4, h5, h6 {
+    @apply break-words;
+  }
+
+  ul, ol {
+    @apply list-none;
+  }
+
+  p, h1, h2, h3, h4, h5, h6 {
+    @apply break-words;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  table {
+    @apply w-full border-collapse;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
