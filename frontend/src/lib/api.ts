@@ -1,17 +1,17 @@
 import axios from 'axios';
 
-// Tạo một instance của Axios với cấu hình mặc định
+// tao mot instance cua axios voi cau hinh mac dinh
 const api = axios.create({
-  baseURL: 'http://your-api-url.com', // Thay thế bằng URL API của bạn
+  baseURL: 'http://your-api-url.com', 
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Thêm interceptor để xử lý request và response
+// them interceptor de xu li request va respond
 api.interceptors.request.use(
   (config) => {
-    // Thêm token vào header nếu có
+    // them token vao header
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -28,9 +28,9 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Xử lý lỗi response (ví dụ: token hết hạn)
+    // xuli loi
     if (error.response.status === 401) {
-      // Xử lý đăng xuất hoặc làm mới token
+      // xu li dang xuat/lam moi token
     }
     return Promise.reject(error);
   }
