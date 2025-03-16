@@ -1,7 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -14,7 +17,7 @@ async function bootstrap() {
     .setTitle('E-learning API')
     .setDescription('API documentation for the e-learning platform')
     .setVersion('1.0')
-    .addBearerAuth() // Nếu dùng JWT Auth
+    //.addBearerAuth() // Nếu dùng JWT Auth
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
