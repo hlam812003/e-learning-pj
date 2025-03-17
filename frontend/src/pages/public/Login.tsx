@@ -1,28 +1,21 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-
-const schema = z.object({
-  email: z.string().email({ message: 'Pleas enter a valid Email.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-});
-
-type FormData = z.infer<typeof schema>;
+import { loginSchema, LoginFormData } from '@/lib/validations';
 
 export default function LoginPage() {
   const { login } = useAuthStore();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
       navigate('/');
@@ -32,7 +25,7 @@ export default function LoginPage() {
   };
 
   return (
-        <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-emerald-25 to-emerald-50">
+        <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
         <div className="w-1/2 h-full flex flex-col items-center justify-center gap-10">
           <div className="w-full max-w-[400px]">
             <Card className="w-full shadow-lg">

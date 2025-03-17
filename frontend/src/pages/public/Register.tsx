@@ -1,33 +1,21 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-
-const schema = z.object({
-  email: z.string().email({ message: 'Please enter a valid Email.' }),
-  username: z.string().min(3, { message: 'Username must have at least 3 characters' }),
-  password: z.string().min(6, { message: 'Password must have at least 6 characters' }),
-  confirmPassword: z.string().min(6, { message: 'Confirm Password must have at least 6 characters' }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match.',
-  path: ['confirmPassword'],
-});
-
-type FormData = z.infer<typeof schema>;
+import { registerSchema, RegisterFormData } from '@/lib/validations';
 
 export default function RegisterPage() {
   const { register: registerUser } = useAuthStore();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser(data.email, data.username, data.password);
       navigate('/');
@@ -37,7 +25,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-emerald-25 to-emerald-50">
+    <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
       <div className="w-1/2 h-full flex flex-col items-center justify-center gap-10">
         <div className="w-full max-w-[400px]">
           <Card className="w-full shadow-lg">

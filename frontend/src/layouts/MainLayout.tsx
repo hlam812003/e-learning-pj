@@ -39,7 +39,7 @@ export default function MainLayout() {
           </Link>
         </div>
       </header>
-      <main className="w-full px-24">
+      <main className="w-full">
         <Outlet />
       </main>
       {/* <footer>Footer chung</footer> */}
