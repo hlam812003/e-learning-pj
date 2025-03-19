@@ -31,8 +31,12 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="w-full min-h-screen flex items-center justify-center relative">
-      <Card className="w-[40rem] shadow-lg relative z-[999] bg-white/10 backdrop-blur-lg border border-white/20">
+    <section className="w-full min-h-screen flex items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-white to-transparent" />
+      
+      <div className="absolute inset-0 bg-gradient-to-tl from-indigo-100 via-transparent to-transparent" />
+      
+      <Card className="w-[40rem] shadow-lg relative z-[999] bg-white backdrop-blur-lg">
         <BorderTrail 
           style={{
             boxShadow:
@@ -41,7 +45,7 @@ export default function LoginPage() {
           size={100}
         />
         <CardHeader className="text-center mb-[.65rem]">
-          <CardTitle className="flex flex-col items-center gap-4 mb-[.7rem]">
+          <CardTitle className="flex flex-col items-center gap-4 mb-[.8rem]">
             <span className="text-[3.5rem] font-bold">Learnify.</span>
             <span className="text-[1.5rem] font-semibold text-gray-600">
               Log in with your email.
