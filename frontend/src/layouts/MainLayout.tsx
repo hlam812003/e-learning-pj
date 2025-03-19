@@ -30,16 +30,16 @@ export default function MainLayout() {
           </nav>
         </div>
         <div className="w-1/3 flex items-center justify-end gap-9">
-          <Link to="/login" className="text-black text-[1.45rem] relative group">
+          <Link to="/auth/login" className="text-black text-[1.45rem] relative group">
             <span>Log in</span>
             <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
           </Link>
-          <Link to="/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
+          <Link to="/auth/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
             Sign Up
           </Link>
         </div>
       </header>
-      <main className="w-full">
+      <main className="w-full px-24">
         <Outlet />
       </main>
       {/* <footer>Footer chung</footer> */}

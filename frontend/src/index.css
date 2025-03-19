@@ -10,6 +10,8 @@
 @theme {
   --font-main: "Inter Tight", sans-serif;
   --transition-duration: 250ms;
+  --background-position: center center;
+  --background-size: 100% 100%;
 }
 
 :root {
@@ -171,5 +173,14 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
