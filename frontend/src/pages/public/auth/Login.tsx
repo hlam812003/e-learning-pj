@@ -94,10 +94,7 @@ export default function LoginPage() {
                 )}
               </div>
               <div className='flex justify-end'>
-                <Link to="/auth/forgot-password" className="relative group">
-                  <span className='font-medium text-[1.35rem]'>Forgot Password?</span>
-                  <span className='absolute -bottom-[.2rem] left-0 w-full h-[.125rem] bg-accent-foreground'></span>
-                </Link>
+                <Link to="/auth/forgot-password" className="font-medium text-[1.35rem] underline">Forgot Password?</Link>
               </div>
             </div>
             <Button type="submit" className={cn('w-full h-[3.9rem] text-[1.3rem] cursor-pointer transition-all', errors.email || errors.password && 'bg-red-500')}>
@@ -109,10 +106,7 @@ export default function LoginPage() {
           <p className="text-[1.25rem] text-gray-600">
             Doesn't Have An Account?
           </p>
-          <Link to="/auth/signup" className="relative group">
-            <span className='font-medium text-[1.25rem]'>Sign up</span>
-            <span className='absolute -bottom-[.2rem] left-0 w-full h-[.125rem] bg-accent-foreground'></span>
-          </Link>
+          <Link to="/auth/signup" className="font-medium text-[1.25rem] underline">Sign up</Link>
         </CardFooter>
       </Card>
     </section>
