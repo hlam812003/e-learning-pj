@@ -1,28 +1,28 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuthStore } from '@/stores/authStore';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { registerSchema, RegisterFormData } from '@/lib/validations';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAuthStore } from '@/stores/authStore'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { registerSchema, RegisterFormData } from '@/lib/validations'
 
 export default function RegisterPage() {
-  const { register: registerUser } = useAuthStore();
-  const navigate = useNavigate();
+  const { register: registerUser } = useAuthStore()
+  const navigate = useNavigate()
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-  });
+  })
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await registerUser(data.email, data.username, data.password);
-      navigate('/');
+      await registerUser(data.email, data.username, data.password)
+      navigate('/')
     } catch (error) {
-      console.error('SignUp fail', error);
+      console.error('SignUp fail', error)
     }
-  };
+  }
 
   return (
     <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             <CardFooter className="flex justify-center">
               <p className="text-lg text-gray-600">
                 Already have an account?{' '}
-                <a href="/login" className="text-emerald-600 hover:underline">
+                <a href="/auth/login" className="text-emerald-600 hover:underline">
                   Sign in now
                 </a>
               </p>
@@ -104,9 +104,6 @@ export default function RegisterPage() {
           </Card>
         </div>
       </div>
-      <div className="w-1/2 h-full flex items-center justify-center">
-        <p className="text-4xl font-bold text-black">Welcome to our E-Learning by 3D AI Teacher!</p>
-      </div>
     </section>  
-  );
+  )
 }
