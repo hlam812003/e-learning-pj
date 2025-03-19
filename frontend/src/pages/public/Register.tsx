@@ -25,7 +25,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <section className="w-full h-[58rem] flex items-center justify-center bg-gradient-to-br from-white to-emerald-50">
+    <section className="w-full h-[58rem] flex items-center justify-center bg-white">
       <div className="w-1/2 h-full flex flex-col items-center justify-center gap-10">
         <div className="w-full max-w-[400px]">
           <Card className="w-full shadow-lg">
