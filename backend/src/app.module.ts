@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { join } from 'path';
 import { ApiModule } from './api/api.module';
 import { ConfigModule } from '@nestjs/config';
+import { UserResolver } from './user/user.resolver';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -16,8 +18,9 @@ import { ConfigModule } from '@nestjs/config';
     }),
     ConfigModule.forRoot(),
     ApiModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, UserResolver],
 })
 export class AppModule {}

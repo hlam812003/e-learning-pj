@@ -8,15 +8,49 @@ type ApiResponse {
   token: String
 }
 
+type UserResponse {
+  id: String!
+  username: String!
+  email: String!
+  phoneNumber: String
+  role: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Query {
+  users: [UserResponse!]!
+  user(id: String!): UserResponse!
   hello: String!
 }
 
 type Mutation {
+  createUser(data: CreateUserInput!): UserResponse!
+  updateUser(data: UpdateUserInput!): UserResponse!
+  deleteUser(id: String!): Boolean!
   register(data: RegisterInput!): ApiResponse!
   login(data: LoginInput!): ApiResponse!
   googleLogin(data: GoogleLoginInput!): ApiResponse!
   logout: Boolean!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  phoneNumber: String
+  password: String!
+}
+
+input UpdateUserInput {
+  id: String!
+  username: String
+  email: String
+  phoneNumber: String
 }
 
 input RegisterInput {
