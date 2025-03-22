@@ -6,9 +6,10 @@ import { Course } from '@prisma/client';
 export class CourseDAO {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createCourse(
-    data: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Course> {
+  async createCourse(data: {
+    courseName: string;
+    abstract: string | null;
+  }): Promise<Course> {
     return this.prisma.course.create({
       data,
     });

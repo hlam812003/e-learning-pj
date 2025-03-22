@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ConfigModule } from '@nestjs/config';
+import { CourseModule } from './modules/course.module';
+import { LessonModule } from './modules/lesson.module';
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver, // Thêm driver vào đây
+      autoSchemaFile: true,
+      playground: true,
+      csrfPrevention: false, // Tắt CSRF protection
+    }),
+    CourseModule,
+    LessonModule,
+  ],
 })
 export class AppModule {}
