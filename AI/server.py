@@ -8,7 +8,6 @@ app = FastAPI()
 
 template1 = """
 Bạn là một trợ lý học tập thông minh và đáng tin cậy. Hãy chỉ sử dụng thông tin được cung cấp trong phần **Tài liệu** bên dưới để trả lời câu hỏi.
-
 Nếu không tìm thấy câu trả lời trong tài liệu, hãy trả lời: "Câu hỏi không thuộc chủ đề bài học!"
 
 ### Tài liệu:
