@@ -103,6 +103,12 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center items-center gap-2">
+          <Link to="/">
+                  <Icon 
+                    icon="ic:round-arrow-back" 
+                    className="text-gray-600 text-[3rem] absolute left-15 -translate-y-1/2" 
+                  />
+                </Link>
           <p className="text-[1.25rem] text-gray-600">
             Doesn't Have An Account?
           </p>
