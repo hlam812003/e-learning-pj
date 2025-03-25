@@ -2,12 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type ApiResponse {
-  success: Boolean!
-  message: String
-  token: String
-}
-
 type UserResponse {
   id: String!
   username: String!
@@ -23,6 +17,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type AuthResponse {
+  success: Boolean!
+  message: String
+  token: String
+}
+
 type Query {
   users: [UserResponse!]!
   user(id: String!): UserResponse!
@@ -33,9 +33,9 @@ type Mutation {
   createUser(data: CreateUserInput!): UserResponse!
   updateUser(data: UpdateUserInput!): UserResponse!
   deleteUser(id: String!): Boolean!
-  register(data: RegisterInput!): ApiResponse!
-  login(data: LoginInput!): ApiResponse!
-  googleLogin(data: GoogleLoginInput!): ApiResponse!
+  register(data: RegisterInput!): AuthResponse!
+  login(data: LoginInput!): AuthResponse!
+  googleLogin(data: GoogleLoginInput!): AuthResponse!
   logout: Boolean!
 }
 

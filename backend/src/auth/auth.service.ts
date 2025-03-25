@@ -1,31 +1,30 @@
 import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { RegisterInput, LoginInput, GoogleLoginInput } from './dto/api.input';
-import { ApiResponse } from './dto/api.response';
+import { RegisterInput, LoginInput, GoogleLoginInput } from './dto/auth.input';
+import { AuthResponse } from './dto/auth.response';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { AuthDAO } from './dao/auth.dao';
 
 @Injectable()
-export class ApiService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+export class AuthService {
+  constructor(private authDAO: AuthDAO, private prisma: PrismaService, private jwtService: JwtService) {}
 
   // ✅ Sửa lỗi xử lý email đã tồn tại
-  async register(data: RegisterInput): Promise<ApiResponse> {
+  async register(data: RegisterInput): Promise<AuthResponse> {
     try {
-      const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+      const existingUser = await this.authDAO.findUserByEmail(data.email);
 
       if (existingUser) {
         throw new ConflictException('Email already exists');
       }
 
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const user = await this.prisma.user.create({
-        data: {
+      const user = await this.authDAO.createUser({
           email: data.email,
           username: 'testuser',
           password: hashedPassword,
           role: 'USER',
-        },
       });
 
       return { 
@@ -39,8 +38,8 @@ export class ApiService {
   }
 
   // ✅ Sửa lỗi khi email không tồn tại hoặc mật khẩu sai
-  async login(data: LoginInput): Promise<ApiResponse> {
-    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+  async login(data: LoginInput): Promise<AuthResponse> {
+    const user = await this.authDAO.findUserByEmail(data.email);
 
     if (!user) {
       return {
@@ -69,29 +68,24 @@ export class ApiService {
   }
 
   // ✅ Kiểm tra Google ID trước khi tạo user mới
-  async googleLogin(data: GoogleLoginInput): Promise<ApiResponse> {
+  async googleLogin(data: GoogleLoginInput): Promise<AuthResponse> {
     if (!data.googleId || !data.email) {
       throw new BadRequestException('Google ID and email are required');
     }
 
-    let user = await this.prisma.user.findUnique({ where: { email: data.email } });
+    let user = await this.authDAO.findUserByEmail(data.email);
 
     let isNewUser = false;
     if (!user) {
       isNewUser = true;
-      user = await this.prisma.user.create({
-        data: {
+      user = await this.authDAO.createUser({
           email: data.email,
           googleId: data.googleId,
           role: 'USER',
-        },
       });
     } else if (!user.googleId) {
       // Nếu user đã tồn tại nhưng chưa có googleId, cập nhật
-      await this.prisma.user.update({
-        where: { email: data.email },
-        data: { googleId: data.googleId },
-      });
+      user = await this.authDAO.updateUserGoogleId(data.email, data.googleId);
     }
 
     return { 

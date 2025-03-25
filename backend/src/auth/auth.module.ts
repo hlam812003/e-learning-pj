@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ApiService } from './api.service';
-import { ApiResolver } from './api.resolver';
+import { AuthService } from './auth.service';
+import { AuthResolver } from './auth.resolver';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { GoogleStrategy } from './google.strategy';
+import { GoogleStrategy } from '../auth/google.strategy';
+import { AuthDAO } from './dao/auth.dao';
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import { GoogleStrategy } from './google.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [ApiService, ApiResolver, PrismaService, GoogleStrategy],
+  providers: [AuthService, AuthResolver, AuthDAO, PrismaService, GoogleStrategy]
 })
-export class ApiModule {}
+export class AuthModule {}

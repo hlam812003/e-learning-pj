@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class ApiResponse {
+export class AuthResponse {
   @Field(() => Boolean)  // Đây là field không thể null
   success: boolean;
 
@@ -12,14 +12,3 @@ export class ApiResponse {
   token?: string;
 }
 
-@ObjectType()
-export class AuthResponse {
-  @Field(() => Boolean)
-  success: boolean;
-
-  @Field(() => String, { nullable: true })
-  message?: string;
-
-  @Field()
-  token: string;
-}

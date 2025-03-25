@@ -1,0 +1,17 @@
+- Test đăng ký:
+mutation {
+  register(data: { email: "test@example.com", password: "123456" }) {
+    success
+    message
+    token
+  }
+}
+
+- Test Đăng nhập:
+mutation {
+  login(data: { email: "test@example.com", password: "123456" }) {
+    success
+    message
+    token
+  }
+}
