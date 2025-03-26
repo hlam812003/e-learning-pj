@@ -27,6 +27,7 @@ type Query {
   users: [UserResponse!]!
   user(id: String!): UserResponse!
   hello: String!
+  admin: String!
 }
 
 type Mutation {

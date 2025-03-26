@@ -15,3 +15,12 @@ mutation {
     token
   }
 }
+
+- Vào trang hello(trang yêu cầu đăng nhập):
+query {
+  hello
+}
+- Vào trang hello(trang yêu cầu role admin):
+query {
+  admin
+}
