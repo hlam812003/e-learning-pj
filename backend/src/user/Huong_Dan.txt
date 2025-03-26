@@ -1,0 +1,62 @@
+- Test xóa người dùng:
+mutation {
+  deleteUser(id: "1e507ff5-89ee-4b57-9882-e2d8131c1c20") 
+}
+- Test xem thông tin người dùng theo id nào đó:
+query {
+  user(id: "1e507ff5-89ee-4b57-9882-e2d8131c1c20") {  # Thay "1" bằng ID hợp lệ trong DB
+    id
+    username
+    email
+    phoneNumber
+    role
+    createdAt
+    updatedAt
+  }
+}
+- Test xem tất cả người dùng:
+query {
+  users {
+    id
+    username
+    email
+    phoneNumber
+    role
+    createdAt
+    updatedAt
+  }
+}
+
+- Test cập nhật thông tin:
+mutation {
+  updateUser(data: {
+    id: "1"
+    username: "new_username"
+    email: "new_email@example.com"
+  }) {
+    id
+    username
+    email
+    phoneNumber
+    role
+    createdAt
+    updatedAt
+  }
+}
+- Test tạo người dùng:
+mutation {
+  createUser(data: {
+    username: "test_user"
+    email: "test@example.com"
+    phoneNumber: "0123456789"
+    password: "password123"
+  }) {
+    id
+    username
+    email
+    phoneNumber
+    role
+    createdAt
+    updatedAt
+  }
+}
