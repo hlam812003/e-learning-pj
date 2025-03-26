@@ -1,26 +1,38 @@
+import { lazy } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
+import { globeConfig } from '@/configs'
+import { cn } from '@/lib'
+
+const Globe = lazy(() => import('@/components/Globe').then(module => ({ default: module.default })))
 
 export default function HomePage() {
   return (
-    <>
-      <section className="w-full h-[58rem] flex items-center justify-center">
-        <div className="w-1/2 h-full flex flex-col justify-center gap-5">
-          <p className="text-[4rem] font-bold w-[90%] leading-[5rem]">Unlock Your Potential with Immersive E-Learning guided by our 3D AI Teacher</p>
-          <p className="text-[1.75rem] font-normal w-[85%] mb-7">Discover expert-led courses with personalized guidance from our interactive 3D AI Teacher.</p>
-          <div className="flex items-center gap-10">
-            <Link to="/courses" className="rounded-full bg-primary text-white px-9 py-5 border border-primary font-medium flex items-center gap-5">
-              <span className="text-[1.5rem]">Explore Courses</span>
-              <Icon icon="ri:arrow-right-long-line" className="text-[2rem]" />
-            </Link>
-            <Link to="/about" className="bg-white text-primary text-[1.5rem] font-medium relative group"> 
-              <span>Learn More</span>
-              <span className="absolute opacity-0 left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:opacity-100 transition-all duration-300" />
-            </Link>
-          </div>
+    <section className="w-full h-[67.5rem] flex flex-col items-center pt-[4rem] relative">
+      <div
+        className={cn(
+          'absolute inset-0',
+          '[background-size:40px_40px]',
+          '[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]',
+          'dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]',
+        )}
+      />
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
+      <div className="w-full h-auto flex flex-col items-center text-center gap-4.5 mb-[1.5vh] relative z-10">
+        <p className="w-1/2 text-[5rem] font-bold leading-[6.75rem]">Unlock Your Potential with 3D AI Immersive Learning</p>
+        <p className="w-[33%] text-[1.75rem] font-normal mb-7">Discover expert-led courses with personalized guidance from our interactive 3D AI Teacher.</p>
+        <div className="flex items-center gap-10">
+          <Link to="/courses" className="rounded-full bg-primary text-white px-9 py-5 border border-primary font-medium flex items-center gap-5">
+            <span className="text-[1.5rem]">Explore Courses</span>
+            <Icon icon="ri:arrow-right-long-line" className="text-[2rem]" />
+          </Link>
+          <Link to="/about" className="bg-white relative group"> 
+            <span className="text-primary text-[1.5rem] font-medium">Learn More</span>
+            <span className="absolute opacity-0 left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:opacity-100 transition-all duration-300" />
+          </Link>
         </div>
-        <div className="w-1/2 h-full"></div>
-      </section>
-    </>
+      </div>
+      <Globe globeConfig={globeConfig.main} data={globeConfig.sampleArcs} />
+    </section>
   )
 }

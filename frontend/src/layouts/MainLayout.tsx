@@ -1,6 +1,27 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
 export default function MainLayout() {
+  const location = useLocation()
+
+  const navItems = [
+    {
+      title: 'Home',
+      path: '/'
+    },
+    {
+      title: 'About',
+      path: '/about'
+    },
+    {
+      title: 'Courses',
+      path: '/courses'
+    },
+    {
+      title: 'Contact',
+      path: '/contact'
+    }
+  ]
+
   return (
     <div className="min-h-screen w-full">
       <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center">
@@ -11,22 +32,18 @@ export default function MainLayout() {
         </div>
         <div className="w-1/3">
           <nav className="flex items-center justify-center gap-9">
-            <Link to="/" className="text-[1.5rem] relative group">
-              <span>Home</span>
-              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-            </Link>
-            <Link to="/about" className="text-[1.5rem] relative group">
-              <span>About</span>
-              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-            </Link>
-            <Link to="/courses" className="text-[1.5rem] relative group">
-              <span>Courses</span>
-              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-            </Link>
-            <Link to="/contact" className="text-[1.5rem] relative group">
-              <span>Contact</span>
-              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-            </Link>
+            {navItems.map((item, index) => {
+              return (
+                <Link key={index} to={item.path} className="relative group">
+                  <span className="text-[1.5rem]">{item.title}</span>
+                  <span 
+                    className={`
+                      absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:scale-x-100 transition-transform duration-250 origin-center
+                      ${location.pathname === item.path ? 'scale-x-100' : 'scale-x-0'}
+                    `} />
+                </Link>
+              )
+            })}
           </nav>
         </div>
         <div className="w-1/3 flex items-center justify-end gap-9">

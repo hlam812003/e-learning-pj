@@ -3,11 +3,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
-import { loginSchema, LoginFormData, cn } from '@/lib'
+import { loginSchema, cn } from '@/lib'
+import { LoginFormData } from '@/types'
 
+import { AuthContainer } from '@/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { AuthContainer } from '@/components'
 import { Icon } from '@iconify/react'
 
 export default function LoginPage() {
