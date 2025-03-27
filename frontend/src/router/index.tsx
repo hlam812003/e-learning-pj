@@ -2,7 +2,7 @@ import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { AuthLayout, MainLayout } from '@/layouts'
-import ErrorBoundary from '@/components/ErrorBoundary'
+import { ErrorBoundary } from '@/components'
 
 const HomePage = lazy(() => import('@/pages/public/Home'))
 const AboutPage = lazy(() => import('@/pages/public/About'))
