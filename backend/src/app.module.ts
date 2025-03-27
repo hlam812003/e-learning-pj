@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ConfigModule } from '@nestjs/config';
 import { CourseModule } from './modules/course.module';
 import { LessonModule } from './modules/lesson.module';
-import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './modules/user.module';
+import { AuthModule } from './modules/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
     }),
     CourseModule,
     LessonModule,
+    UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
