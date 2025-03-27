@@ -17,6 +17,12 @@ export class LessonResolver {
     }));
   }
 
+  @Query(() => [LessonDto])
+  async getLessonsByCourseId(
+    @Args('id', { type: () => String }) id: string,
+  ): Promise<LessonDto[]> {
+    return this.lessonService.getLessonsByCourseId(id);
+  }
   @Query(() => LessonDto, { nullable: true })
   async getLessonById(
     @Args('id', { type: () => String }) id: string,

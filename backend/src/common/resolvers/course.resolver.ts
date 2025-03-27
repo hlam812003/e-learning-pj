@@ -9,7 +9,6 @@ export class CourseResolver {
   constructor(private readonly courseService: CourseService) {}
 
   @Query(() => [CourseDto])
-  @Query(() => [CourseDto])
   async getAllCourses(): Promise<CourseDto[]> {
     const courses = await this.courseService.getAllCourses();
     return courses.map((course) => ({

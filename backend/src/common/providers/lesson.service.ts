@@ -20,10 +20,12 @@ export class LessonService {
     return this.lessonDAO.getLessonById(id);
   }
 
+  async getLessonsByCourseId(id: string): Promise<Lesson[]> {
+    return this.lessonDAO.getLessonsByCourseId(id);
+  }
   async getAllLessons(): Promise<Lesson[]> {
     return this.lessonDAO.getAllLessons();
   }
-
   async updateLesson(data: UpdateLessonDto): Promise<Lesson> {
     return this.lessonDAO.updateLesson(data.id, data);
   }

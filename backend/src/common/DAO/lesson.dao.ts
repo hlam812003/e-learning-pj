@@ -13,6 +13,9 @@ export class LessonDAO {
   }): Promise<Lesson> {
     return this.prisma.lesson.create({ data });
   }
+  async getLessonsByCourseId(courseId: string): Promise<Lesson[]> {
+    return this.prisma.lesson.findMany({ where: { courseId } });
+  }
 
   async getLessonById(id: string): Promise<Lesson | null> {
     return this.prisma.lesson.findUnique({ where: { id } });
