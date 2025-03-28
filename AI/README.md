@@ -1,19 +1,7 @@
-## build dockerfile
+## build containers with docker-compose.yml
 ```bash
-docker build -t my-fastapi .
-``` 
+docker-compose up -d
 
-## run container
-```bash
-docker run -p 8000:8000 -it -v /e/learn/oose/ai:/app --name api-ai my-fastapi bash
-```
-
-**change folder you want association  
-/e/learn/oose/ai**
-
-## run api
-```bash 
-uvicorn server:app --host 0.0.0.0 --port 8000 
 ```
 ## run the file python main.py for call api
 - run file 
