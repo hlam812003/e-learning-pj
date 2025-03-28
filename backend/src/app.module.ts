@@ -12,7 +12,9 @@ import { AuthModule } from './modules/auth.module';
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver, // Thêm driver vào đây
-      autoSchemaFile: true,
+      autoSchemaFile: 'schema.gql',
+      debug: true, // Bật debug mode
+      introspection: true,
       playground: true,
       csrfPrevention: false, // Tắt CSRF protection
     }),
