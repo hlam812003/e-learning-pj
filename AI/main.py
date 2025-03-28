@@ -5,7 +5,7 @@ type = int(input("Nhập loại: "))
 if type == 1:
     id = int(input("Nhập id: "))
     question = str(input("Nhập câu hỏi: "))
-    url = "http://localhost:8000/ask"
+    url = "http://localhost/ask"
 
     try:
         response = requests.post(
@@ -20,7 +20,7 @@ if type == 1:
 else:
     id = int(input("Nhập id: "))
     system_prompt = str(input("nhap cam xuc: "))
-    url = "http://localhost:8000/rewrite-pdf-emotion"
+    url = "http://localhost/rewrite-pdf-emotion"
 
     try:
         response = requests.post(
