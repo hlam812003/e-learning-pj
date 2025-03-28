@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { User } from '@prisma/client';
-import { CreateUserInput, UpdateUserInput } from '../DTO/user/user.input';
+import { UpdateUserInput } from '../DTO/user/user.input';
 
 @Injectable()
 export class UserDAO {

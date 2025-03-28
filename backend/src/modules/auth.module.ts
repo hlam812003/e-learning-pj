@@ -28,5 +28,6 @@ import { AuthDAO } from '../common/DAO/auth.dao';
     PrismaService,
     GoogleStrategy,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}
