@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import {
   FastifyAdapter,
@@ -11,19 +10,9 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-
-  // Cấu hình Swagger
-  const config = new DocumentBuilder()
-    .setTitle('E-learning API')
-    .setDescription('API documentation for the e-learning platform')
-    .setVersion('1.0')
-    //.addBearerAuth() // Nếu dùng JWT Auth
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-
+  app.enableCors();
   await app.listen(3000);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
