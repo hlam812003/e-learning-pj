@@ -4,6 +4,9 @@
   "description": "",
   "author": "",
   "private": true,
+  "main": "./src/main.ts",
+  "schema": "./src/prisma/schema.prisma",
+
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
