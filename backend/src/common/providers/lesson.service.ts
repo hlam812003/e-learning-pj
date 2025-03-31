@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
 import { LessonDAO } from '../DAO/lesson.dao';
 import { CreateLessonDto } from '../DTO/lesson/create-lesson.dto';
 import { UpdateLessonDto } from '../DTO/lesson/update-lesson.dto';

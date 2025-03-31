@@ -1,8 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,6 +29,7 @@ export class AuthGuard implements CanActivate {
       ctx.user = decoded; // Gán thông tin user vào context
       return true;
     } catch (error) {
+      console.error('Token verification failed:', error);
       return false;
     }
   }

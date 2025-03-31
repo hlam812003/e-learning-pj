@@ -103,7 +103,6 @@ model Message {
 model Conversation {
   id            String    @id @default(uuid())
   name          String?
-  isGroup       Boolean   @default(false)
   creator       User      @relation(fields: [creatorId], references: [id])
   creatorId     String
   messages      Message[]
