@@ -4,8 +4,11 @@ services:
   ai_api:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: ai_api
-    image: ai-myapi:latest       
+    image: ai-myapi:latest    
+    environment:
+      - PYTHONUNBUFFERED=1   
     expose:
       - "8000"
     volumes:
