@@ -10,8 +10,9 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  const port = process.env.PORT || 8000;
   app.enableCors();
-  await app.listen(3000);
+  await app.listen(port);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
