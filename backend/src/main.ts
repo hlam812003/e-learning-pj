@@ -13,8 +13,11 @@ async function bootstrap() {
     }),
   );
   const port = process.env.PORT || 10000;
+  const address =
+    process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
   app.enableCors();
-  await app.listen(port, '0.0.0.0', (err, address) => {
+  await app.listen(port, address, (err, address) => {
     if (err) {
       console.error('Error starting server:', err);
       process.exit(1);
