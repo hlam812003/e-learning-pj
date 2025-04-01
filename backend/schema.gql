@@ -40,6 +40,14 @@ type AuthResponse {
   token: String
 }
 
+type ConversationResponse {
+  id: String!
+  name: String
+  creatorId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Query {
   getAllCourses: [CourseDto!]!
   getCourseById(id: String!): CourseDto
@@ -50,6 +58,8 @@ type Query {
   user(id: String!): UserResponse!
   hello: String!
   admin: String!
+  myConversations: [ConversationResponse!]!
+  conversation(id: String!): ConversationResponse
 }
 
 type Mutation {
@@ -66,6 +76,9 @@ type Mutation {
   login(data: LoginInput!): AuthResponse!
   googleLogin(data: GoogleLoginInput!): AuthResponse!
   logout: Boolean!
+  createConversation(data: CreateConversationInput!): ConversationResponse!
+  updateConversation(data: UpdateConversationInput!): ConversationResponse!
+  deleteConversation(id: String!): ConversationResponse!
 }
 
 input CreateCourseDto {
@@ -119,4 +132,14 @@ input LoginInput {
 input GoogleLoginInput {
   googleId: String!
   email: String!
+}
+
+input CreateConversationInput {
+  name: String
+  creatorId: String!
+}
+
+input UpdateConversationInput {
+  id: String!
+  name: String
 }

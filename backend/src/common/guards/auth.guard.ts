@@ -1,15 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,20 +10,23 @@ export class AuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const ctx = GqlExecutionContext.create(context).getContext();
-    const authHeader = ctx.req.headers.authorization;
-    
-    if (!authHeader) {
-      return false;
+    const authHeader = ctx.req?.headers?.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Invalid authorization header');
     }
 
     const token = authHeader.split(' ')[1];
+    if (!token) {
+      throw new UnauthorizedException('No token provided');
+    }
+
     try {
       const decoded = this.jwtService.verify(token);
-      ctx.user = decoded; // Gán thông tin user vào context
+      ctx.user = decoded;
       return true;
     } catch (error) {
-      console.error('Token verification failed:', error);
-      return false;
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }
@@ -40,12 +36,16 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>(ROLES_KEY, context.getHandler());
+    const requiredRoles = this.reflector.get<string[]>(
+      ROLES_KEY,
+      context.getHandler(),
+    );
     if (!requiredRoles) return true;
 
-    const ctx = GqlExecutionContext.create(context).getContext();
+    const ctx: { user?: { role: string } } =
+      GqlExecutionContext.create(context).getContext();
     const user = ctx.user;
 
-    return user && requiredRoles.includes(user.role);
+    return !!user && requiredRoles.includes(user.role);
   }
 }

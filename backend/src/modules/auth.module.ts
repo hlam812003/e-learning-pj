@@ -13,7 +13,7 @@ import { AuthDAO } from '../common/DAO/auth.dao';
     ConfigModule,
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule], // ✅ Đảm bảo ConfigModule được import
+      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
@@ -28,6 +28,6 @@ import { AuthDAO } from '../common/DAO/auth.dao';
     PrismaService,
     GoogleStrategy,
   ],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule], // Added JwtModule to exports
 })
 export class AuthModule {}
