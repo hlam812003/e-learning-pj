@@ -1,4 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { JSX } from 'react'
+import { PageTransition } from '@/components'
 
 export default function MainLayout() {
   const location = useLocation()
@@ -22,8 +24,8 @@ export default function MainLayout() {
     }
   ]
 
-  return (
-    <div className="min-h-screen w-full">
+  const MainNav = (): JSX.Element => {
+    return (
       <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center">
         <div className="w-1/3">
           <Link to="/">
@@ -56,10 +58,17 @@ export default function MainLayout() {
           </Link>
         </div>
       </header>
-      <main className="w-full px-24">
-        <Outlet />
+    )
+  }
+
+  return (
+    <div className="min-h-screen w-full">
+      <MainNav />
+      <main className="px-24">
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </main>
-      {/* <footer>Footer chung</footer> */}
     </div>
   )
 }
