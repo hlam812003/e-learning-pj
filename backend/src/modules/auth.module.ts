@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { Module } from '@nestjs/common';
 import { AuthService } from '../common/providers/auth.service';
 import { AuthResolver } from '../common/resolvers/auth.resolver';
