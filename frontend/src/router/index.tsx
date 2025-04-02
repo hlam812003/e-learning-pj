@@ -8,6 +8,7 @@ const HomePage = lazy(() => import('@/pages/public/Home'))
 const AboutPage = lazy(() => import('@/pages/public/About'))
 const LoginPage = lazy(() => import('@/pages/public/auth/Login'))
 const RegisterPage = lazy(() => import('@/pages/public/auth/Register'))
+const ContactPage = lazy(() => import('@/pages/public/Contact'))
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> }
     ],
     errorElement: <ErrorBoundary />
   },

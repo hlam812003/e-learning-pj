@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { Module } from '@nestjs/common';
 import { AuthService } from '../common/providers/auth.service';
 import { AuthResolver } from '../common/resolvers/auth.resolver';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -13,7 +14,7 @@ import { AuthDAO } from '../common/DAO/auth.dao';
     ConfigModule,
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule], // ✅ Đảm bảo ConfigModule được import
+      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
@@ -28,6 +29,6 @@ import { AuthDAO } from '../common/DAO/auth.dao';
     PrismaService,
     GoogleStrategy,
   ],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule], // Added JwtModule to exports
 })
 export class AuthModule {}
