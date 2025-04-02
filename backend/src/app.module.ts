@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
 import { EnrollmentModule } from './modules/enrollment.module';
-import { ProgressModule } from './progress/progress.module';
+import { ProgressModule } from './modules/progress.module';
 
 @Module({
   imports: [
