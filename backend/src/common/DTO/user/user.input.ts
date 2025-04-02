@@ -16,7 +16,7 @@ export class CreateUserInput {
   phoneNumber?: string;
 
   @Field()
-  @MinLength(6)
+  @MinLength(8)
   password: string; // Thêm mật khẩu để tạo user
 }
 
