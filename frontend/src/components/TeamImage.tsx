@@ -11,7 +11,7 @@ interface TeamMemberProps {
 }
 
 const backendMembers = [
-  { name: 'Do Duc Anh', jobTitle: 'Backend Dev', image: profilePicsDA},
+  { name: 'Do Duc Anh', jobTitle: 'Backend Developer', image: profilePicsDA},
   { name: 'La Huy Hoang', jobTitle: 'Backend Developer', image: profilePicsHH },
   { name: 'Luu Trong Dung', jobTitle: 'AI Developer', image: profilePicsTD },
 ]
