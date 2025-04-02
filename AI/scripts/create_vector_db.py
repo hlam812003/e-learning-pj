@@ -3,12 +3,11 @@ from langchain.text_splitter import (
     CharacterTextSplitter,
 )
 from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings
 
-
-pdf_data_path = None
 vector_db_path = None
+pdf_data_path = None
 
 
 def create_vector_db_from_text():
@@ -44,8 +43,8 @@ def create_vector_db_from_file():
     return db
 
 
-# create_vector_db_from_text()
+course_name = "dsa"
 for i in range(1, 8):
-    pdf_data_path = f"data/courses/pdf/{i}.pdf"
-    vector_db_path = f"data/vectorstores/dsa/{i}"
+    pdf_data_path = f"../data/courses/{course_name}/pdf/{i}.pdf"
+    vector_db_path = f"../data/vectorstores/{course_name}/{i}"
     create_vector_db_from_file()

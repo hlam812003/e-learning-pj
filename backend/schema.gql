@@ -1,0 +1,169 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CourseDto {
+  id: String!
+  courseName: String!
+  abstract: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type LessonDto {
+  id: String!
+  lessonName: String!
+  abstract: String
+  courseId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type UserResponse {
+  id: String!
+  username: String!
+  email: String!
+  phoneNumber: String
+  role: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AuthResponse {
+  success: Boolean!
+  message: String
+  token: String
+}
+
+type MessageResponse {
+  id: String!
+  content: String!
+  senderType: String!
+  conversationId: String!
+  timestamp: DateTime!
+}
+
+type ConversationResponse {
+  id: String!
+  name: String
+  creatorId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  getAllCourses: [CourseDto!]!
+  getCourseById(id: String!): CourseDto
+  getAllLessons: [LessonDto!]!
+  getLessonsByCourseId(id: String!): [LessonDto!]!
+  getLessonById(id: String!): LessonDto
+  users: [UserResponse!]!
+  user(id: String!): UserResponse!
+  hello: String!
+  admin: String!
+  myConversations: [ConversationResponse!]!
+  conversation(id: String!): ConversationResponse
+  message(id: String!): MessageResponse
+  messagesByConversation(conversationId: String!): [MessageResponse!]!
+}
+
+type Mutation {
+  createCourse(data: CreateCourseDto!): CourseDto!
+  updateCourse(data: UpdateCourseDto!): CourseDto!
+  deleteCourse(id: String!): CourseDto!
+  createLesson(data: CreateLessonDto!): LessonDto!
+  updateLesson(data: UpdateLessonDto!): LessonDto!
+  deleteLesson(id: String!): LessonDto!
+  createUser(data: CreateUserInput!): UserResponse!
+  updateUser(data: UpdateUserInput!): UserResponse!
+  deleteUser(id: String!): Boolean!
+  register(data: RegisterInput!): AuthResponse!
+  login(data: LoginInput!): AuthResponse!
+  googleLogin(data: GoogleLoginInput!): AuthResponse!
+  logout: Boolean!
+  createConversation(data: CreateConversationInput!): ConversationResponse!
+  updateConversation(data: UpdateConversationInput!): ConversationResponse!
+  deleteConversation(id: String!): ConversationResponse!
+  createMessage(data: CreateMessageInput!): MessageResponse!
+  updateMessage(data: UpdateMessageInput!): MessageResponse!
+  deleteMessage(id: String!): MessageResponse!
+}
+
+input CreateCourseDto {
+  courseName: String!
+  abstract: String
+}
+
+input UpdateCourseDto {
+  id: String!
+  courseName: String
+  abstract: String
+}
+
+input CreateLessonDto {
+  lessonName: String!
+  abstract: String
+  courseId: String!
+}
+
+input UpdateLessonDto {
+  id: String!
+  lessonName: String!
+  abstract: String
+  courseId: String!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  phoneNumber: String
+  password: String!
+}
+
+input UpdateUserInput {
+  id: String!
+  username: String
+  email: String
+  phoneNumber: String
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input GoogleLoginInput {
+  googleId: String!
+  email: String!
+}
+
+input CreateConversationInput {
+  name: String
+  creatorId: String!
+}
+
+input UpdateConversationInput {
+  id: String!
+  name: String
+}
+
+input CreateMessageInput {
+  content: String!
+  senderType: String!
+  conversationId: String!
+}
+
+input UpdateMessageInput {
+  id: String!
+  content: String!
+}
