@@ -1,7 +1,7 @@
-import profilePicsDA from '@/assets/danh.jpg'
+import profilePicsDA from '@/assets/ducanhdo.jpg'
 import profilePicsHWAN from '@/assets/Hwan.png'
 import profilePicsTD from '@/assets/trongdung.jpg'
-import profilePicsBN from '@/assets/catava.jpg'
+import profilePicsBN from '@/assets/nhancat.jpg'
 import profilePicsHH from '@/assets/hhoang.png'
 
 interface TeamMemberProps {
@@ -23,9 +23,9 @@ const frontendMembers = [
 
 function TeamMember({ name, jobTitle, image}: TeamMemberProps) {
   return (
-    <div className="flex flex-col">
-      <img src={image} alt={name} className="w-[300px] rounded-lg shadow-xl" />
-      <div className="text-start">
+    <div className="flex flex-col items-center">
+      <img src={image} alt={name} className="w-[300px] rounded-full shrink-0 grow-0 shadow-xl" />
+      <div>
         <h1 className="text-[2rem] font-semibold mt-2">{name}</h1>
         <p className="text-[1.5rem] font-normal">{jobTitle}</p>
       </div>
