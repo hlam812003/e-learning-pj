@@ -10,18 +10,18 @@ router = APIRouter()
 
 
 class QuestionRequest(BaseModel):
-    query: str
-    id: int
-    course: str
+    question: str
+    lesson_id: str
+    course_id: str
 
 
 @router.post("/ask")
-async def ask_question(request: QuestionRequest):
+async def ask_question(request: QuestionRequest) -> dict:
     try:
         prompt = create_prompt(templates[0])
-        vector_db = read_vertors_db(request.course, request.id)
+        vector_db = read_vertors_db(request.course_id, request.lesson_id)
         llm_chain = create_qa_chain(vector_db, llm, prompt)
-        result = llm_chain.invoke({"query": request.query})
+        result = llm_chain.invoke({"query": request.question})
         return {"result": result["result"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
