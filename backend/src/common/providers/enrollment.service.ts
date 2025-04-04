@@ -9,7 +9,7 @@ export class EnrollmentService {
   constructor(private readonly enrollmentDAO: EnrollmentDAO) {}
 
   async enrollUserToCourse(input: CreateEnrollmentInput): Promise<EnrollmentResponse> {
-    const { userId, courseId } = input;
+    const { userId, courseId, totalLessons } = input;
 
     const [user, course] = await Promise.all([
       this.enrollmentDAO.findUserById(userId),
@@ -22,7 +22,10 @@ export class EnrollmentService {
     const existingEnrollment = await this.enrollmentDAO.findEnrollment(userId, courseId);
     if (existingEnrollment) throw new ConflictException('User already enrolled in this course');
 
-    return this.enrollmentDAO.createEnrollment(userId, courseId);
+    const enrollment = await this.enrollmentDAO.createEnrollment(userId, courseId);
+    await this.enrollmentDAO.createProgress(userId, courseId, totalLessons);
+
+    return enrollment;
   }
 
   async getUserEnrollments(userId: string): Promise<EnrollmentResponse[]> {

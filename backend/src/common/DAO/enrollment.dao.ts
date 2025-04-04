@@ -23,8 +23,8 @@ export class EnrollmentDAO {
     return this.prisma.enrollment.create({ data: { userId, courseId } });
   }
 
-  async createProgress(userId: string, courseId: string): Promise<Progress> {
-    return this.prisma.progress.create({ data: { userId, courseId, percentage: 0 } });
+  async createProgress(userId: string, courseId: string, totalLessons: number): Promise<Progress> {
+    return this.prisma.progress.create({ data: { userId, courseId, percentage: 0, completedLessons: 0, totalLessons } });
   }
 
   async getUserEnrollments(userId: string): Promise<Enrollment[]> {
