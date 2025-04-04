@@ -46,6 +46,16 @@ type EnrollmentResponse {
   enrolledAt: DateTime!
 }
 
+type ProgressResponse {
+  id: String!
+  userId: String!
+  courseId: String!
+  completedLessons: Float!
+  totalLessons: Float!
+  percentage: Float!
+  updatedAt: DateTime!
+}
+
 type Query {
   getAllCourses: [CourseDto!]!
   getCourseById(id: String!): CourseDto
@@ -57,6 +67,7 @@ type Query {
   hello: String!
   admin: String!
   getUserEnrollments(userId: String!): [EnrollmentResponse!]!
+  getProgress(progressId: String!): ProgressResponse!
 }
 
 type Mutation {
@@ -74,6 +85,7 @@ type Mutation {
   googleLogin(data: GoogleLoginInput!): AuthResponse!
   logout: Boolean!
   enrollCourse(input: CreateEnrollmentInput!): EnrollmentResponse!
+  updateProgress(input: UpdateProgressInput!): ProgressResponse!
 }
 
 input CreateCourseDto {
@@ -132,4 +144,10 @@ input GoogleLoginInput {
 input CreateEnrollmentInput {
   userId: String!
   courseId: String!
+}
+
+input UpdateProgressInput {
+  progressId: String!
+  completedLessons: Float!
+  totalLessons: Float!
 }
