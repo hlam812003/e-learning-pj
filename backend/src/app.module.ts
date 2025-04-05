@@ -8,6 +8,7 @@ import { UserModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
 import { EnrollmentModule } from './modules/enrollment.module';
 import { ProgressModule } from './modules/progress.module';
+import { SystemPromptModule } from './modules/system-prompt.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProgressModule } from './modules/progress.module';
     AuthModule,
     EnrollmentModule,
     ProgressModule,
+    SystemPromptModule,
   ],
 })
 export class AppModule {}

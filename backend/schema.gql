@@ -56,6 +56,13 @@ type ProgressResponse {
   updatedAt: DateTime!
 }
 
+type SystemPromptResponse {
+  id: String!
+  title: String!
+  content: String!
+  createdAt: DateTime!
+}
+
 type Query {
   getAllCourses: [CourseDto!]!
   getCourseById(id: String!): CourseDto
@@ -68,6 +75,8 @@ type Query {
   admin: String!
   getUserEnrollments(userId: String!): [EnrollmentResponse!]!
   getProgress(progressId: String!): ProgressResponse!
+  systemPrompts: [SystemPromptResponse!]!
+  systemPrompt(id: String!): SystemPromptResponse!
 }
 
 type Mutation {
@@ -86,6 +95,9 @@ type Mutation {
   logout: Boolean!
   enrollCourse(input: CreateEnrollmentInput!): EnrollmentResponse!
   updateProgress(input: UpdateProgressInput!): ProgressResponse!
+  createSystemPrompt(data: CreateSystemPromptInput!): SystemPromptResponse!
+  updateSystemPrompt(id: String!, data: UpdateSystemPromptInput!): SystemPromptResponse!
+  deleteSystemPrompt(id: String!): Boolean!
 }
 
 input CreateCourseDto {
@@ -150,4 +162,14 @@ input CreateEnrollmentInput {
 input UpdateProgressInput {
   progressId: String!
   completedLessons: Float!
+}
+
+input CreateSystemPromptInput {
+  title: String!
+  content: String!
+}
+
+input UpdateSystemPromptInput {
+  title: String
+  content: String
 }
