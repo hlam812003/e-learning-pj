@@ -11,5 +11,4 @@ export class UpdateProgressInput {
   @Min(0)
   completedLessons: number;
 
-
 }

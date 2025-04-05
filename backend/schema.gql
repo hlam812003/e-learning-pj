@@ -150,5 +150,4 @@ input CreateEnrollmentInput {
 input UpdateProgressInput {
   progressId: String!
   completedLessons: Float!
-  totalLessons: Float!
 }
