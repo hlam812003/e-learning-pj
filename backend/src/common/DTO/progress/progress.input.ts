@@ -11,9 +11,5 @@ export class UpdateProgressInput {
   @Min(0)
   completedLessons: number;
 
-  @Field()
-  @IsInt()
-  @Min(0)
-  totalLessons: number;
 
 }
