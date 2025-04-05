@@ -40,6 +40,29 @@ type AuthResponse {
   token: String
 }
 
+type EnrollmentResponse {
+  userId: String!
+  courseId: String!
+  enrolledAt: DateTime!
+}
+
+type ProgressResponse {
+  id: String!
+  userId: String!
+  courseId: String!
+  completedLessons: Float!
+  totalLessons: Float!
+  percentage: Float!
+  updatedAt: DateTime!
+}
+
+type SystemPromptResponse {
+  id: String!
+  title: String!
+  content: String!
+  createdAt: DateTime!
+}
+
 type MessageResponse {
   id: String!
   content: String!
@@ -66,10 +89,6 @@ type Query {
   user(id: String!): UserResponse!
   hello: String!
   admin: String!
-  myConversations: [ConversationResponse!]!
-  conversation(id: String!): ConversationResponse
-  message(id: String!): MessageResponse
-  messagesByConversation(conversationId: String!): [MessageResponse!]!
 }
 
 type Mutation {
@@ -86,12 +105,6 @@ type Mutation {
   login(data: LoginInput!): AuthResponse!
   googleLogin(data: GoogleLoginInput!): AuthResponse!
   logout: Boolean!
-  createConversation(data: CreateConversationInput!): ConversationResponse!
-  updateConversation(data: UpdateConversationInput!): ConversationResponse!
-  deleteConversation(id: String!): ConversationResponse!
-  createMessage(data: CreateMessageInput!): MessageResponse!
-  updateMessage(data: UpdateMessageInput!): MessageResponse!
-  deleteMessage(id: String!): MessageResponse!
 }
 
 input CreateCourseDto {
@@ -145,25 +158,4 @@ input LoginInput {
 input GoogleLoginInput {
   googleId: String!
   email: String!
-}
-
-input CreateConversationInput {
-  name: String
-  creatorId: String!
-}
-
-input UpdateConversationInput {
-  id: String!
-  name: String
-}
-
-input CreateMessageInput {
-  content: String!
-  senderType: String!
-  conversationId: String!
-}
-
-input UpdateMessageInput {
-  id: String!
-  content: String!
 }
