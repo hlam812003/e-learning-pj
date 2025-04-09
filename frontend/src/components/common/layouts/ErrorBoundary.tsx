@@ -2,7 +2,7 @@ import { isRouteErrorResponse, useRouteError, Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 import { cn } from '@/lib'
 
-export default function ErrorBoundary() {
+const ErrorBoundary = () => {
   const error = useRouteError()
   
   return (
@@ -40,10 +40,12 @@ export default function ErrorBoundary() {
             className="relative group cursor-pointer"
           > 
             <span className="text-primary text-[1.35rem] font-medium">Reload Page</span>
-            <span className="absolute opacity-0 left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:opacity-100 transition-all duration-300" />
+            <span className="absolute opacity-0 left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:opacity-100 transition-all duration-(--duration-main)" />
           </div>
         </div>
       </div>
     </section>
   )
 }
+
+export default ErrorBoundary

@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores'
 import { registerSchema, cn } from '@/lib'
 import { RegisterFormData } from '@/types'
 
-import { AuthContainer } from '@/components'
+import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Icon } from '@iconify/react'

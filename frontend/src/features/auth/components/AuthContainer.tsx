@@ -7,8 +7,8 @@ import {
   CardTitle,
   CardContent,
   CardFooter
-} from '../ui/card'
-import { BorderTrail } from '../ui/border-trail'
+} from '@/components/ui/card'
+import { BorderTrail } from '@/components/ui/border-trail'
 
 type AuthContainerProps = {
   title: string

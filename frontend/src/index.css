@@ -12,6 +12,9 @@
   --transition-duration: 250ms;
   --background-position: center center;
   --background-size: 100% 100%;
+  --duration-main: 250ms;
+  --full-size: 100% 100%;
+  --full-center: center center;
 }
 
 :root {

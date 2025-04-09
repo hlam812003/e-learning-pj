@@ -6,7 +6,7 @@ type PageTransitionProps = {
   children: ReactNode
 }
 
-export default function PageTransition({ children }: PageTransitionProps) {
+const PageTransition = ({ children }: PageTransitionProps) => {
   const location = useLocation()
   const containerRef = useRef<HTMLDivElement>(null)
   const prevPathRef = useRef<string>(location.pathname)
@@ -15,8 +15,8 @@ export default function PageTransition({ children }: PageTransitionProps) {
     if (prevPathRef.current !== location.pathname) {
       const tl = gsap.timeline()
       
-      const mainElements = containerRef.current ? 
-        Array.from(containerRef.current.querySelectorAll('section, div, h1, h2, h3, p')).filter(element => element.id !== 'home-pattern') : []
+      const animatedElements = containerRef.current ? 
+        Array.from(containerRef.current.querySelectorAll('.element-animation')).filter(element => element.id !== 'home-pattern') : []
       
       tl.to(containerRef.current, {
         opacity: 0,
@@ -36,8 +36,8 @@ export default function PageTransition({ children }: PageTransitionProps) {
         }
       )
       
-      if (mainElements.length > 0) {
-        tl.fromTo(mainElements, 
+      if (animatedElements.length > 0) {
+        tl.fromTo(animatedElements, 
           { 
             y: 30, 
             opacity: 0 
@@ -61,4 +61,6 @@ export default function PageTransition({ children }: PageTransitionProps) {
       {children}
     </div>
   )
-} 
+}
+
+export default PageTransition
