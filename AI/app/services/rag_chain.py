@@ -1,11 +1,7 @@
 from langchain.chains import RetrievalQA
 
 
-def create_qa_chain(vector_db, llm, prompt):
-    print("vector_db:", type(vector_db))
-    print("llm:", type(llm))
-    print("prompt:", type(prompt))
-
+def create_qa_chain(vector_db, llm, prompt) -> RetrievalQA:
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",

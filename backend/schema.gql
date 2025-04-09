@@ -40,6 +40,29 @@ type AuthResponse {
   token: String
 }
 
+type EnrollmentResponse {
+  userId: String!
+  courseId: String!
+  enrolledAt: DateTime!
+}
+
+type ProgressResponse {
+  id: String!
+  userId: String!
+  courseId: String!
+  completedLessons: Float!
+  totalLessons: Float!
+  percentage: Float!
+  updatedAt: DateTime!
+}
+
+type SystemPromptResponse {
+  id: String!
+  title: String!
+  content: String!
+  createdAt: DateTime!
+}
+
 type MessageResponse {
   id: String!
   content: String!
@@ -66,6 +89,10 @@ type Query {
   user(id: String!): UserResponse!
   hello: String!
   admin: String!
+  getUserEnrollments(userId: String!): [EnrollmentResponse!]!
+  getProgress(progressId: String!): ProgressResponse!
+  systemPrompts: [SystemPromptResponse!]!
+  systemPrompt(id: String!): SystemPromptResponse!
   myConversations: [ConversationResponse!]!
   conversation(id: String!): ConversationResponse
   message(id: String!): MessageResponse
@@ -86,6 +113,11 @@ type Mutation {
   login(data: LoginInput!): AuthResponse!
   googleLogin(data: GoogleLoginInput!): AuthResponse!
   logout: Boolean!
+  enrollCourse(input: CreateEnrollmentInput!): EnrollmentResponse!
+  updateProgress(input: UpdateProgressInput!): ProgressResponse!
+  createSystemPrompt(data: CreateSystemPromptInput!): SystemPromptResponse!
+  updateSystemPrompt(id: String!, data: UpdateSystemPromptInput!): SystemPromptResponse!
+  deleteSystemPrompt(id: String!): Boolean!
   createConversation(data: CreateConversationInput!): ConversationResponse!
   updateConversation(data: UpdateConversationInput!): ConversationResponse!
   deleteConversation(id: String!): ConversationResponse!
@@ -145,6 +177,27 @@ input LoginInput {
 input GoogleLoginInput {
   googleId: String!
   email: String!
+}
+
+input CreateEnrollmentInput {
+  userId: String!
+  courseId: String!
+  totalLessons: Float!
+}
+
+input UpdateProgressInput {
+  progressId: String!
+  completedLessons: Float!
+}
+
+input CreateSystemPromptInput {
+  title: String!
+  content: String!
+}
+
+input UpdateSystemPromptInput {
+  title: String
+  content: String
 }
 
 input CreateConversationInput {

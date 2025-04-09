@@ -10,7 +10,7 @@ vector_db_path = None
 pdf_data_path = None
 
 
-def create_vector_db_from_text():
+def create_vector_db_from_text() -> FAISS:
     text = """"""
     text_splitter = CharacterTextSplitter(
         chunk_size=500, chunk_overlap=100, length_function=len, separator="\n"
@@ -27,7 +27,7 @@ def create_vector_db_from_text():
     return db
 
 
-def create_vector_db_from_file():
+def create_vector_db_from_file() -> FAISS:
     loader = PyPDFLoader(pdf_data_path)
     documents = loader.load()
 
@@ -43,8 +43,8 @@ def create_vector_db_from_file():
     return db
 
 
-course_name = "dsa"
+course_id = "dsa"
 for i in range(1, 8):
-    pdf_data_path = f"../data/courses/{course_name}/pdf/{i}.pdf"
-    vector_db_path = f"../data/vectorstores/{course_name}/{i}"
+    pdf_data_path = f"../data/courses/{course_id}/pdf/{i}.pdf"
+    vector_db_path = f"../data/vectorstores/{course_id}/{i}"
     create_vector_db_from_file()

@@ -117,9 +117,14 @@ model Progress {
   userId     String
   course     Course   @relation(fields: [courseId], references: [id])
   courseId   String
+  completedLessons Int            @default(0)
+  totalLessons     Int            @default(0)
   percentage Float    @default(0.0) 
   status     ProgressStatus @default(IN_PROGRESS)
   updatedAt  DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([percentage])
 }
 
 enum ProgressStatus {

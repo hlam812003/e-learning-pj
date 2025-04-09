@@ -8,19 +8,18 @@ router = APIRouter()
 
 
 class PdfRequest(BaseModel):
-    system_prompt: str
-    id: int
-    course: str
+    emotion: str
+    course_id: str
+    lesson_id: str
 
 
 @router.post("/rewrite-pdf-emotion")
-async def rewrite_pdf_emotion(request: PdfRequest):
+async def rewrite_pdf_emotion(request: PdfRequest) -> dict:
     try:
-
         prompt = create_prompt_emotion()
-        text = extract_text_from_pdf_path(request.course, request.id)
+        text = extract_text_from_pdf_path(request.course_id, request.lesson_id)
         chain = prompt | llm
-        rewritten_text = chain.invoke({"style": request.system_prompt, "content": text})
+        rewritten_text = chain.invoke({"style": request.emotion, "content": text})
         return {"rewritten_text": rewritten_text}
 
     except Exception as e:

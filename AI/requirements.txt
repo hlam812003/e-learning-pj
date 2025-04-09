@@ -9,3 +9,4 @@ langchain_together
 python-dotenv
 tf-keras
 pypdf
+pydantic

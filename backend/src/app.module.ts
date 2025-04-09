@@ -6,6 +6,9 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
+import { EnrollmentModule } from './modules/enrollment.module';
+import { ProgressModule } from './modules/progress.module';
+import { SystemPromptModule } from './modules/system-prompt.module';
 import { ConversationModule } from './modules/conversation.module';
 import { MessageModule } from './modules/message.module';
 
@@ -24,6 +27,9 @@ import { MessageModule } from './modules/message.module';
     LessonModule,
     UserModule,
     AuthModule,
+    EnrollmentModule,
+    ProgressModule,
+    SystemPromptModule,
     ConversationModule,
     MessageModule,
   ],
