@@ -53,8 +53,14 @@ export default function CoursesPage() {
       })
   }, [searchTerm, selectedCategory, selectedLevel, sortBy])
 
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setSelectedCategory('All Categories')
+    setSelectedLevel('All Levels')
+  }
+
   return (
-    <div className="w-full py-10">
+    <div className="w-full px-24 py-10">
       <h1 className="element-animation text-[2.5rem] font-bold mb-3.5">Explore Our Courses</h1>
       
       <section className="w-full mb-8">
@@ -132,19 +138,15 @@ export default function CoursesPage() {
             ))}
           </div>
         ) : (
-          <div className="element-animation flex flex-col items-center justify-center py-20 text-center">
-            <Icon icon="ph:magnifying-glass-duotone" className="text-9xl text-slate-300 mb-6" />
-            <h3 className="text-3xl font-bold text-slate-700 mb-3">No courses found</h3>
+          <div className="flex flex-col items-center justify-center text-center py-[10rem]">
+            <Icon icon="ph:magnifying-glass-light" className="text-[5.5rem] text-[#2b2b2b] mb-6" />
+            <h3 className="text-3xl font-bold text-slate-700 mb-3">No courses found...</h3>
             <p className="text-[1.25rem] text-slate-500 max-w-xl">
               We couldn't find any courses matching your current filters. Try changing your search terms or filters.
             </p>
             <button
-              onClick={() => {
-                setSearchTerm('')
-                setSelectedCategory('All Categories')
-                setSelectedLevel('All Levels')
-              }}
-              className="mt-6 rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium hover:bg-primary/90 transition-colors"
+              onClick={handleClearFilters}
+              className="mt-6 rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
             >
               Clear Filters
             </button>
