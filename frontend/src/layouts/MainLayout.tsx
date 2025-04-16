@@ -1,9 +1,11 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { JSX } from 'react'
-import { PageTransition } from '@/components'
+import { JSX, useState } from 'react'
+
+import { PageTransition, LanguageDropdown } from '@/components'
 
 export default function MainLayout() {
   const location = useLocation()
+  const [language, setLanguage] = useState('en')
 
   const navItems = [
     {
@@ -22,6 +24,11 @@ export default function MainLayout() {
       title: 'Contact',
       path: '/contact'
     }
+  ]
+
+  const languageOptions = [
+    { id: 'en', name: 'English', flag: 'english' },
+    { id: 'vi', name: 'Tiếng Việt', flag: 'vietnam' }
   ]
 
   const MainNav = (): JSX.Element => {
@@ -48,14 +55,21 @@ export default function MainLayout() {
             })}
           </nav>
         </div>
-        <div className="w-1/3 flex items-center justify-end gap-9">
-          <Link to="/auth/login" className="text-black text-[1.45rem] relative group">
-            <span>Log in</span>
-            <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-          </Link>
-          <Link to="/auth/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
-            Sign Up
-          </Link>
+        <div className="w-1/3 flex items-center justify-end gap-3">
+          <LanguageDropdown 
+            options={languageOptions}
+            value={language}
+            onChange={setLanguage}
+          />
+          <div className="flex items-center gap-9">
+            <Link to="/auth/login" className="text-black text-[1.45rem] relative group">
+              <span>Log in</span>
+              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
+            </Link>
+            <Link to="/auth/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
+              Sign Up
+            </Link>
+          </div>
         </div>
       </header>
     )

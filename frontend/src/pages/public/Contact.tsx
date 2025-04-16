@@ -7,12 +7,12 @@ export default function ContactPage() {
     <section className="w-full relative">
         <div className="relative h-[43rem]">
             <div
-            className={cn(
-                'absolute inset-0',
-                '[background-size:40px_40px]',
-                '[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]',
-                'dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]'
-            )}
+                className={cn(
+                    'absolute inset-0',
+                    '[background-size:40px_40px]',
+                    '[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]',
+                    'dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]'
+                )}
             />
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
             
@@ -30,10 +30,10 @@ export default function ContactPage() {
                     <h3 className="text-[2rem] font-bold">{option.title}</h3>
                     <p className="text-[1.5rem] font-normal">{option.description}</p>
                     {option.onClick ? (
-                        <button className=" border p-2 rounded-md shadow-sm  text-black transition-all duration-300 hover:bg-gray-300 dark:hover:bg-gray-500 cursor-pointer" 
+                            <button className=" border p-2 rounded-md shadow-sm  text-black transition-all duration-(--duration-main) hover:bg-gray-300 dark:hover:bg-gray-500 cursor-pointer" 
                         onClick={option.onClick}>{option.linkLabel}</button>
                     ) : (
-                        <a href={option.link} target="_blank" rel="noopener noreferrer" className="border p-2 rounded-md shadow-sm text-black text-center transition-all duration-300 hover:bg-gray-300 dark:hover:bg-gray-500">
+                        <a href={option.link} target="_blank" rel="noopener noreferrer" className="border p-2 rounded-md shadow-sm text-black text-center transition-all duration-(--duration-main) hover:bg-gray-300 dark:hover:bg-gray-500">
                         {option.linkLabel}
                         </a>
                     )}

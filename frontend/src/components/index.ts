@@ -1,5 +1,3 @@
-export { default as Loading } from './Loading'
-export { default as ErrorBoundary } from './ErrorBoundary'
-export { default as AuthContainer } from './auth/AuthContainer'
-export { default as Globe } from './Globe'
-export { default as PageTransition } from './PageTransition'
+export * from './common/layouts'
+export * from './common/dropdowns'
+export * from './common/images'

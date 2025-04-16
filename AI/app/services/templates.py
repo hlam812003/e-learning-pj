@@ -53,7 +53,7 @@ Tài liệu:
 {context}
 
 Câu hỏi:
-{question}
+{question} 
 
 Trả lời:
 """,
