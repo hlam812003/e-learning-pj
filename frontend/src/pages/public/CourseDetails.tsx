@@ -488,7 +488,7 @@ export default function CourseDetails() {
                   
                   <div className="flex items-center gap-5 mb-5">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Icon icon="ph:robot-fill" className="text-[3rem] text-white" />
+                      <Icon icon="ph:robot-fill" className="text-[2.5rem] text-white" />
                     </div>
                     <div>
                       <h4 className="text-[1.5rem] font-semibold text-zinc-800">AI Assistant</h4>
