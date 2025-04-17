@@ -27,6 +27,7 @@ model User {
   enrollments Enrollment[]
   conversations Conversation[]
   progress Progress[] 
+  explanations LessonExplanation[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -55,8 +56,22 @@ model Lesson {
   abstract   String?
   course     Course  @relation(fields: [courseId], references: [id])
   courseId   String
+  explanations LessonExplanation[] 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model LessonExplanation {
+  id        String   @id @default(uuid())
+  emotion   String 
+  content   String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId  String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([lessonId, userId])  // Ensures one explanation per lesson per user
 }
 
 model Enrollment {
