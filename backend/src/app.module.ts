@@ -22,6 +22,10 @@ import { MessageModule } from './modules/message.module';
       introspection: true,
       playground: true,
       csrfPrevention: false, // Tắt CSRF protection
+      subscriptions: {
+        'graphql-ws': true,
+        'subscriptions-transport-ws': true,
+      },
     }),
     CourseModule,
     LessonModule,

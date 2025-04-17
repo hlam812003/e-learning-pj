@@ -6,7 +6,7 @@ import { ConversationService } from '../common/providers/conversation.service';
 import { ConversationDAO } from '../common/DAO/conversation.dao';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { AuthModule } from './auth.module';
-import { HttpModule } from '@nestjs/axios'
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [PrismaModule, AuthModule, HttpModule],
