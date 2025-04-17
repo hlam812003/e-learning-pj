@@ -1,6 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsEnum, IsUUID } from 'class-validator';
-import { SenderType } from '@prisma/client';
+import { IsString, IsUUID } from 'class-validator';
 
 @InputType()
 export class CreateMessageInput {
@@ -9,12 +8,14 @@ export class CreateMessageInput {
   content: string;
 
   @Field(() => String)
-  @IsEnum(SenderType)
-  senderType: SenderType;
-
-  @Field(() => String)
   @IsUUID()
   conversationId: string;
+
+  @Field(() => String)
+  courseId: string;
+
+  @Field(() => String)
+  lessonId: string;
 }
 
 @InputType()
