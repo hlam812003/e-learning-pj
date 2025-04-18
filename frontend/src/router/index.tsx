@@ -1,7 +1,7 @@
 import { lazy } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
-import { AuthLayout, MainLayout } from '@/layouts'
+import { AuthLayout, MainLayout, ClassRoomLayout, DashboardLayout } from '@/layouts'
 import { ErrorBoundary } from '@/components'
 
 const Pages = {
@@ -9,11 +9,15 @@ const Pages = {
     Home: lazy(() => import('@/pages/public/Home')),
     About: lazy(() => import('@/pages/public/About')),
     Courses: lazy(() => import('@/pages/public/Courses')),
+    CourseDetails: lazy(() => import('@/pages/public/CourseDetails')),
     Contact: lazy(() => import('@/pages/public/Contact'))
   },
   Auth: {
     Login: lazy(() => import('@/pages/public/auth/Login')),
     Register: lazy(() => import('@/pages/public/auth/Register'))
+  },
+  Dashboard: {
+    ClassRoom: lazy(() => import('@/pages/dashboard/ClassRoom'))
   }
 } 
 
@@ -25,6 +29,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Pages.Main.Home /> },
       { path: 'about', element: <Pages.Main.About /> },
       { path: 'courses', element: <Pages.Main.Courses /> },
+      { path: 'courses/:courseId', element: <Pages.Main.CourseDetails /> },
       { path: 'contact', element: <Pages.Main.Contact /> }
     ],
     errorElement: <ErrorBoundary />
@@ -37,5 +42,26 @@ export const router = createBrowserRouter([
       { path: 'signup', element: <Pages.Auth.Register /> }
     ],
     errorElement: <ErrorBoundary />
+  },
+  {
+    path: '/dashboard',
+    element: <DashboardLayout />,
+    // children: [{ 
+    //   path: 'classroom',
+    //   element: <ClassRoomLayout />,
+    //   children: [{ 
+    //     index: true,
+    //     element: <Pages.Dashboard.ClassRoom />
+    //   }]
+    // }],
+    errorElement: <ErrorBoundary />
+  },
+  {
+    path: '/dashboard/classroom',
+    element: <ClassRoomLayout />,
+    children: [{ 
+      index: true,
+      element: <Pages.Dashboard.ClassRoom />
+    }]
   }
 ])

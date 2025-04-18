@@ -212,8 +212,9 @@ input UpdateConversationInput {
 
 input CreateMessageInput {
   content: String!
-  senderType: String!
   conversationId: String!
+  courseId: String!
+  lessonId: String!
 }
 
 input UpdateMessageInput {

@@ -2,24 +2,26 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsUUID } from 'class-validator';
 
 @InputType()
-export class CreateMessageInput {
+export class CreateLessonExplanationInput {
   @Field(() => String)
   @IsString()
-  content: string;
+  emotion: string;
 
   @Field(() => String)
   @IsUUID()
-  conversationId: string;
-
-  @Field(() => String)
-  courseId: string;
-
-  @Field(() => String)
   lessonId: string;
+
+  @Field(() => String)
+  @IsUUID()
+  userId: string;
+
+  @Field(() => String)
+  @IsString()
+  courseId: string;
 }
 
 @InputType()
-export class UpdateMessageInput {
+export class UpdateLessonExplanationInput {
   @Field(() => String)
   @IsUUID()
   id: string;

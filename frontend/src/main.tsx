@@ -1,9 +1,14 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { scan } from 'react-scan'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import './index.css'
 import './lib/gsap'
+
+scan({
+  enabled: true
+})
 
 const queryClient = new QueryClient()
 

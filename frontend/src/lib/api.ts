@@ -1,21 +1,14 @@
 import axios from 'axios'
 
-// tao mot instance cua axios voi cau hinh mac dinh
 const api = axios.create({
-  baseURL: 'http://your-api-url.com', 
+  baseURL: import.meta.env.VITE_API_BACKEND_URL, 
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// them interceptor de xu li request va respond
 api.interceptors.request.use(
   (config) => {
-    // them token vao header
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
     return config
   },
   (error) => {

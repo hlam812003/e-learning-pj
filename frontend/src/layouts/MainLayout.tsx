@@ -1,11 +1,12 @@
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { JSX, useState } from 'react'
 
 import { PageTransition, LanguageDropdown } from '@/components'
+import { cn } from '@/lib/utils'
 
 export default function MainLayout() {
   const location = useLocation()
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState<string>('en')
 
   const navItems = [
     {
@@ -43,14 +44,22 @@ export default function MainLayout() {
           <nav className="flex items-center justify-center gap-9">
             {navItems.map((item, index) => {
               return (
-                <Link key={index} to={item.path} className="relative group">
+                <NavLink 
+                  key={index} 
+                  to={item.path} 
+                  className={({ isActive }) => cn(
+                    'relative group',
+                    isActive && 'text-primary'
+                  )}
+                >
                   <span className="text-[1.5rem]">{item.title}</span>
                   <span 
                     className={`
                       absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:scale-x-100 transition-transform duration-250 origin-center
                       ${location.pathname === item.path ? 'scale-x-100' : 'scale-x-0'}
-                    `} />
-                </Link>
+                    `} 
+                  />
+                </NavLink>
               )
             })}
           </nav>
@@ -78,7 +87,7 @@ export default function MainLayout() {
   return (
     <div className="min-h-screen w-full">
       <MainNav />
-      <main className="px-24">
+      <main>
         <PageTransition>
           <Outlet />
         </PageTransition>

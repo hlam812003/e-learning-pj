@@ -6,17 +6,41 @@ import {
 } from '../DTO/message/message.input';
 import { MessageResponse } from '../DTO/message/message.response';
 import { plainToClass } from 'class-transformer';
-
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { SenderType } from '@prisma/client';
+interface AIApiResponse {
+  result: string;
+}
 @Injectable()
 export class MessageService {
-  constructor(private readonly messageDAO: MessageDAO) {}
+  constructor(
+    private readonly messageDAO: MessageDAO,
+    private readonly httpService: HttpService,
+  ) {}
 
   async createMessage(input: CreateMessageInput): Promise<MessageResponse> {
     const message = await this.messageDAO.createMessage({
       content: input.content,
-      senderType: input.senderType,
+      senderType: SenderType.USER,
       conversationId: input.conversationId,
     });
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<AIApiResponse>('http://localhost:8000/ask', {
+          question: input.content,
+          course_id: input.courseId,
+          lesson_id: input.lessonId,
+        }),
+      );
+      await this.messageDAO.createMessage({
+        content: response.data.result,
+        senderType: SenderType.AI,
+        conversationId: input.conversationId,
+      });
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+    }
     return plainToClass(MessageResponse, message);
   }
 
