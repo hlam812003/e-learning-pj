@@ -48,6 +48,7 @@
     "dotenv": "^16.4.7",
     "fastify-swagger": "^5.2.0",
     "graphql": "^16.10.0",
+    "graphql-subscriptions": "^3.0.0",
     "graphql-tools": "^9.0.16",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
