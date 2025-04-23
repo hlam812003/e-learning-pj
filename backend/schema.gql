@@ -221,3 +221,7 @@ input UpdateMessageInput {
   id: String!
   content: String!
 }
+
+type Subscription {
+  messageAdded(conversationId: String!): MessageResponse!
+}

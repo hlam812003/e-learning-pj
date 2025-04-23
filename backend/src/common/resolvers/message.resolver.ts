@@ -128,6 +128,7 @@ export class MessageResolver {
   })
   @Roles('USER', 'ADMIN')
   messageAdded(@Args('conversationId') conversationId: string) {
-    return this.pubSub.asyncIterator(`message.${conversationId}`);
+    // Use type assertion to fix the TypeScript error
+    return (this.pubSub as any).asyncIterator(`message.${conversationId}`);
   }
 }
