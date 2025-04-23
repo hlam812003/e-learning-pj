@@ -27,7 +27,7 @@ export class LessonExplanationService {
       // Call the PDF rewrite API
       const response = await firstValueFrom(
         this.httpService.post<PDFRewriteResponse>(
-          'http://localhost:8000/rewrite-pdf-emotion',
+          `${process.env.AI_URL}/rewrite-pdf-emotion`,
           {
             emotion: input.emotion,
             course_id: input.courseId,
