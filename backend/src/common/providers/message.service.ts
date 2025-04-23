@@ -38,7 +38,8 @@ export class MessageService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.post<AIApiResponse>('http://localhost:8000/ask', {
+        // Replace with actual AI API endpoint
+        this.httpService.post<AIApiResponse>(`${process.env.AI_URL}/ask`, {
           question: input.content,
           course_id: input.courseId,
           lesson_id: input.lessonId,
