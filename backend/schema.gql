@@ -15,6 +15,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type AuthResponse {
+  success: Boolean!
+  message: String
+  token: String
+}
+
 type LessonDto {
   id: String!
   lessonName: String!
@@ -32,12 +38,6 @@ type UserResponse {
   role: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-}
-
-type AuthResponse {
-  success: Boolean!
-  message: String
-  token: String
 }
 
 type EnrollmentResponse {
@@ -82,13 +82,13 @@ type ConversationResponse {
 type Query {
   getAllCourses: [CourseDto!]!
   getCourseById(id: String!): CourseDto
+  hello: String!
+  admin: String!
   getAllLessons: [LessonDto!]!
   getLessonsByCourseId(id: String!): [LessonDto!]!
   getLessonById(id: String!): LessonDto
   users: [UserResponse!]!
   user(id: String!): UserResponse!
-  hello: String!
-  admin: String!
   getUserEnrollments(userId: String!): [EnrollmentResponse!]!
   getProgress(progressId: String!): ProgressResponse!
   systemPrompts: [SystemPromptResponse!]!
@@ -103,16 +103,16 @@ type Mutation {
   createCourse(data: CreateCourseDto!): CourseDto!
   updateCourse(data: UpdateCourseDto!): CourseDto!
   deleteCourse(id: String!): CourseDto!
+  register(data: RegisterInput!): AuthResponse!
+  login(data: LoginInput!): AuthResponse!
+  googleLogin(data: GoogleLoginInput!): AuthResponse!
+  logout: Boolean!
   createLesson(data: CreateLessonDto!): LessonDto!
   updateLesson(data: UpdateLessonDto!): LessonDto!
   deleteLesson(id: String!): LessonDto!
   createUser(data: CreateUserInput!): UserResponse!
   updateUser(data: UpdateUserInput!): UserResponse!
   deleteUser(id: String!): Boolean!
-  register(data: RegisterInput!): AuthResponse!
-  login(data: LoginInput!): AuthResponse!
-  googleLogin(data: GoogleLoginInput!): AuthResponse!
-  logout: Boolean!
   enrollCourse(input: CreateEnrollmentInput!): EnrollmentResponse!
   updateProgress(input: UpdateProgressInput!): ProgressResponse!
   createSystemPrompt(data: CreateSystemPromptInput!): SystemPromptResponse!
@@ -135,6 +135,21 @@ input UpdateCourseDto {
   id: String!
   courseName: String
   abstract: String
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input GoogleLoginInput {
+  googleId: String!
+  email: String!
 }
 
 input CreateLessonDto {
@@ -164,21 +179,6 @@ input UpdateUserInput {
   phoneNumber: String
 }
 
-input RegisterInput {
-  email: String!
-  password: String!
-}
-
-input LoginInput {
-  email: String!
-  password: String!
-}
-
-input GoogleLoginInput {
-  googleId: String!
-  email: String!
-}
-
 input CreateEnrollmentInput {
   userId: String!
   courseId: String!
@@ -186,6 +186,7 @@ input CreateEnrollmentInput {
 }
 
 input UpdateProgressInput {
+  userId: String!
   progressId: String!
   completedLessons: Float!
 }
@@ -220,4 +221,8 @@ input CreateMessageInput {
 input UpdateMessageInput {
   id: String!
   content: String!
+}
+
+type Subscription {
+  messageAdded(conversationId: String!): MessageResponse!
 }

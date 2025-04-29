@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { MessageDAO } from '../DAO/message.dao';
 import {
   CreateMessageInput,
@@ -9,14 +9,18 @@ import { plainToClass } from 'class-transformer';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { SenderType } from '@prisma/client';
+import { PubSub } from 'graphql-subscriptions';
+
 interface AIApiResponse {
   result: string;
 }
+
 @Injectable()
 export class MessageService {
   constructor(
     private readonly messageDAO: MessageDAO,
     private readonly httpService: HttpService,
+    @Inject('PUB_SUB') private pubSub: PubSub,
   ) {}
 
   async createMessage(input: CreateMessageInput): Promise<MessageResponse> {
@@ -25,23 +29,40 @@ export class MessageService {
       senderType: SenderType.USER,
       conversationId: input.conversationId,
     });
+
+    // Publish the user message to subscribers
+    const userMessageResponse = plainToClass(MessageResponse, message);
+    await this.pubSub.publish(`message.${input.conversationId}`, {
+      messageAdded: userMessageResponse,
+    });
+
     try {
       const response = await firstValueFrom(
-        this.httpService.post<AIApiResponse>('http://localhost:8000/ask', {
+        // Replace with actual AI API endpoint
+        this.httpService.post<AIApiResponse>(`${process.env.AI_URL}/ask`, {
           question: input.content,
           course_id: input.courseId,
           lesson_id: input.lessonId,
         }),
       );
-      await this.messageDAO.createMessage({
+
+      // Create AI response message
+      const aiMessage = await this.messageDAO.createMessage({
         content: response.data.result,
         senderType: SenderType.AI,
         conversationId: input.conversationId,
       });
+
+      // Publish the AI message to subscribers
+      const aiMessageResponse = plainToClass(MessageResponse, aiMessage);
+      await this.pubSub.publish(`message.${input.conversationId}`, {
+        messageAdded: aiMessageResponse,
+      });
     } catch (error) {
       console.error('Error getting AI response:', error);
     }
-    return plainToClass(MessageResponse, message);
+
+    return userMessageResponse;
   }
 
   async getMessageById(id: string): Promise<MessageResponse | null> {

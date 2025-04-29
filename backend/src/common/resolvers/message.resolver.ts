@@ -1,5 +1,12 @@
-import { Args, Mutation, Query, Resolver, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import {
+  Args,
+  Mutation,
+  Query,
+  Resolver,
+  Context,
+  Subscription,
+} from '@nestjs/graphql';
+import { UseGuards, Inject } from '@nestjs/common';
 import { MessageService } from '../providers/message.service';
 import { MessageResponse } from '../DTO/message/message.response';
 import {
@@ -10,11 +17,13 @@ import { AuthGuard, RolesGuard } from '../guards/auth.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { AuthContext } from '../interfaces/auth.interface';
 import { ConversationService } from '../providers/conversation.service';
+import { PubSub } from 'graphql-subscriptions';
 
 @Resolver(() => MessageResponse)
 @UseGuards(AuthGuard, RolesGuard)
 export class MessageResolver {
   constructor(
+    @Inject('PUB_SUB') private pubSub: PubSub,
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
   ) {}
@@ -109,5 +118,17 @@ export class MessageResolver {
       throw new Error('Unauthorized to delete this message');
     }
     return this.messageService.deleteMessage(id);
+  }
+
+  // Add a subscription for real-time updates
+  @Subscription(() => MessageResponse, {
+    filter: (payload, variables) => {
+      return payload.messageAdded.conversationId === variables.conversationId;
+    },
+  })
+  @Roles('USER', 'ADMIN')
+  messageAdded(@Args('conversationId') conversationId: string) {
+    // Use type assertion to fix the TypeScript error
+    return (this.pubSub as any).asyncIterator(`message.${conversationId}`);
   }
 }

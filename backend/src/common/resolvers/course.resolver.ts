@@ -3,8 +3,12 @@ import { CourseService } from '../providers/course.service';
 import { CourseDto } from '../DTO/cousre/course.dto';
 import { CreateCourseDto } from '../DTO/cousre/create-course.dto';
 import { UpdateCourseDto } from '../DTO/cousre/update-course.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard, RolesGuard } from '../guards/auth.guard';
+import { Roles } from '../decorators/roles.decorator';
 
 @Resolver(() => CourseDto)
+@UseGuards(AuthGuard, RolesGuard)
 export class CourseResolver {
   constructor(private readonly courseService: CourseService) {}
 
@@ -18,6 +22,7 @@ export class CourseResolver {
   }
 
   @Query(() => CourseDto, { nullable: true })
+  @Roles('USER', 'ADMIN')
   async getCourseById(
     @Args('id', { type: () => String }) id: string,
   ): Promise<CourseDto | null> {
@@ -25,16 +30,19 @@ export class CourseResolver {
   }
 
   @Mutation(() => CourseDto)
+  @Roles('ADMIN')
   async createCourse(@Args('data') data: CreateCourseDto): Promise<CourseDto> {
     return this.courseService.createCourse(data);
   }
 
   @Mutation(() => CourseDto)
+  @Roles('ADMIN')
   async updateCourse(@Args('data') data: UpdateCourseDto): Promise<CourseDto> {
     return this.courseService.updateCourse(data);
   }
 
   @Mutation(() => CourseDto)
+  @Roles('ADMIN')
   async deleteCourse(@Args('id') id: string): Promise<CourseDto> {
     return this.courseService.deleteCourse(id);
   }
