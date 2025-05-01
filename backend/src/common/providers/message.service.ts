@@ -36,33 +36,29 @@ export class MessageService {
       messageAdded: userMessageResponse,
     });
 
-    try {
-      const response = await firstValueFrom(
-        // Replace with actual AI API endpoint
-        this.httpService.post<AIApiResponse>(`${process.env.AI_URL}/ask`, {
-          question: input.content,
-          course_id: input.courseId,
-          lesson_id: input.lessonId,
-        }),
-      );
+    const response = await firstValueFrom(
+      // Replace with actual AI API endpoint
+      this.httpService.post<AIApiResponse>(`${process.env.AI_URL}/ask`, {
+        question: input.content,
+        course_id: input.courseId,
+        lesson_id: input.lessonId,
+      }),
+    );
 
-      // Create AI response message
-      const aiMessage = await this.messageDAO.createMessage({
-        content: response.data.result,
-        senderType: SenderType.AI,
-        conversationId: input.conversationId,
-      });
+    // Create AI response message
+    const aiMessage = await this.messageDAO.createMessage({
+      content: response.data.result,
+      senderType: SenderType.AI,
+      conversationId: input.conversationId,
+    });
 
-      // Publish the AI message to subscribers
-      const aiMessageResponse = plainToClass(MessageResponse, aiMessage);
-      await this.pubSub.publish(`message.${input.conversationId}`, {
-        messageAdded: aiMessageResponse,
-      });
-    } catch (error) {
-      console.error('Error getting AI response:', error);
-    }
+    // Publish the AI message to subscribers
+    const aiMessageResponse = plainToClass(MessageResponse, aiMessage);
+    await this.pubSub.publish(`message.${input.conversationId}`, {
+      messageAdded: aiMessageResponse,
+    });
 
-    return userMessageResponse;
+    return aiMessageResponse;
   }
 
   async getMessageById(id: string): Promise<MessageResponse | null> {
