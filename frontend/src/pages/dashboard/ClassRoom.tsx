@@ -6,8 +6,7 @@ export default function ClassRoomPage() {
   return (
     <Canvas
       camera={{
-        position: [0, 1, 5],
-        fov: 50
+        position: [0, 0, 0.0001]
       }}
     >
       <Scene />
