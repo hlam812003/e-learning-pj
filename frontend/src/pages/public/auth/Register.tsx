@@ -27,8 +27,9 @@ export default function RegisterPage() {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
 
   const onSubmit = async (data: RegisterFormData) => {
+    console.log('Register submit data:', data)
     try {
-      setApiError(null) // reset lỗi cũ
+      setApiError(null) 
       await registerUser(data.email, data.password)
       navigate('/')
     } catch (error: any) {
@@ -140,6 +141,7 @@ export default function RegisterPage() {
             )}
           </div>
         </div>
+        
         {apiError && (
           <p className="text-[1.25rem] text-red-500 text-center">{apiError}</p>
         )}

@@ -16,19 +16,23 @@ export const authService = {
     })
     return response.data.data.login
   },
-
+  
   register: async (email: string, password: string) => {
-    const response = await api.post('', {
-      query: `
-        mutation Register($email: String!, $password: String!) {
-          register(data: { email: $email, password: $password }) {
-            success
-            message
-            token
-          }
+    const mutation = `
+      mutation Register($data: RegisterInput!) {
+        register(data: $data) {
+          success
+          message
+          token
         }
-      `,
-      variables: { email, password }
+      }
+    `
+    const variables = {
+      data: { email, password }
+    }
+    const response = await api.post('', {
+      query: mutation,
+      variables
     })
     return response.data.data.register
   }

@@ -17,6 +17,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (email, password) => {
     const user = await authService.register(email, password)
     set({ user })
+    return user
   },
+  
   logout: () => set({ user: null }),
 }))
