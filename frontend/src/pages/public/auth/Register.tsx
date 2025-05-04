@@ -13,6 +13,7 @@ import { Icon } from '@iconify/react'
 
 export default function RegisterPage() {
   const { register: registerUser } = useAuthStore()
+  const [apiError, setApiError] = useState<string | null>(null)
   const navigate = useNavigate()
   const {
     register,
@@ -22,15 +23,17 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   })
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await registerUser(data.email, data.username, data.password)
+      setApiError(null) // reset lỗi cũ
+      await registerUser(data.email, data.password)
       navigate('/')
-    } catch (error) {
+    } catch (error: any) {
       console.error('SignUp fail', error)
+      setApiError(error?.response?.data?.message || 'Registration failed. Please try again.')
     }
   }
 
@@ -44,10 +47,7 @@ export default function RegisterPage() {
           <p className="text-[1.4rem] text-gray-600">
             Already have an account?
           </p>
-          <Link
-            to="/auth/login"
-            className="font-medium text-[1.4rem] underline"
-          >
+          <Link to="/auth/login" className="font-medium text-[1.4rem] underline">
             Sign in
           </Link>
         </>
@@ -55,6 +55,7 @@ export default function RegisterPage() {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
         <div className="space-y-5">
+          {/* Email */}
           <div className="space-y-1">
             <div className="relative">
               <Icon 
@@ -78,28 +79,8 @@ export default function RegisterPage() {
               </p>
             )}
           </div>
-          <div className="space-y-1">
-            <div className="relative">
-              <Icon 
-                icon="mdi:user-box" 
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-[1.6rem]" 
-              />
-              <Input
-                {...register('username')}
-                id="username"
-                placeholder="Username"
-                className={cn(
-                  'h-14 pl-[3.15rem] pr-6 !text-[1.35rem] !rounded-[.65rem]',
-                  errors.username && 'border-red-500'
-                )}
-              />
-            </div>
-            {errors.username && (
-              <p className="text-[1.15rem] text-red-500 mt-2">
-                {errors.username.message}
-              </p>
-            )}
-          </div>
+
+          {/* Password */}
           <div className="space-y-1">
             <div className="relative">
               <Icon 
@@ -128,6 +109,8 @@ export default function RegisterPage() {
               </p>
             )}
           </div>
+
+          {/* Confirm Password */}
           <div className="space-y-1">
             <div className="relative">
               <Icon 
@@ -157,11 +140,16 @@ export default function RegisterPage() {
             )}
           </div>
         </div>
+        {apiError && (
+          <p className="text-[1.25rem] text-red-500 text-center">{apiError}</p>
+        )}
+
+        {/* Submit button */}
         <Button
           type="submit"
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
-            errors.email || errors.username || errors.password || errors.confirmPassword && 'bg-red-500'
+            (errors.email || errors.password || errors.confirmPassword) && 'bg-red-500'
           )}
         >
           Sign Up
