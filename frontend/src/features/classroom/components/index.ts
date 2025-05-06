@@ -1,1 +1,3 @@
-export { Scene } from './Scene'
+export * from './Scene'
+export * from './Teacher'
+export * from './CameraManager'
