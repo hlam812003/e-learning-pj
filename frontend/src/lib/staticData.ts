@@ -3,8 +3,8 @@ export const contactOptions = [
       icon: 'mdi:chat',
       title: 'Chat to sales',
       description: 'Speak to our friendly team.',
-      link: 'mailto:baonhanthai2710@gmail.com',
-      linkLabel: 'baonhanthai2710@gmail.com'
+      link: 'mailto:andott1@gmail.com',
+      linkLabel: 'anhdott1@gmail.com'
     },
     {
       icon: 'mdi:chat-question',
