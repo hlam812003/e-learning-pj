@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores'
 import { loginSchema, cn } from '@/lib'
 import { LoginFormData } from '@/types'
 import { Icon } from '@iconify/react'
+import { toast } from 'sonner'
 
 import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
@@ -29,8 +30,11 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password)
       navigate('/')
-    } catch (error) {
-      console.error('Login', error)
+      toast.success('Successfully logged in!')
+    } catch (error: any) {
+      // console.error('Login failed', error)
+      console.log(error.message)
+      toast.error(error?.message || 'Invalid email or password')
     }
   }
 

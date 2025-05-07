@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
 import { registerSchema, cn } from '@/lib'
 import { RegisterFormData } from '@/types'
+import { toast } from 'sonner'
 
 import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,6 @@ import { Icon } from '@iconify/react'
 
 export default function RegisterPage() {
   const { register: registerUser } = useAuthStore()
-  const [apiError, setApiError] = useState<string | null>(null)
   const navigate = useNavigate()
   const {
     register,
@@ -28,12 +28,12 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      setApiError(null) 
       await registerUser(data.email, data.password)
       navigate('/auth/login')
+      toast.success('Successfully registered!')
     } catch (error: any) {
-      console.error('SignUp fail', error)
-      setApiError(error?.response?.data?.message || 'Registration failed. Please try again.')
+      // console.error('SignUp failed', error)
+      toast.error(error?.message || 'Registration failed. Please try again.')
     }
   }
 
@@ -140,10 +140,6 @@ export default function RegisterPage() {
             )}
           </div>
         </div>
-        
-        {apiError && (
-          <p className="text-[1.25rem] text-red-500 text-center">{apiError}</p>
-        )}
 
         {/* Submit button */}
         <Button

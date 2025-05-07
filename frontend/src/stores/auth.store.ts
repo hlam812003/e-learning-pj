@@ -43,23 +43,23 @@ export const useAuthStore = create<AuthStore>(
     user: null,
     login: async (email: string, password: string): Promise<any> => {
       const loginResult = await authService.login(email, password)
-      if (loginResult.token) {
+      if (loginResult.success && loginResult.token) {
         const decoded: DecodedToken = jwtDecode(loginResult.token)
         set({ user: { ...decoded, token: loginResult.token } })
-        
         setCookie('token', loginResult.token, 7)
+        return loginResult
       }
-      return loginResult
+      throw new Error(loginResult.message || 'Login failed')
     },
     register: async (email: string, password: string): Promise<any> => {
       const registerResult = await authService.register(email, password)
-      if (registerResult.token) {
+      if (registerResult.success && registerResult.token) {
         const decoded: DecodedToken = jwtDecode(registerResult.token)
         set({ user: { ...decoded, token: registerResult.token } })
-        
         setCookie('token', registerResult.token, 7)
+        return registerResult
       }
-      return registerResult
+      throw new Error(registerResult.message || 'Registration failed')
     },
     logout: (): void => {
       set({ user: null })

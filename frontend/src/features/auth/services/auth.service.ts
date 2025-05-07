@@ -60,7 +60,7 @@ export const authService = {
     `
     const variables = { id: userId }
     const response = await api.post('', { query, variables })
-    console.log(response.data.data.user)
+    // console.log(response.data.data.user)
     return response.data.data.user
   }
 }
