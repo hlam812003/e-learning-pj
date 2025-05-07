@@ -1,51 +1,50 @@
 import { create } from 'zustand'
 import { SpeechMessage } from '../hooks'
-
-type TeacherMode = 'idle' | 'thinking' | 'talking'
-type CameraMode = 'default' | 'thinking' | 'talking'
+import { GeneralMode } from '../type'
+import { GENERAL_MODE } from '../constants'
 
 interface ClassroomState {
-  teacherMode: TeacherMode
+  teacherMode: GeneralMode
   currentMessage: SpeechMessage | null
   isSpeaking: boolean
-  isLoading: boolean
-  cameraMode: CameraMode
+  isThinking: boolean
+  cameraMode: GeneralMode
 
-  setTeacherMode: (mode: TeacherMode) => void
+  setTeacherMode: (mode: GeneralMode) => void
   setCurrentMessage: (message: SpeechMessage | null) => void
   setIsSpeaking: (isSpeaking: boolean) => void
-  setIsLoading: (isLoading: boolean) => void
-  setCameraMode: (mode: CameraMode) => void
+  setIsThinking: (isThinking: boolean) => void
+  setCameraMode: (mode: GeneralMode) => void
 
   startThinking: () => void
   stopAll: () => void
 }
 
 export const useClassroomStore = create<ClassroomState>((set) => ({
-  teacherMode: 'idle',
+  teacherMode: GENERAL_MODE.IDLE,
   currentMessage: null,
   isSpeaking: false,
-  isLoading: false,
-  cameraMode: 'default',
+  isThinking: false,
+  cameraMode: GENERAL_MODE.IDLE,
 
   setTeacherMode: (mode) => set({ teacherMode: mode }),
   setCurrentMessage: (message) => set({ currentMessage: message }),
   setIsSpeaking: (isSpeaking) => set({ isSpeaking }),
-  setIsLoading: (isLoading) => set({ isLoading }),
+  setIsThinking: (isThinking) => set({ isThinking }),
   setCameraMode: (mode) => set({ cameraMode: mode }),
 
   startThinking: () => set({
-    teacherMode: 'thinking',
+    teacherMode: GENERAL_MODE.THINKING,
     isSpeaking: false,
-    isLoading: true,
-    cameraMode: 'thinking'
+    isThinking: true,
+    cameraMode: GENERAL_MODE.THINKING
   }),
   
   stopAll: () => set({
-    teacherMode: 'idle',
+    teacherMode: GENERAL_MODE.IDLE,
     currentMessage: null,
     isSpeaking: false,
-    isLoading: false,
-    cameraMode: 'default'
+    isThinking: false,
+    cameraMode: GENERAL_MODE.IDLE
   })
 }))

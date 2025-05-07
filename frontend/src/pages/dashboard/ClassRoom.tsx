@@ -5,7 +5,8 @@ import {
   Scene, 
   useClassroomStore, 
   useTeacherSpeech, 
-  checkAzureSpeechSDK 
+  checkAzureSpeechSDK,
+  GENERAL_MODE
 } from '@/features/classroom'
 
 const sampleLectures = [
@@ -20,9 +21,9 @@ export default function ClassRoomPage() {
   const [sdkError, setSdkError] = useState<string | null>(null)
   const [sdkLoading, setSdkLoading] = useState(true)
   
-  const isLoading = useClassroomStore((state) => state.isLoading)
+  const isThinking = useClassroomStore((state) => state.isThinking)
   const isSpeaking = useClassroomStore((state) => state.isSpeaking)
-  const setIsLoading = useClassroomStore((state) => state.setIsLoading)
+  const setIsThinking = useClassroomStore((state) => state.setIsThinking)
   const setIsSpeaking = useClassroomStore((state) => state.setIsSpeaking)
   const setCurrentMessage = useClassroomStore((state) => state.setCurrentMessage)
   const setCameraMode = useClassroomStore((state) => state.setCameraMode)
@@ -48,24 +49,24 @@ export default function ClassRoomPage() {
     error: azureError,
     currentMessage,
     isSpeaking: isAzureSpeaking,
-    isLoading: isAzureLoading
+    isThinking: isAzureThinking
   } = useTeacherSpeech()
 
   useEffect(() => {
-    setIsLoading(isAzureLoading)
+    setIsThinking(isAzureThinking)
     setIsSpeaking(isAzureSpeaking)
     
-    if (isAzureLoading) {
-      setCameraMode('thinking')
-      setTeacherMode('thinking')
+    if (isAzureThinking) {
+      setCameraMode(GENERAL_MODE.THINKING)
+      setTeacherMode(GENERAL_MODE.THINKING)
     } else if (isAzureSpeaking) {
-      setCameraMode('talking') 
-      setTeacherMode('talking')
+      setCameraMode(GENERAL_MODE.SPEAKING) 
+      setTeacherMode(GENERAL_MODE.SPEAKING)
     } else {
-      setCameraMode('default')
-      setTeacherMode('idle')
+      setCameraMode(GENERAL_MODE.IDLE)
+      setTeacherMode(GENERAL_MODE.IDLE)
     }
-  }, [isAzureLoading, isAzureSpeaking, setIsLoading, setIsSpeaking, setCameraMode, setTeacherMode])
+  }, [isAzureThinking, isAzureSpeaking, setIsThinking, setIsSpeaking, setCameraMode, setTeacherMode])
   
   useEffect(() => {
     setCurrentMessage(currentMessage)
@@ -158,14 +159,14 @@ export default function ClassRoomPage() {
             <Button
               onClick={handleSpeak}
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={isLoading}
+              disabled={isThinking}
             >
-              {isLoading ? 'Đang tải...' : isSpeaking ? 'Dừng' : 'Nói'}
+              {isThinking ? 'Đang tải...' : isSpeaking ? 'Dừng' : 'Nói'}
             </Button>
             <Button 
               onClick={handleNextLecture}
               className="bg-gray-600 hover:bg-gray-700 text-white"
-              disabled={isLoading}
+              disabled={isThinking}
             >
               Bài tiếp theo
             </Button>

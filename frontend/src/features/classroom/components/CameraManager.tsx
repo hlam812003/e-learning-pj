@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useControls, button } from 'leva'
 import { Vector3 } from 'three'
 import { useClassroomStore } from '../store'
-import { CAMERA_POSITIONS, CAMERA_ZOOMS } from '../constants'
+import { CAMERA_POSITION, CAMERA_ZOOM, GENERAL_MODE } from '../constants'
 
 export const CameraManager = () => {
   const { camera } = useThree()
@@ -16,9 +16,9 @@ export const CameraManager = () => {
     e.preventDefault()
     
     const currentIsSpeaking = useClassroomStore.getState().isSpeaking
-    const currentIsLoading = useClassroomStore.getState().isLoading
+    const currentIsThinking = useClassroomStore.getState().isThinking
     
-    if (currentIsLoading || currentIsSpeaking) return
+    if (currentIsThinking || currentIsSpeaking) return
     
     if (controlsRef.current) {
       const zoomAmount = e.deltaY > 0 ? -camera.zoom / 4 : camera.zoom / 4
@@ -34,14 +34,17 @@ export const CameraManager = () => {
     setTimeout(() => {
       if (controlsRef.current) {
         try {
+          const position = CAMERA_POSITION[cameraMode] || CAMERA_POSITION[GENERAL_MODE.IDLE]
+          const zoom = CAMERA_ZOOM[cameraMode] || CAMERA_ZOOM[GENERAL_MODE.IDLE]
+
           controlsRef.current.setPosition(
-            CAMERA_POSITIONS[cameraMode][0],
-            CAMERA_POSITIONS[cameraMode][1],
-            CAMERA_POSITIONS[cameraMode][2],
+            position[0],
+            position[1],
+            position[2],
             true
           )
           
-          controlsRef.current.zoomTo(CAMERA_ZOOMS[cameraMode], true)
+          controlsRef.current.zoomTo(zoom, true)
           
           console.log(`Camera position and zoom set for mode: ${cameraMode}`)
         } catch (error) {

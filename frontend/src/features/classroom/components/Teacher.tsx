@@ -13,7 +13,7 @@ export const Teacher = (props: TeacherProps) => {
   const { animations } = useGLTF('/models/teacher_animation.glb')
   
   const isSpeaking = useClassroomStore((state) => state.isSpeaking)
-  const isLoading = useClassroomStore((state) => state.isLoading)
+  const isThinking = useClassroomStore((state) => state.isThinking)
   const currentMessage = useClassroomStore((state) => state.currentMessage)
   
   const [blink, setBlink] = useState<boolean>(false)
@@ -116,7 +116,7 @@ export const Teacher = (props: TeacherProps) => {
   useEffect(() => {
     let nextAnimation: string
     
-    if (isLoading) {
+    if (isThinking) {
       nextAnimation = 'Thinking'
       shouldAutoChangeAnimRef.current = false
     } else if (currentMessage) {
@@ -135,7 +135,7 @@ export const Teacher = (props: TeacherProps) => {
       console.log(`Changing animation from ${teacherAnimation} to ${nextAnimation}`)
       setTeacherAnimation(nextAnimation)
     }
-  }, [currentMessage, isLoading, teacherAnimation])
+  }, [currentMessage, isThinking, teacherAnimation])
 
   useFrame((state, delta) => {
     const limitedDelta = Math.min(delta, 0.05)
@@ -241,7 +241,7 @@ export const Teacher = (props: TeacherProps) => {
       ref={groupRef} 
       {...props}
     >
-      {isLoading ? (
+      {isThinking ? (
         <Html position={[0, 1.57, 0]}>
           <div className="flex items-center justify-center">
             <div className="size-[2.75rem] bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">

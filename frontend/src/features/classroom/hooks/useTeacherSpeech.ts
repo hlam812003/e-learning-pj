@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createAzureSpeechConfig, checkAzureSpeechSDK } from '../utils'
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
+import { GeneralMode } from '../type'
+import { GENERAL_MODE } from '../constants'
 
 export type Viseme = [number, number]
 
@@ -11,8 +13,6 @@ export interface SpeechMessage {
   visemes: Viseme[] | null;
   visemeStartTime?: number;
 }
-
-type SpeechState = 'idle' | 'loading' | 'speaking' | 'error'
 
 interface UseTeacherSpeechOptions {
   subscriptionKey?: string
@@ -31,7 +31,7 @@ export const useTeacherSpeech = ({
   pitch = 0,
   rate = 1
 }: UseTeacherSpeechOptions = {}) => {
-  const [state, setState] = useState<SpeechState>('idle')
+  const [state, setState] = useState<GeneralMode>(GENERAL_MODE.IDLE)
   const [error, setError] = useState<string | null>(null)
   const [isReady, setIsReady] = useState<boolean>(false)
   const [currentMessage, setCurrentMessage] = useState<SpeechMessage | null>(null)
@@ -131,7 +131,7 @@ export const useTeacherSpeech = ({
     }
     
     setCurrentMessage(null)
-    setState('idle')
+    setState(GENERAL_MODE.IDLE)
   }, [])
   
   useEffect(() => {
@@ -293,7 +293,7 @@ export const useTeacherSpeech = ({
       }
     }
     
-    setState('loading')
+    setState(GENERAL_MODE.THINKING)
     setError(null)
     
     const synthesizer = synthesisRef.current
@@ -347,7 +347,7 @@ export const useTeacherSpeech = ({
               audioPlayer.oncanplaythrough = () => {
                 console.log('Audio can play through')
                 
-                setState('speaking')
+                setState(GENERAL_MODE.SPEAKING)
                 isPlayingRef.current = true
                 
                 const visemeStartTime = Date.now()
@@ -364,7 +364,7 @@ export const useTeacherSpeech = ({
                 
                 audioPlayer.play().catch(error => {
                   console.error('Error playing audio:', error)
-                  setState('error')
+                  setState(GENERAL_MODE.ERROR)
                   setError('Failed to play audio')
                   synthesisInProgressRef.current = false
                   isPlayingRef.current = false
@@ -373,7 +373,7 @@ export const useTeacherSpeech = ({
               
               audioPlayer.onended = () => {
                 console.log('Audio playback ended naturally')
-                setState('idle')
+                setState(GENERAL_MODE.IDLE)
                 setCurrentMessage(null)
                 synthesisInProgressRef.current = false
                 isPlayingRef.current = false
@@ -381,7 +381,7 @@ export const useTeacherSpeech = ({
               
               audioPlayer.onerror = (e) => {
                 console.error('Audio playback error:', e)
-                setState('error')
+                setState(GENERAL_MODE.ERROR)
                 setError('Audio playback error')
                 synthesisInProgressRef.current = false
                 isPlayingRef.current = false
@@ -398,7 +398,7 @@ export const useTeacherSpeech = ({
             },
             (error: any) => {
               console.error('Speech synthesis failed:', error)
-              setState('error')
+              setState(GENERAL_MODE.ERROR)
               setError(`Speech synthesis failed: ${error}`)
               synthesisInProgressRef.current = false
               isPlayingRef.current = false
@@ -415,7 +415,7 @@ export const useTeacherSpeech = ({
           )
         } catch (err) {
           console.error('Exception during speech synthesis:', err)
-          setState('error')
+          setState(GENERAL_MODE.ERROR)
           const errorMessage = err instanceof Error ? 
             `Azure speech error: ${err.message}` : 
             'Failed to generate speech. Please try again.'
@@ -436,7 +436,7 @@ export const useTeacherSpeech = ({
       }) as Promise<any>
     } catch (err) {
       console.error('Error in speak function:', err)
-      setState('error')
+      setState(GENERAL_MODE.ERROR)
       const errorMessage = err instanceof Error ? 
         `Azure speech error: ${err.message}` : 
         'Failed to generate speech. Please try again.'
@@ -462,7 +462,7 @@ export const useTeacherSpeech = ({
     stopAudioAndSynthesizer()
     
     setCurrentMessage(null)
-    setState('idle')
+    setState(GENERAL_MODE.IDLE)
   }, [stopAudioAndSynthesizer])
   
   return {
@@ -474,7 +474,7 @@ export const useTeacherSpeech = ({
     isReady,
     currentMessage,
     isSpeaking: state === 'speaking',
-    isLoading: state === 'loading',
+    isThinking: state === 'thinking',
     isError: state === 'error'
   }
 } 
