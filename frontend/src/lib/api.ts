@@ -7,8 +7,14 @@ const api = axios.create({
   },
 })
 
+// Thêm interceptor để tự động gắn token vào header Authorization
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers = config.headers || {}
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -22,7 +28,7 @@ api.interceptors.response.use(
   },
   (error) => {
     // xuli loi
-    if (error.response.status === 401) {
+    if (error.response && error.response.status === 401) {
       // xu li dang xuat/lam moi token
     }
     return Promise.reject(error)

@@ -31,7 +31,7 @@ export default function RegisterPage() {
     try {
       setApiError(null) 
       await registerUser(data.email, data.password)
-      navigate('/')
+      navigate('/auth/login')
     } catch (error: any) {
       console.error('SignUp fail', error)
       setApiError(error?.response?.data?.message || 'Registration failed. Please try again.')
