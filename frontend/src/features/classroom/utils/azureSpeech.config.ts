@@ -2,7 +2,7 @@ import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
 
 export function checkAzureSpeechSDK() {
   try {
-    console.log('Checking Azure Speech SDK availability...')
+    // console.log('Checking Azure Speech SDK availability...')
     
     if (!SpeechSDK) {
       throw new Error('Azure Speech SDK chưa được import')
@@ -23,7 +23,7 @@ export function checkAzureSpeechSDK() {
       throw new Error(`Azure Speech SDK thiếu các thành phần: ${missingComponents.join(', ')}`)
     }
     
-    console.log('Azure Speech SDK availability check passed!')
+    // console.log('Azure Speech SDK availability check passed!')
     
     return {
       isAvailable: true,

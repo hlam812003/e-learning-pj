@@ -2,7 +2,8 @@ import { Canvas } from '@react-three/fiber'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { 
-  Scene, 
+  Scene,
+  MessageBox,
   useClassroomStore, 
   useTeacherSpeech, 
   checkAzureSpeechSDK,
@@ -190,6 +191,8 @@ export default function ClassRoomPage() {
           </div>
         </div>
       </div>
+
+      <MessageBox />
       
       <Canvas
         camera={{

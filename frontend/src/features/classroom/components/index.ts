@@ -1,3 +1,4 @@
 export * from './Scene'
 export * from './Teacher'
 export * from './CameraManager'
+export * from './MessageBox'

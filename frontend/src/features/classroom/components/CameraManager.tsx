@@ -29,7 +29,7 @@ export const CameraManager = () => {
   useEffect(() => {
     if (!controlsRef.current) return
     
-    console.log(`Camera mode changed to: ${cameraMode}`)
+    // console.log(`Camera mode changed to: ${cameraMode}`)
     
     setTimeout(() => {
       if (controlsRef.current) {
@@ -46,7 +46,7 @@ export const CameraManager = () => {
           
           controlsRef.current.zoomTo(zoom, true)
           
-          console.log(`Camera position and zoom set for mode: ${cameraMode}`)
+          // console.log(`Camera position and zoom set for mode: ${cameraMode}`)
         } catch (error) {
           console.error('Error setting camera position or zoom:', error)
         }
@@ -59,7 +59,7 @@ export const CameraManager = () => {
     
     if (!canvas) return
     
-    console.log('Setting up wheel event listener')
+    // console.log('Setting up wheel event listener')
     
     canvas.removeEventListener('wheel', handleWheel)
     

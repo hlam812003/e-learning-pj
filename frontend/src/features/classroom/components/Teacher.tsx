@@ -85,7 +85,7 @@ export const Teacher = (props: TeacherProps) => {
   
   useEffect(() => {
     if (actions && actions.Idle) {
-      console.log('Setting up initial Idle animation')
+      // console.log('Setting up initial Idle animation')
       
       const idleAction = actions.Idle
       idleAction.reset()
@@ -101,17 +101,17 @@ export const Teacher = (props: TeacherProps) => {
     }
   }, [actions])
   
-  useEffect(() => {
-    if (scene) {
-      console.log('Model loaded:', scene)
+  // useEffect(() => {
+  //   if (scene) {
+  //     // console.log('Model loaded:', scene)
       
-      scene.traverse((object) => {
-        if (object instanceof THREE.SkinnedMesh && object.morphTargetDictionary) {
-          console.log('Found morph targets on:', object.name, Object.keys(object.morphTargetDictionary))
-        }
-      })
-    }
-  }, [scene])
+  //     scene.traverse((object) => {
+  //       if (object instanceof THREE.SkinnedMesh && object.morphTargetDictionary) {
+  //         // console.log('Found morph targets on:', object.name, Object.keys(object.morphTargetDictionary))
+  //       }
+  //     })
+  //   }
+  // }, [scene])
 
   useEffect(() => {
     let nextAnimation: string
@@ -132,7 +132,7 @@ export const Teacher = (props: TeacherProps) => {
     }
     
     if (nextAnimation !== teacherAnimation) {
-      console.log(`Changing animation from ${teacherAnimation} to ${nextAnimation}`)
+      // console.log(`Changing animation from ${teacherAnimation} to ${nextAnimation}`)
       setTeacherAnimation(nextAnimation)
     }
   }, [currentMessage, isThinking, teacherAnimation])
@@ -211,7 +211,7 @@ export const Teacher = (props: TeacherProps) => {
       prevAnim.fadeOut(FADE_DURATION.FADE_OUT)
     }
     
-    console.log(`Playing animation: ${teacherAnimation}`)
+    // console.log(`Playing animation: ${teacherAnimation}`)
     nextAnim.reset().fadeIn(FADE_DURATION.FADE_IN).play()
     
     nextAnim.clampWhenFinished = false
@@ -245,7 +245,7 @@ export const Teacher = (props: TeacherProps) => {
         <Html position={[0, 1.57, 0]}>
           <div className="flex items-center justify-center">
             <div className="size-[2.75rem] bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <div className="size-8 border-t-transparent border-b-transparent border-r-transparent border-l-black rounded-full animate-spin border-2" />
+              <div className="size-[1.85rem] border-t-transparent border-b-transparent border-r-transparent border-l-black rounded-full animate-spin border-2" />
             </div>
           </div>
         </Html>
