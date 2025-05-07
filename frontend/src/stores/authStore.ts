@@ -30,6 +30,7 @@ export const useAuthStore = create<AuthStore>(
       if (loginResult.token) {
         const decoded: DecodedToken = jwtDecode(loginResult.token)
         set({ user: { ...decoded, token: loginResult.token } })
+        localStorage.setItem('token', loginResult.token) // Lưu token vào localStorage
       }
       return loginResult
     },
@@ -38,9 +39,13 @@ export const useAuthStore = create<AuthStore>(
       if (registerResult.token) {
         const decoded: DecodedToken = jwtDecode(registerResult.token)
         set({ user: { ...decoded, token: registerResult.token } })
+        localStorage.setItem('token', registerResult.token) // Lưu token vào localStorage
       }
       return registerResult
     },
-    logout: (): void => set({ user: null }),
+    logout: (): void => {
+      set({ user: null })
+      localStorage.removeItem('token') // Xóa token khi logout
+    },
   })
 )

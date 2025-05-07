@@ -1,3 +1,4 @@
+
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { JSX, useState } from 'react'
 
@@ -5,13 +6,22 @@ import { PageTransition, LanguageDropdown } from '@/components'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import { Icon } from '@iconify/react'
+import { useQuery } from '@tanstack/react-query'
+import { authService } from '@/features/auth/services/auth.service'
 
 export default function MainLayout() {
   const location = useLocation()
   const [language, setLanguage] = useState<string>('en')
-  const { user, logout } = useAuthStore()
+  const { user: authUser, logout } = useAuthStore()
 
-  console.log('Current user:', user)
+  // Sử dụng React Query để lấy user hiện tại từ authService
+  const { data: user, isLoading: loading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: authService.getCurrentUser,
+    staleTime: 5 * 60 * 1000,
+    enabled: !!authUser, // chỉ fetch khi đã đăng nhập
+  })
+
   const navItems = [
     {
       title: 'Home',
@@ -75,9 +85,12 @@ export default function MainLayout() {
             onChange={setLanguage}
           />
           <div className="flex items-center gap-9">
-            {user ? (
+            {authUser ? (
               <div className="flex items-center gap-4">
                 <Icon icon="mdi:user-circle" className="text-white bg-primary rounded-full p-2 text-[1.45rem] h-[3rem] w-[3rem]" />
+                {!loading && user && (
+                  <span className="text-[1.25rem] font-medium text-primary">{user.email}</span>
+                )}
                 <button
                   onClick={logout}
                   className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
