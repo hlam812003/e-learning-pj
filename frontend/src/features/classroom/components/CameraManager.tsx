@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { CameraControls } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useControls, button } from 'leva'
 import { Vector3 } from 'three'
 import { useClassroomStore } from '../store'
@@ -13,40 +12,60 @@ export const CameraManager = () => {
   
   const cameraMode = useClassroomStore((state) => state.cameraMode)
   
-  const handleWheel = (e: WheelEvent) => {
+  const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault()
+    
+    const currentIsSpeaking = useClassroomStore.getState().isSpeaking
+    const currentIsLoading = useClassroomStore.getState().isLoading
+    
+    if (currentIsLoading || currentIsSpeaking) return
+    
     if (controlsRef.current) {
       const zoomAmount = e.deltaY > 0 ? -camera.zoom / 4 : camera.zoom / 4
       controlsRef.current.zoom(zoomAmount, true)
     }
-  }
+  }, [camera.zoom])
 
   useEffect(() => {
-    if (controlsRef.current) {
-      console.log(`Camera mode changed to: ${cameraMode}`)
-      
-      controlsRef.current.setPosition(
-        CAMERA_POSITIONS[cameraMode][0],
-        CAMERA_POSITIONS[cameraMode][1],
-        CAMERA_POSITIONS[cameraMode][2],
-        true
-      )
-      controlsRef.current.zoomTo(CAMERA_ZOOMS[cameraMode], true)
-    }
+    if (!controlsRef.current) return
+    
+    console.log(`Camera mode changed to: ${cameraMode}`)
+    
+    setTimeout(() => {
+      if (controlsRef.current) {
+        try {
+          controlsRef.current.setPosition(
+            CAMERA_POSITIONS[cameraMode][0],
+            CAMERA_POSITIONS[cameraMode][1],
+            CAMERA_POSITIONS[cameraMode][2],
+            true
+          )
+          
+          controlsRef.current.zoomTo(CAMERA_ZOOMS[cameraMode], true)
+          
+          console.log(`Camera position and zoom set for mode: ${cameraMode}`)
+        } catch (error) {
+          console.error('Error setting camera position or zoom:', error)
+        }
+      }
+    }, 100)
   }, [cameraMode])
 
   useEffect(() => {
     const canvas = document.querySelector('canvas')
-    if (canvas) {
-      canvas.addEventListener('wheel', handleWheel, { passive: false })
-    }
+    
+    if (!canvas) return
+    
+    console.log('Setting up wheel event listener')
+    
+    canvas.removeEventListener('wheel', handleWheel)
+    
+    canvas.addEventListener('wheel', handleWheel, { passive: false })
     
     return () => {
-      if (canvas) {
-        canvas.removeEventListener('wheel', handleWheel)
-      }
+      canvas.removeEventListener('wheel', handleWheel)
     }
-  }, [camera.zoom])
+  }, [handleWheel])
 
   useControls('Helper', {
     getCameraPosition: button(() => {
@@ -55,9 +74,18 @@ export const CameraManager = () => {
         controlsRef.current.getPosition(position)
         const zoom = controlsRef.current.camera.zoom
         
-        console.log(position.toArray(), zoom)
+        console.log('Current camera:', position.toArray(), zoom)
       }
     }),
+    
+    testZoom: button(() => {
+      if (controlsRef.current) {
+        console.log('Testing zoom to 2.5...')
+        controlsRef.current.zoomTo(2.5, true)
+      } else {
+        console.log('Controls not available')
+      }
+    })
   })
   
   return (
@@ -70,9 +98,9 @@ export const CameraManager = () => {
       polarRotateSpeed={-.3}
       azimuthRotateSpeed={-.3}
       mouseButtons={{
-        left: 1, // ROTATE
-        middle: 1, // ROTATE
-        right: 1, // ROTATE
+        left: 1,
+        middle: 1,
+        right: 1,
         wheel: 0
       }}
       touches={{
