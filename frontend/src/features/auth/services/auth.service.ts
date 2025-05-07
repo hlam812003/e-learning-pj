@@ -1,5 +1,6 @@
-import api from '@/lib/api'
+import { api } from '@/lib'
 import { jwtDecode } from 'jwt-decode'
+import { getCookie } from '@/stores'
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -39,10 +40,10 @@ export const authService = {
   },
   
   getCurrentUser: async () => {
-    const token = localStorage.getItem('token')
+    const token = getCookie('token')
     if (!token) throw new Error('No token found')
     const decoded: any = jwtDecode(token)
-    const userId = decoded.id || decoded.userId || decoded.sub // tuỳ vào backend encode gì
+    const userId = decoded.id || decoded.userId || decoded.sub
     if (!userId) throw new Error('No user id in token')
     const query = `
       query GetUser($id: String!) {
@@ -59,6 +60,7 @@ export const authService = {
     `
     const variables = { id: userId }
     const response = await api.post('', { query, variables })
+    console.log(response.data.data.user)
     return response.data.data.user
   }
 }

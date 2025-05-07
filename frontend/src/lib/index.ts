@@ -1,4 +1,4 @@
 export * from './validations'
 export * from './utils'
-export * from './api'
+export { default as api } from './api'
 export * from './gsap'

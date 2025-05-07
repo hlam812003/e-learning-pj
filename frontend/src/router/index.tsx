@@ -1,8 +1,9 @@
 import { lazy } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, redirect } from 'react-router-dom'
 
 import { AuthLayout, MainLayout, ClassRoomLayout, DashboardLayout } from '@/layouts'
 import { ErrorBoundary } from '@/components'
+import { getCookie } from '@/stores'
 
 const Pages = {
   Main: {
@@ -21,6 +22,22 @@ const Pages = {
   }
 } 
 
+const authGuard = () => {
+  const token = getCookie('token')
+  if (!token) {
+    return redirect('/auth/login')
+  }
+  return null
+}
+
+const redirectIfAuthenticated = () => {
+  const token = getCookie('token')
+  if (token) {
+    return redirect('/')
+  }
+  return null
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -37,6 +54,7 @@ export const router = createBrowserRouter([
   {
     path: '/auth',
     element: <AuthLayout />,
+    loader: redirectIfAuthenticated,
     children: [
       { path: 'login', element: <Pages.Auth.Login /> },
       { path: 'signup', element: <Pages.Auth.Register /> }
@@ -46,19 +64,13 @@ export const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: <DashboardLayout />,
-    // children: [{ 
-    //   path: 'classroom',
-    //   element: <ClassRoomLayout />,
-    //   children: [{ 
-    //     index: true,
-    //     element: <Pages.Dashboard.ClassRoom />
-    //   }]
-    // }],
+    loader: authGuard,
     errorElement: <ErrorBoundary />
   },
   {
     path: '/dashboard/classroom',
     element: <ClassRoomLayout />,
+    loader: authGuard,
     children: [{ 
       index: true,
       element: <Pages.Dashboard.ClassRoom />

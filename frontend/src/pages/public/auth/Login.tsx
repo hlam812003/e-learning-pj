@@ -5,19 +5,20 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
 import { loginSchema, cn } from '@/lib'
 import { LoginFormData } from '@/types'
+import { Icon } from '@iconify/react'
 
 import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Icon } from '@iconify/react'
 
 export default function LoginPage() {
   const { login } = useAuthStore()
   const navigate = useNavigate()
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -128,10 +129,20 @@ export default function LoginPage() {
           type="submit"
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
-            errors.email || (errors.password && 'bg-red-500')
+            errors.email || (errors.password && 'bg-red-500'),
+            isSubmitting && 'flex items-center justify-center gap-3'
           )}
         >
-          Sign In
+          {isSubmitting ? (
+            <>
+              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+              </svg>
+              <span>Signing in...</span>
+            </>
+          ) : (
+            'Sign In'
+          )}
         </Button>
       </form>
     </AuthContainer>

@@ -1,16 +1,17 @@
 import axios from 'axios'
+import { getCookie, useAuthStore } from '@/stores'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BACKEND_URL, 
+  baseURL: import.meta.env.VITE_API_BACKEND_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Thêm interceptor để tự động gắn token vào header Authorization
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    const token = getCookie('token')
+    
     if (token) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = `Bearer ${token}`
@@ -27,10 +28,25 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    // xuli loi
-    if (error.response && error.response.status === 401) {
-      // xu li dang xuat/lam moi token
+    if (error.response) {
+      const { status } = error.response
+      
+      if (status === 401) {
+        try {
+          if (useAuthStore) {
+            const { logout } = useAuthStore.getState()
+            if (typeof logout === 'function') {
+              logout()
+            }
+          }
+        } catch (e) {
+          console.error('Không thể đăng xuất tự động:', e)
+        }
+        
+        window.location.href = '/auth/login'
+      }
     }
+    
     return Promise.reject(error)
   }
 )

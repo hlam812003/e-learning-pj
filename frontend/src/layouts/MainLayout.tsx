@@ -1,25 +1,29 @@
-
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { JSX, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { JSX, useState, useEffect } from 'react'
+import { cn } from '@/lib'
+import { useQuery } from '@tanstack/react-query'
+import { authService } from '@/features/auth'
+import { useAuthStore } from '@/stores'
 
 import { PageTransition, LanguageDropdown } from '@/components'
-import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores'
-import { Icon } from '@iconify/react'
-import { useQuery } from '@tanstack/react-query'
-import { authService } from '@/features/auth/services/auth.service'
+import MainDropdown from '@/components/common/dropdowns/MainDropdown'
 
 export default function MainLayout() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user: authUser, logout, initAuth } = useAuthStore()
+  
   const [language, setLanguage] = useState<string>('en')
-  const { user: authUser, logout } = useAuthStore()
 
-  // Sử dụng React Query để lấy user hiện tại từ authService
+  useEffect(() => {
+    initAuth()
+  }, [initAuth])
+
   const { data: user, isLoading: loading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: authService.getCurrentUser,
     staleTime: 5 * 60 * 1000,
-    enabled: !!authUser, // chỉ fetch khi đã đăng nhập
+    enabled: !!authUser,
   })
 
   const navItems = [
@@ -45,6 +49,38 @@ export default function MainLayout() {
     { id: 'en', name: 'English', flag: 'english' },
     { id: 'vi', name: 'Tiếng Việt', flag: 'vietnam' }
   ]
+
+  const userMenuOptions = [
+    { label: 'Profile', value: 'profile', icon: 'lucide:user' },
+    { label: 'Dashboard', value: 'dashboard', icon: 'lucide:layout-dashboard' },
+    { label: 'Settings', value: 'settings', icon: 'lucide:settings' },
+    { label: 'Logout', value: 'logout', icon: 'lucide:log-out' }
+  ]
+
+  const handleUserMenuSelect = (value: string) => {
+    switch (value) {
+      case 'profile':
+        navigate('/dashboard/profile')
+        break
+      case 'dashboard':
+        navigate('/dashboard')
+        break
+      case 'settings':
+        navigate('/dashboard/settings')
+        break
+      case 'logout':
+        logout()
+        navigate('/', { replace: true })
+        break
+      default:
+        break
+    }
+  }
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U'
+    return name.split(' ').map(n => n[0]).join('').toUpperCase()
+  }
 
   const MainNav = (): JSX.Element => {
     return (
@@ -86,17 +122,41 @@ export default function MainLayout() {
           />
           <div className="flex items-center gap-9">
             {authUser ? (
-              <div className="flex items-center gap-4">
-                <Icon icon="mdi:user-circle" className="text-white bg-primary rounded-full p-2 text-[1.45rem] h-[3rem] w-[3rem]" />
+              <div className="flex items-center">
                 {!loading && user && (
-                  <span className="text-[1.25rem] font-medium text-primary">{user.email}</span>
+                  <div className="flex items-center">
+                    <MainDropdown
+                      value="profile"
+                      options={userMenuOptions}
+                      onChange={handleUserMenuSelect}
+                      minWidth="180px"
+                      className="ml-auto"
+                      align="right"
+                      showChecks={false}
+                      userInfo={{
+                        username: user.username,
+                        email: user.email
+                      }}
+                    >
+                      {({ isOpen }) => (
+                        <div className="flex-shrink-0 relative cursor-pointer">
+                          <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md">
+                            {user.avatar ? (
+                              <img 
+                                src={user.avatar} 
+                                alt={user.username || 'User'} 
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            ) : (
+                              <span>{getInitials(user.username || user.email || 'User')}</span>
+                            )}
+                          </div>
+                          <div className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full border-2 border-white"></div>
+                        </div>
+                      )}
+                    </MainDropdown>
+                  </div>
                 )}
-                <button
-                  onClick={logout}
-                  className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
-                >
-                  Logout
-                </button>
               </div>
             ) : (
               <>

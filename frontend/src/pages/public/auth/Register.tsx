@@ -18,16 +18,15 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   })
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false)
 
   const onSubmit = async (data: RegisterFormData) => {
-    console.log('Register submit data:', data)
     try {
       setApiError(null) 
       await registerUser(data.email, data.password)
@@ -151,10 +150,20 @@ export default function RegisterPage() {
           type="submit"
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
-            (errors.email || errors.password || errors.confirmPassword) && 'bg-red-500'
+            (errors.email || errors.password || errors.confirmPassword) && 'bg-red-500',
+            isSubmitting && 'flex items-center justify-center gap-3'
           )}
         >
-          Sign Up
+          {isSubmitting ? (
+            <>
+              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+              </svg>
+              <span>Signing up...</span>
+            </>
+          ) : (
+            'Sign Up'
+          )}
         </Button>
       </form>
     </AuthContainer>
