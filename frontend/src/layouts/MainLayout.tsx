@@ -3,11 +3,15 @@ import { JSX, useState } from 'react'
 
 import { PageTransition, LanguageDropdown } from '@/components'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores'
+import { Icon } from '@iconify/react'
 
 export default function MainLayout() {
   const location = useLocation()
   const [language, setLanguage] = useState<string>('en')
+  const { user, logout } = useAuthStore()
 
+  console.log('Current user:', user)
   const navItems = [
     {
       title: 'Home',
@@ -16,7 +20,7 @@ export default function MainLayout() {
     {
       title: 'About',
       path: '/about'
-    },
+    }, 
     {
       title: 'Courses',
       path: '/courses'
@@ -71,13 +75,30 @@ export default function MainLayout() {
             onChange={setLanguage}
           />
           <div className="flex items-center gap-9">
-            <Link to="/auth/login" className="text-black text-[1.45rem] relative group">
-              <span>Log in</span>
-              <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
-            </Link>
-            <Link to="/auth/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
-              Sign Up
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <Icon icon="mdi:user-circle" className="text-white bg-primary rounded-full p-2 text-[1.45rem] h-[3rem] w-[3rem]" />
+                <span className="text-[1.2rem] font-medium">
+                  {user?.email || user?.username || 'No email'}
+                </span>
+                <button
+                  onClick={logout}
+                  className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/auth/login" className="text-black text-[1.45rem] relative group">
+                  <span>Log in</span>
+                  <span className="absolute left-0 right-0 bottom-0 h-[.15rem] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-250 origin-center" />
+                </Link>
+                <Link to="/auth/signup" className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium">
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
