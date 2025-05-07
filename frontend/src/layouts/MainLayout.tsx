@@ -78,9 +78,6 @@ export default function MainLayout() {
             {user ? (
               <div className="flex items-center gap-4">
                 <Icon icon="mdi:user-circle" className="text-white bg-primary rounded-full p-2 text-[1.45rem] h-[3rem] w-[3rem]" />
-                <span className="text-[1.2rem] font-medium">
-                  {user?.email || user?.username || 'No email'}
-                </span>
                 <button
                   onClick={logout}
                   className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
