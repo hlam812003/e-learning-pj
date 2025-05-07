@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { MathUtils, randInt } from 'three/src/math/MathUtils.js'
 import { useClassroomStore } from '../store'
 import { FADE_DURATION } from '../constants'
+import { gsap, useGSAP } from '@/lib/gsap'
 
 type TeacherProps = ThreeElements['group']
 
@@ -23,8 +24,45 @@ export const Teacher = (props: TeacherProps) => {
   const previousAnimationRef = useRef<string>('Idle')
   const animationTimeoutRef = useRef<number | null>(null)
   const shouldAutoChangeAnimRef = useRef<boolean>(false)
+  const spinnerRef = useRef<HTMLDivElement>(null)
   
   const { actions, mixer } = useAnimations(animations, groupRef)
+
+  useGSAP(() => {
+    if (!spinnerRef.current) return
+    
+    if (isThinking) {
+      gsap.fromTo(
+        spinnerRef.current,
+        { 
+          opacity: 0, 
+          scale: 0.5,
+          display: 'none'
+        },
+        { 
+          opacity: 1, 
+          scale: 1, 
+          display: 'flex',
+          duration: 0.5, 
+          ease: 'back.out(1.7)',
+          transformOrigin: 'center center'
+        }
+      )
+    } else {
+      gsap.to(spinnerRef.current, { 
+        opacity: 0, 
+        scale: 0.5,
+        duration: 0.4, 
+        ease: 'back.in(1.2)',
+        transformOrigin: 'center center',
+        onComplete: () => {
+          if (spinnerRef.current) {
+            spinnerRef.current.style.display = 'none'
+          }
+        }
+      })
+    }
+  }, [isThinking])
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -241,15 +279,17 @@ export const Teacher = (props: TeacherProps) => {
       ref={groupRef} 
       {...props}
     >
-      {isThinking ? (
-        <Html position={[0, 1.57, 0]}>
-          <div className="flex items-center justify-center">
-            <div className="size-[2.75rem] bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <div className="size-[1.85rem] border-t-transparent border-b-transparent border-r-transparent border-l-black rounded-full animate-spin border-2" />
-            </div>
+      <Html position={[0, 1.57, 0]}>
+        <div 
+          ref={spinnerRef}
+          className="items-center justify-center"
+          style={{ display: 'none', opacity: 0 }}
+        >
+          <div className="size-[2.75rem] bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <div className="size-[1.85rem] border-t-transparent border-b-transparent border-r-transparent border-l-black rounded-full animate-spin border-2" />
           </div>
-        </Html>
-      ) : null}
+        </div>
+      </Html>
       <primitive object={scene} />
     </group>
   )
