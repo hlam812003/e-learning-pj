@@ -6,35 +6,41 @@ export const authService = {
   login: async (email: string, password: string) => {
     const response = await api.post('', {
       query: `
-        mutation Login($email: String!, $password: String!) {
-          login(data: { email: $email, password: $password }) {
+        mutation Login($data: LoginInput!) {
+          login(data: $data) {
             success
             message
             token
           }
         }
       `,
-      variables: { email, password }
+      variables: { 
+        data: { 
+          email, 
+          password 
+        } 
+      }
     })
     return response.data.data.login
   },
   
   register: async (email: string, password: string) => {
-    const mutation = `
-      mutation Register($data: RegisterInput!) {
-        register(data: $data) {
-          success
-          message
-          token
-        }
-      }
-    `
-    const variables = {
-      data: { email, password } 
-    }
     const response = await api.post('', {
-      query: mutation,
-      variables
+      query: `
+        mutation Register($data: RegisterInput!) {
+          register(data: $data) {
+            success
+            message
+            token
+          }
+        }
+      `,
+      variables: { 
+        data: { 
+          email, 
+          password 
+        } 
+      }
     })
     return response.data.data.register
   },
@@ -50,7 +56,7 @@ export const authService = {
           }
         }
       `,
-      variables: { 
+      variables: {   
         data: { 
           googleId, 
           email
@@ -66,22 +72,22 @@ export const authService = {
     const decoded: any = jwtDecode(token)
     const userId = decoded.id || decoded.userId || decoded.sub
     if (!userId) throw new Error('No user id in token')
-    const query = `
-      query GetUser($id: String!) {
-        user(id: $id) {
-          id
-          username
-          email
-          phoneNumber
-          role
-          createdAt
-          updatedAt
+    const response = await api.post('', {
+      query: `
+        query User($id: String!) {
+          user(id: $id) {
+            id
+            username
+            email
+            phoneNumber
+            role
+            createdAt
+            updatedAt
+          }
         }
-      }
-    `
-    const variables = { id: userId }
-    const response = await api.post('', { query, variables })
-    // console.log(response.data.data.user)
+      `,
+      variables: { id: userId }
+    })
     return response.data.data.user
   }
 }
