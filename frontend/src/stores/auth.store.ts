@@ -25,7 +25,7 @@ const useAuthStore = create<AuthStore>()(
     (set): AuthStore => ({
       user: null,
       googleInfo: null,
-      login: async (email: string, password: string): Promise<any> => {
+      login: async (email: string, password: string) => {
         const loginResult = await authService.login(email, password)
         if (loginResult.success && loginResult.token) {
           const decoded: DecodedToken = jwtDecode(loginResult.token)
@@ -36,7 +36,7 @@ const useAuthStore = create<AuthStore>()(
         }
         throw new Error(loginResult.message || 'Login failed')
       },
-      register: async (email: string, password: string): Promise<any> => {
+      register: async (email: string, password: string) => {
         const registerResult = await authService.register(email, password)
         if (registerResult.success && registerResult.token) {
           toast.success(registerResult.message || 'Register successfully. Please login.')
@@ -44,7 +44,7 @@ const useAuthStore = create<AuthStore>()(
         }
         throw new Error(registerResult.message || 'Registration failed')
       },
-      loginWithGoogle: async (googleId: string, email: string, googleInfo?: GoogleUserInfo): Promise<any> => {
+      loginWithGoogle: async (googleId: string, email: string, googleInfo?: GoogleUserInfo) => {
         try {
           const loginResult = await authService.loginWithGoogle(googleId, email)
           
@@ -70,14 +70,23 @@ const useAuthStore = create<AuthStore>()(
           throw error
         }
       },
-      logout: (): void => {
+      logout: () => {
         set({ 
           user: null,
           googleInfo: null
         })
         deleteCookie('token')
       },
-      initAuth: (): void => {
+      getUserInfo: async () => {
+        try {
+          const userInfo = await authService.getCurrentUser()
+          return userInfo
+        } catch (error) {
+          console.error('Error getting user info:', error)
+          throw error
+        }
+      },
+      initAuth: () => {
         const token = getCookie('token')
         if (token) {
           try {
@@ -95,7 +104,7 @@ const useAuthStore = create<AuthStore>()(
           }
         }
       },
-      setGoogleInfo: (info: GoogleUserInfo): void => {
+      setGoogleInfo: (info: GoogleUserInfo) => {
         set({ 
           googleInfo: {
             name: info.name,
@@ -104,7 +113,7 @@ const useAuthStore = create<AuthStore>()(
           } 
         })
       },
-      clearGoogleInfo: (): void => {
+      clearGoogleInfo: () => {
         set({ googleInfo: null })
       }
     }),

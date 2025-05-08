@@ -2,7 +2,6 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { JSX, useState, useEffect } from 'react'
 import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
-import { authService } from '@/features/auth'
 import { useAuthStore } from '@/stores'
 
 import { PageTransition, LanguageDropdown } from '@/components'
@@ -12,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, initAuth, googleInfo } = useAuthStore()
+  const { user: authUser, logout, initAuth, googleInfo, getUserInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
   const [isImageLoading, setIsImageLoading] = useState<boolean>(true)
@@ -21,9 +20,9 @@ export default function MainLayout() {
     initAuth()
   }, [initAuth])
 
-  const { data: user, isLoading: loading } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: authService.getCurrentUser,
+    queryFn: getUserInfo,
     enabled: !!authUser
   })
 
@@ -128,7 +127,7 @@ export default function MainLayout() {
           <div className="flex items-center gap-9">
             {authUser ? (
               <div className="flex items-center">
-                {loading ? (
+                {isLoading ? (
                   <div className="flex-shrink-0 relative cursor-pointer">
                     <Skeleton className="size-[3rem] rounded-full shadow-md" />
                     <Skeleton className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white" />

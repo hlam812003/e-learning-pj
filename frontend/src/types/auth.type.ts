@@ -1,4 +1,5 @@
 import { JwtPayload } from 'jwt-decode'
+import { User } from './user.type'
 
 interface DecodedToken extends JwtPayload {
   email?: string
@@ -28,6 +29,7 @@ interface AuthStore {
   register: (email: string, password: string) => Promise<any>
   loginWithGoogle: (googleId: string, email: string, googleInfo?: GoogleUserInfo) => Promise<any>
   logout: () => void
+  getUserInfo: () => Promise<User>
   initAuth: () => void
   setGoogleInfo: (info: GoogleUserInfo) => void
   clearGoogleInfo: () => void
