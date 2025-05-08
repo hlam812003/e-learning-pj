@@ -3,17 +3,18 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
-import { loginSchema, cn } from '@/lib'
+import { loginSchema, cn, api } from '@/lib'
 import { LoginFormData } from '@/types'
 import { Icon } from '@iconify/react'
 import { toast } from 'sonner'
+import { useGoogleLogin } from '@react-oauth/google'
 
 import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 export default function LoginPage() {
-  const { login } = useAuthStore()
+  const { login, loginWithGoogle, setGoogleInfo, clearGoogleInfo } = useAuthStore()
   const navigate = useNavigate()
 
   const {
@@ -25,16 +26,71 @@ export default function LoginPage() {
   })
 
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false)
 
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password)
       navigate('/')
-      toast.success('Successfully logged in!')
     } catch (error: any) {
       // console.error('Login failed', error)
       console.log(error.message)
       toast.error(error?.message || 'Invalid email or password')
+    }
+  }
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (response) => {
+      try {
+        setIsGoogleLoading(true)
+        
+        const userInfoResponse = await api.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${response.access_token}` }
+        })
+        
+        const userInfo = userInfoResponse.data
+        // console.log('Google User Info:', userInfo)
+        
+        clearGoogleInfo()
+        
+        const googleUserInfo = {
+          name: userInfo.name,
+          given_name: userInfo.given_name,
+          email: userInfo.email,
+          picture: userInfo.picture,
+          sub: userInfo.sub
+        }
+        
+        setGoogleInfo(googleUserInfo)
+        
+        await loginWithGoogle(userInfo.sub, userInfo.email, googleUserInfo)
+        
+        setIsGoogleLoading(false)
+        navigate('/')
+      } catch (error) {
+        setIsGoogleLoading(false)
+        console.error('Google login failed:', error)
+        toast.error('Google login failed')
+      }
+    },
+    onError: () => {
+      setIsGoogleLoading(false)
+      toast.error('Google login failed')
+    },
+    prompt: 'consent',
+    onNonOAuthError: () => {
+      setIsGoogleLoading(false)
+      toast.error('Google login failed due to non-OAuth error')
+    }
+  })
+
+  const handleGoogleLogin = () => {
+    setIsGoogleLoading(true)
+    try {
+      googleLogin()
+    } catch (error: any) {
+      setIsGoogleLoading(false)
+      toast.error(error?.message || 'Failed to open Google login popup')
     }
   }
 
@@ -133,7 +189,7 @@ export default function LoginPage() {
           type="submit"
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
-            errors.email || (errors.password && 'bg-red-500'),
+            errors.email || (errors.password && 'bg-red-500 pointer-events-none'),
             isSubmitting && 'flex items-center justify-center gap-3 pointer-events-none'
           )}
         >
@@ -146,6 +202,37 @@ export default function LoginPage() {
             </>
           ) : (
             'Sign In'
+          )}
+        </Button>
+
+        <div className="flex items-center gap-4">
+          <div className="h-[.15rem] flex-1 bg-gray-200"></div>
+          <span className="text-gray-500 text-[1.35rem]">OR</span>
+          <div className="h-[.15rem] flex-1 bg-gray-200"></div>
+        </div>
+
+        <Button 
+          type="button"
+          variant="outline"
+          className={cn(
+            'w-full h-[4rem] flex items-center justify-center gap-2 text-[1.35rem] border-[1px]',
+            isGoogleLoading && 'pointer-events-none'
+          )}
+          disabled={isGoogleLoading}
+          onClick={handleGoogleLogin}
+        >
+          {isGoogleLoading ? (
+            <>
+              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                <circle r="20" cy="50" cx="50" className="loading__circle !stroke-black" />
+              </svg>
+              <span>Connecting to Google...</span>
+            </>
+          ) : (
+            <>
+              <Icon icon="flat-color-icons:google" className="size-[1.95rem]" />
+              <span>Continue with Google</span>
+            </>
           )}
         </Button>
       </form>

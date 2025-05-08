@@ -30,7 +30,6 @@ export default function RegisterPage() {
     try {
       await registerUser(data.email, data.password)
       navigate('/auth/login')
-      toast.success('Successfully registered!')
     } catch (error: any) {
       // console.error('SignUp failed', error)
       toast.error(error?.message || 'Registration failed. Please try again.')

@@ -7,13 +7,15 @@ import { useAuthStore } from '@/stores'
 
 import { PageTransition, LanguageDropdown } from '@/components'
 import MainDropdown from '@/components/common/dropdowns/MainDropdown'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, initAuth } = useAuthStore()
+  const { user: authUser, logout, initAuth, googleInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
+  const [isImageLoading, setIsImageLoading] = useState<boolean>(true)
 
   useEffect(() => {
     initAuth()
@@ -25,6 +27,10 @@ export default function MainLayout() {
     staleTime: 5 * 60 * 1000,
     enabled: !!authUser,
   })
+
+  const displayName = googleInfo?.name || user?.username || authUser?.email || 'User'
+  const email = googleInfo?.email || user?.email || ''
+  const avatar = googleInfo?.picture || user?.avatar || null
 
   const navItems = [
     {
@@ -114,7 +120,7 @@ export default function MainLayout() {
             })}
           </nav>
         </div>
-        <div className="w-1/3 flex items-center justify-end gap-3">
+        <div className="w-1/3 flex items-center justify-end gap-2.5">
           <LanguageDropdown 
             options={languageOptions}
             value={language}
@@ -123,7 +129,12 @@ export default function MainLayout() {
           <div className="flex items-center gap-9">
             {authUser ? (
               <div className="flex items-center">
-                {!loading && user && (
+                {loading ? (
+                  <div className="flex-shrink-0 relative cursor-pointer">
+                    <Skeleton className="size-[3rem] rounded-full shadow-md" />
+                    <Skeleton className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white" />
+                  </div>
+                ) : (
                   <div className="flex items-center">
                     <MainDropdown
                       value="profile"
@@ -134,21 +145,29 @@ export default function MainLayout() {
                       align="right"
                       showChecks={false}
                       userInfo={{
-                        username: user.username,
-                        email: user.email
+                        username: displayName,
+                        email: email
                       }}
                     >
                       {({ isOpen }) => (
                         <div className="flex-shrink-0 relative cursor-pointer">
-                          <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md">
-                            {user.avatar ? (
-                              <img 
-                                src={user.avatar} 
-                                alt={user.username || 'User'} 
-                                className="w-full h-full rounded-full object-cover"
-                              />
+                          <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md overflow-hidden">
+                            {avatar ? (
+                              <>
+                                {isImageLoading && (
+                                  <Skeleton className="absolute inset-0 rounded-full" />
+                                )}
+                                <img 
+                                  src={avatar} 
+                                  alt={displayName} 
+                                  className="size-full rounded-full object-cover"
+                                  onLoad={() => setIsImageLoading(false)}
+                                />
+                              </>
                             ) : (
-                              <span>{getInitials(user.username || user.email || 'User')}</span>
+                              <span>
+                                {getInitials(displayName)}
+                              </span>
                             )}
                           </div>
                           <div className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full border-2 border-white"></div>

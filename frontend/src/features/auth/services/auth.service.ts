@@ -39,6 +39,27 @@ export const authService = {
     return response.data.data.register
   },
   
+  loginWithGoogle: async (googleId: string, email: string) => {
+    const response = await api.post('', {
+      query: `
+        mutation GoogleLogin($data: GoogleLoginInput!) {
+          googleLogin(data: $data) {
+            success
+            message
+            token
+          }
+        }
+      `,
+      variables: { 
+        data: { 
+          googleId, 
+          email
+        } 
+      }
+    })
+    return response.data.data.googleLogin
+  },
+  
   getCurrentUser: async () => {
     const token = getCookie('token')
     if (!token) throw new Error('No token found')
