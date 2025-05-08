@@ -11,6 +11,7 @@ import {
   GoogleLoginInput,
 } from '../DTO/auth/auth.input';
 import { AuthResponse } from '../DTO/auth/auth.response';
+import { AuthResponseRegis } from '../DTO/auth/auth.responseRegis';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthDAO } from '../DAO/auth.dao';
@@ -24,7 +25,7 @@ export class AuthService {
   ) {}
 
   // ✅ Sửa lỗi xử lý email đã tồn tại
-  async register(data: RegisterInput): Promise<AuthResponse> {
+  async register(data: RegisterInput): Promise<AuthResponseRegis> {
     try {
       const existingUser = await this.authDAO.findUserByEmail(data.email);
 
@@ -44,7 +45,7 @@ export class AuthService {
       return {
         success: true,
         message: 'User registered successfully',
-        token: this.jwtService.sign({ id: user.id, role: user.role }),
+        // token: this.jwtService.sign({ id: user.id, role: user.role }),
       };
     } catch (error) {
       throw new BadRequestException(error);
