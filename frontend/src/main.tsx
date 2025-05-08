@@ -9,7 +9,7 @@ import './index.css'
 import './lib/gsap'
 
 scan({
-  enabled: true
+  enabled: !import.meta.env.PROD
 })
 
 const queryClient = new QueryClient({

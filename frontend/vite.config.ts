@@ -29,8 +29,8 @@ export default defineConfig({
   build: {
     sourcemap: false,
     minify: 'esbuild',
-    chunkSizeWarningLimit: 1600,
-    target: 'esnext',
+    chunkSizeWarningLimit: 3000,
+    target: 'es2020',
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
     terserOptions: {
@@ -46,14 +46,29 @@ export default defineConfig({
     rollupOptions: {
       treeshake: 'recommended',
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            return 'vendor'
-          }
-          if (id.includes('/features/')) {
-            const feature = id.split('/features/')[1].split('/')[0]
-            return `feature-${feature}`
-          }
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'zustand'],
+          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei', 'three-globe'],
+          'vendor-ui': [
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-label',
+            'class-variance-authority',
+            'tailwind-merge',
+            'clsx',
+            'sonner',
+            'lucide-react',
+            'shadcn'
+          ],
+          'vendor-animation': ['gsap', '@gsap/react', 'framer-motion', 'motion'],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-data': ['axios', '@tanstack/react-query'],
+          'vendor-speech': ['microsoft-cognitiveservices-speech-sdk'],
+          'vendor-icons': ['@iconify/react'],
+          'vendor-tools': ['leva', 'next-themes', 'react-scan', 'jwt-decode'],
+          'vendor-spline': ['@splinetool/react-spline', '@splinetool/runtime']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -68,10 +83,16 @@ export default defineConfig({
       'react-router-dom',
       'three',
       '@react-three/fiber',
-      '@react-three/drei'
+      '@react-three/drei',
+      'gsap',
+      'framer-motion',
+      '@radix-ui/react-slot',
+      'class-variance-authority',
+      'axios',
+      '@tanstack/react-query'
     ],
     esbuildOptions: {
-      target: 'esnext'
+      target: 'es2020'
     }
   }
 })
