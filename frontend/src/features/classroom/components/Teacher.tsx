@@ -49,7 +49,7 @@ export const Teacher = (props: TeacherProps) => {
         }
       )
     } else {
-      gsap.to(spinnerRef.current, { 
+      gsap.to(spinnerRef.current, {
         opacity: 0, 
         scale: 0.5,
         duration: 0.4, 
@@ -175,7 +175,7 @@ export const Teacher = (props: TeacherProps) => {
     }
   }, [currentMessage, isThinking, teacherAnimation])
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     const limitedDelta = Math.min(delta, 0.05)
     
     if (mixer) {

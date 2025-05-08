@@ -147,7 +147,7 @@ export default function MainLayout() {
                         email: email
                       }}
                     >
-                      {({ isOpen }) => (
+                      {() => (
                         <div className="flex-shrink-0 relative cursor-pointer">
                           <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md overflow-hidden">
                             {avatar ? (

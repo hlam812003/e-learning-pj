@@ -310,7 +310,7 @@ export const useTeacherSpeech = ({
     const visemes: Viseme[] = []
     
     try {
-      synthesizer.visemeReceived = function(s: any, e: any) {
+      synthesizer.visemeReceived = function(_s: any, e: any) {
         // console.log(`(Viseme), Audio offset: ${e.audioOffset / 10000}ms. Viseme ID: ${e.visemeId}`)
         visemes.push([e.audioOffset / 10000, e.visemeId])
       }
