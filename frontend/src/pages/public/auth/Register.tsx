@@ -147,7 +147,7 @@ export default function RegisterPage() {
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
             (errors.email || errors.password || errors.confirmPassword) && 'bg-red-500',
-            isSubmitting && 'flex items-center justify-center gap-3'
+            isSubmitting && 'flex items-center justify-center gap-3 pointer-events-none'
           )}
         >
           {isSubmitting ? (

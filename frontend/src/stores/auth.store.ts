@@ -29,7 +29,7 @@ const setCookie = (name: string, value: string, days: number = 7) => {
   document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/; SameSite=Strict; Secure`
 }
 
-export const getCookie = (name: string): string | null => {
+const getCookie = (name: string): string | null => {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
   return match ? match[2] : null
 }
@@ -38,7 +38,7 @@ const deleteCookie = (name: string) => {
   document.cookie = `${name}=; Max-Age=-99999999; path=/; SameSite=Strict; Secure`
 }
 
-export const useAuthStore = create<AuthStore>(
+const useAuthStore = create<AuthStore>(
   (set): AuthStore => ({
     user: null,
     login: async (email: string, password: string): Promise<any> => {
@@ -64,9 +64,6 @@ export const useAuthStore = create<AuthStore>(
     logout: (): void => {
       set({ user: null })
       deleteCookie('token')
-      
-      // Không cần thực hiện điều hướng ở đây
-      // Việc điều hướng sẽ do component gọi logout() xử lý
     },
     initAuth: (): void => {
       const token = getCookie('token')
@@ -88,3 +85,8 @@ export const useAuthStore = create<AuthStore>(
     }
   })
 )
+
+export {
+  useAuthStore,
+  getCookie
+}
