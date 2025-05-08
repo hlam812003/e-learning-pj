@@ -294,6 +294,3 @@ export const Teacher = (props: TeacherProps) => {
     </group>
   )
 }
-
-useGLTF.preload('/models/teacher.glb')
-useGLTF.preload('/models/teacher_animation.glb')

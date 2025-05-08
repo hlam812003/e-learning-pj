@@ -38,7 +38,7 @@ const useAuthStore = create<AuthStore>()(
       },
       register: async (email: string, password: string) => {
         const registerResult = await authService.register(email, password)
-        if (registerResult.success && registerResult.token) {
+        if (registerResult.success) {
           toast.success(registerResult.message || 'Register successfully. Please login.')
           return registerResult
         }

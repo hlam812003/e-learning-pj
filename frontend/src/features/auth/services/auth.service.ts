@@ -31,7 +31,6 @@ export const authService = {
           register(data: $data) {
             success
             message
-            token
           }
         }
       `,
