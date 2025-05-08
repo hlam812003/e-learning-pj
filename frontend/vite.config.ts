@@ -50,7 +50,6 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom', 'zustand'],
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei', 'three-globe'],
           'vendor-ui': [
-            'shadcn',
             'class-variance-authority',
             'tailwind-merge',
             'clsx',
