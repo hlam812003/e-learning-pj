@@ -4,6 +4,7 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import viteCompression from 'vite-plugin-compression'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -19,6 +20,21 @@ export default defineConfig({
       algorithm: 'brotliCompress', // gzip
       ext: '.br',
       threshold: 10240
+    }),
+    ViteImageOptimizer({
+      png: {
+        quality: 80
+      },
+      jpeg: {
+        quality: 80
+      },
+      jpg: {
+        quality: 80
+      },
+      webp: {
+        lossless: false,
+        quality: 80
+      }
     })
   ],
   resolve: {
