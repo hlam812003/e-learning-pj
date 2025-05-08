@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
 import { registerSchema, cn } from '@/lib'
 import { RegisterFormData } from '@/types'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { AuthContainer } from '@/features/auth'
@@ -18,7 +19,7 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   })
@@ -26,14 +27,20 @@ export default function RegisterPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState<boolean>(false)
 
-  const onSubmit = async (data: RegisterFormData) => {
-    try {
-      await registerUser(data.email, data.password)
+
+  const registerMutation = useMutation({
+    mutationFn: (data: RegisterFormData) => registerUser(data.email, data.password),
+    onSuccess: () => {
       navigate('/auth/login')
-    } catch (error: any) {
-      // console.error('SignUp failed', error)
+    },
+    onError: (error: Error) => {
+      console.error('SignUp failed', error)
       toast.error(error?.message || 'Registration failed. Please try again.')
     }
+  })
+
+  const onSubmit = async (data: RegisterFormData) => {
+    registerMutation.mutate(data)
   }
 
   return (
@@ -146,10 +153,11 @@ export default function RegisterPage() {
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
             (errors.email || errors.password || errors.confirmPassword) && 'bg-red-500',
-            isSubmitting && 'flex items-center justify-center gap-3 pointer-events-none'
+            registerMutation.isPending && 'flex items-center justify-center gap-3 pointer-events-none'
           )}
+          // disabled={registerMutation.isPending}
         >
-          {isSubmitting ? (
+          {registerMutation.isPending ? (
             <>
               <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />

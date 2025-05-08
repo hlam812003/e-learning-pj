@@ -39,10 +39,7 @@ const useAuthStore = create<AuthStore>()(
       register: async (email: string, password: string): Promise<any> => {
         const registerResult = await authService.register(email, password)
         if (registerResult.success && registerResult.token) {
-          const decoded: DecodedToken = jwtDecode(registerResult.token)
-          set({ user: { ...decoded, token: registerResult.token } })
-          setCookie('token', registerResult.token, 7)
-          toast.success(registerResult.message || 'Registration successfully')
+          toast.success(registerResult.message || 'Register successfully. Please login.')
           return registerResult
         }
         throw new Error(registerResult.message || 'Registration failed')

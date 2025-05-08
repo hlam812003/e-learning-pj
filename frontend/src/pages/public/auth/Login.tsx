@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
 import { loginSchema, cn, api } from '@/lib'
-import { LoginFormData } from '@/types'
+import { LoginFormData, GoogleUserInfo } from '@/types'
 import { Icon } from '@iconify/react'
-import { toast } from 'sonner'
 import { useGoogleLogin } from '@react-oauth/google'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { AuthContainer } from '@/features/auth'
 import { Button } from '@/components/ui/button'
@@ -20,24 +21,51 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema)
   })
 
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false)
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      await login(data.email, data.password)
+  const loginMutation = useMutation({
+    mutationFn: (data: LoginFormData) => login(data.email, data.password),
+    onSuccess: () => {
       navigate('/')
-    } catch (error: any) {
-      // console.error('Login failed', error)
+    },
+    onError: (error: Error) => {
       console.log(error.message)
       toast.error(error?.message || 'Invalid email or password')
     }
+  })
+
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data)
   }
+
+  const googleLoginMutation = useMutation({
+    mutationFn: async (googleUserInfo: {
+      sub: string, 
+      email: string, 
+      googleInfo: GoogleUserInfo
+    }) => {
+      return loginWithGoogle(
+        googleUserInfo.sub, 
+        googleUserInfo.email, 
+        googleUserInfo.googleInfo
+      )
+    },
+    onSuccess: () => {
+      setIsGoogleLoading(false)
+      navigate('/', { replace: true })
+    },
+    onError: (error) => {
+      setIsGoogleLoading(false)
+      console.error('Google login failed:', error)
+      toast.error('Google login failed')
+    }
+  })
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
@@ -63,10 +91,11 @@ export default function LoginPage() {
         
         setGoogleInfo(googleUserInfo)
         
-        await loginWithGoogle(userInfo.sub, userInfo.email, googleUserInfo)
-        
-        setIsGoogleLoading(false)
-        navigate('/')
+        googleLoginMutation.mutate({
+          sub: userInfo.sub,
+          email: userInfo.email,
+          googleInfo: googleUserInfo
+        })
       } catch (error) {
         setIsGoogleLoading(false)
         console.error('Google login failed:', error)
@@ -77,7 +106,6 @@ export default function LoginPage() {
       setIsGoogleLoading(false)
       toast.error('Google login failed')
     },
-    prompt: 'consent',
     onNonOAuthError: () => {
       setIsGoogleLoading(false)
       toast.error('Google login failed due to non-OAuth error')
@@ -93,6 +121,8 @@ export default function LoginPage() {
       toast.error(error?.message || 'Failed to open Google login popup')
     }
   }
+
+  const isLoading = isGoogleLoading || googleLoginMutation.isPending
 
   return (
     <AuthContainer
@@ -190,10 +220,11 @@ export default function LoginPage() {
           className={cn(
             'w-full h-[4rem] text-[1.35rem]',
             errors.email || (errors.password && 'bg-red-500 pointer-events-none'),
-            isSubmitting && 'flex items-center justify-center gap-3 pointer-events-none'
+            loginMutation.isPending && 'flex items-center justify-center gap-3 pointer-events-none'
           )}
+          // disabled={loginMutation.isPending}
         >
-          {isSubmitting ? (
+          {loginMutation.isPending ? (
             <>
               <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
@@ -216,12 +247,12 @@ export default function LoginPage() {
           variant="outline"
           className={cn(
             'w-full h-[4rem] flex items-center justify-center gap-2 text-[1.35rem] border-[1px]',
-            isGoogleLoading && 'pointer-events-none'
+            isLoading && 'pointer-events-none'
           )}
-          disabled={isGoogleLoading}
+          disabled={isLoading}
           onClick={handleGoogleLogin}
         >
-          {isGoogleLoading ? (
+          {isLoading ? (
             <>
               <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-black" />

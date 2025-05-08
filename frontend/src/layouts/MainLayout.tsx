@@ -24,8 +24,7 @@ export default function MainLayout() {
   const { data: user, isLoading: loading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: authService.getCurrentUser,
-    staleTime: 5 * 60 * 1000,
-    enabled: !!authUser,
+    enabled: !!authUser
   })
 
   const displayName = googleInfo?.name || user?.username || authUser?.email || 'User'
