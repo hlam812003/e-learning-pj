@@ -50,24 +50,19 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom', 'zustand'],
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei', 'three-globe'],
           'vendor-ui': [
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-label',
+            'shadcn',
             'class-variance-authority',
             'tailwind-merge',
             'clsx',
             'sonner',
-            'lucide-react',
-            'shadcn'
+            'lucide-react'
           ],
           'vendor-animation': ['gsap', '@gsap/react', 'framer-motion', 'motion'],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'vendor-data': ['axios', '@tanstack/react-query'],
           'vendor-speech': ['microsoft-cognitiveservices-speech-sdk'],
           'vendor-icons': ['@iconify/react'],
-          'vendor-tools': ['leva', 'next-themes', 'react-scan', 'jwt-decode'],
+          'vendor-tools': ['leva', 'react-scan', 'jwt-decode'],
           'vendor-spline': ['@splinetool/react-spline', '@splinetool/runtime']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -86,7 +81,6 @@ export default defineConfig({
       '@react-three/drei',
       'gsap',
       'framer-motion',
-      '@radix-ui/react-slot',
       'class-variance-authority',
       'axios',
       '@tanstack/react-query'
