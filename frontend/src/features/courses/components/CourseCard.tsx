@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 import { ICourse } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib'
 
 import { 
   Card, 

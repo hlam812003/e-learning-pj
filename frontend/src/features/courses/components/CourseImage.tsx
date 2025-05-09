@@ -1,4 +1,4 @@
-import { OptimizeImage } from '@/components/common/images'
+import { OptimizeImage } from '@/components'
 
 type CourseImageProps = {
   src?: string
