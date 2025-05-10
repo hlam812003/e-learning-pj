@@ -4,6 +4,7 @@ import { cn, gsap, useGSAP } from '@/lib'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 
 export interface MessageBoxHandle {
   show: () => void
@@ -310,7 +311,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   }
 
   return (
-    <div ref={containerRef} className="absolute bottom-[1.65rem] left-0 right-0 flex flex-col items-center z-50">
+    <div ref={containerRef} className="absolute bottom-[1.65rem] left-1/2 -translate-x-1/2 flex items-center justify-center z-50">
       <div 
         ref={messageBoxRef}
         className={cn(
@@ -322,24 +323,33 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
           ref={collapseButtonContainerRef} 
           className="absolute -top-[1.2rem] left-1/2 -translate-x-1/2 z-20"
         >
-          <Button
-            ref={collapseButtonRef}
-            onClick={toggleMessageBox}
-            variant="outline"
-            className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+          <Tooltip
+            content="Minimize box"
+            contentClassName="text-[1.25rem] z-[60]"
           >
-            <Icon icon="tabler:minimize" className="text-[1.4rem]" />
-          </Button>
+            <Button
+              ref={collapseButtonRef}
+              onClick={toggleMessageBox}
+              variant="outline"
+              className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+            >
+              <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
+            </Button>
+          </Tooltip>
         </div>
-
         <div 
           ref={expandIconRef}
-          className="flex items-center justify-center w-full h-full cursor-pointer absolute inset-0" 
+          className="flex items-center justify-center size-full cursor-pointer relative" 
           onClick={showMessageBox}
         >
-          <Icon icon="fluent:chat-28-regular" className="text-[1.75rem] text-white" />
+          <Icon icon="fluent:chat-28-regular" className="text-[1.75rem] text-white drop-shadow-lg" />
+          
+          <Tooltip 
+            content="Ask your teacher"
+            className="absolute inset-0 z-[51]"
+            contentClassName="text-[1.25rem] z-[60]"
+          />
         </div>
-        
         <div 
           ref={contentRef} 
           className="size-full flex flex-col justify-between px-[1.6rem] py-[1.4rem]"
@@ -359,7 +369,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
             </p>
           </div>
           
-          <div ref={controlsRef} className="flex items-center gap-4">
+          <div ref={controlsRef} className="flex items-center gap-5">
             <div className="flex-1 relative">
               <Input 
                 ref={inputRef}
@@ -367,7 +377,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className={cn(
-                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.15rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg'
+                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg'
                 )}
                 placeholder="Ask something..."
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -380,7 +390,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 variant="outline" 
                 className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
               >
-                <Icon icon="si:mic-line" className="text-[1.4rem]" />
+                <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
               </Button>
               
               <Button 
@@ -388,7 +398,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 variant="default" 
                 className="rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg"
               >
-                <Icon icon="akar-icons:send" className="text-[1.4rem]" />
+                <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
               </Button>
             </div>
           </div>
