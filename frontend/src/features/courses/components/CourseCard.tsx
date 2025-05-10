@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 import { cn } from '@/lib'
+import { Badge } from '@/components/ui/badge'
+import CourseImage from './CourseImage'
 
 import { 
   Card, 
@@ -11,8 +13,6 @@ import {
   CardFooter,
   CardAction 
 } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import CourseImage from './CourseImage'
 
 interface Course {
   id: string
