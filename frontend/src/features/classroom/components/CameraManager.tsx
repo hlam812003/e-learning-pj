@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { useEffect, useRef, useCallback } from 'react'
 import { useControls, button } from 'leva'
 import { Vector3 } from 'three'
-import { useClassroomStore } from '../store'
+import { useClassroomStore } from '../stores'
 import { CAMERA_POSITION, CAMERA_ZOOM, GENERAL_MODE } from '../constants'
 
 const CameraManager = () => {

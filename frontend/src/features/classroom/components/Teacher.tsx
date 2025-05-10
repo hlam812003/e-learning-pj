@@ -3,9 +3,9 @@ import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useRef, useState, useEffect } from 'react'
 import * as THREE from 'three'
 import { MathUtils, randInt } from 'three/src/math/MathUtils.js'
-import { useClassroomStore } from '../store'
+import { useClassroomStore } from '../stores'
 import { FADE_DURATION } from '../constants'
-import { gsap, useGSAP } from '@/lib/gsap'
+import { gsap, useGSAP } from '@/lib'
 
 type TeacherProps = ThreeElements['group']
 
@@ -152,6 +152,7 @@ const Teacher = (props: TeacherProps) => {
   // }, [scene])
 
   useEffect(() => {
+    const TALKING_ANIMATIONS = ['Talking_1', 'Talking_2', 'Talking_3']
     let nextAnimation: string
     
     if (isThinking) {
@@ -159,7 +160,8 @@ const Teacher = (props: TeacherProps) => {
       shouldAutoChangeAnimRef.current = false
     } else if (currentMessage) {
       if (!teacherAnimation.startsWith('Talking_')) {
-        nextAnimation = 'Talking_' + randInt(1, 3)
+        const randomIndex = randInt(0, TALKING_ANIMATIONS.length - 1)
+        nextAnimation = TALKING_ANIMATIONS[randomIndex]
         shouldAutoChangeAnimRef.current = false
       } else {
         nextAnimation = teacherAnimation
@@ -285,8 +287,8 @@ const Teacher = (props: TeacherProps) => {
           className="items-center justify-center"
           style={{ display: 'none', opacity: 0 }}
         >
-          <div className="size-[2.75rem] bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">
-            <div className="size-[1.85rem] border-t-transparent border-b-transparent border-r-transparent border-l-black rounded-full animate-spin border-2" />
+          <div className="size-[2.75rem] bg-white/20 backdrop-blur-[16px] border border-white/20 rounded-full flex items-center justify-center drop-shadow-lg">
+            <div className="size-[1.9rem] border-t-transparent border-b-transparent border-r-transparent border-l-white rounded-full animate-spin border-3 drop-shadow-lg" />
           </div>
         </div>
       </Html>

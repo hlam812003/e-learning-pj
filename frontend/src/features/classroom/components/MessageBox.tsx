@@ -1,6 +1,10 @@
 import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import { Icon } from '@iconify/react'
 import { cn, gsap, useGSAP } from '@/lib'
+import { useMessageStore, useClassroomStore } from '../stores'
+import { useTeacherSpeech } from '../hooks'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -21,10 +25,17 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   visible = true,
   onVisibilityChange
 }, ref) => {
+  const createMessage = useMessageStore((state) => state.createMessage)
+  
+  const { speak: speakAzure, isReady: isAzureReady } = useTeacherSpeech()
+  const startThinking = useClassroomStore((state) => state.startThinking)
+  const stopAll = useClassroomStore((state) => state.stopAll)
+
   const [message, setMessage] = useState<string>('')
   const [isVisible, setIsVisible] = useState(visible)
   const [isAnimating, setIsAnimating] = useState<boolean>(false)
-
+  
+  
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const messageBoxRef = useRef<HTMLDivElement>(null)
@@ -297,10 +308,51 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
     toggle: toggleMessageBox
   }))
 
+  const messageMutation = useMutation({
+    mutationFn: (content: string) => createMessage(content),
+    onSuccess: async (result) => {
+      if (result) {
+        setMessage('')
+        
+        if (result.content) {
+          try {
+            startThinking()
+            
+            if (!isAzureReady) return
+            
+            const speakResult = await speakAzure(result.content)
+            
+            if (!speakResult?.success && speakResult?.error) {
+              stopAll()
+              
+              if (speakResult.error.includes('disposed')) {
+                await new Promise(resolve => setTimeout(resolve, 500))
+                const retryResult = await speakAzure(result.content)
+                
+                if (!retryResult?.success) {
+                  toast.error(`Lỗi khi phát âm: ${retryResult.error}`)
+                  stopAll()
+                }
+              } else {
+                toast.error(`Lỗi khi phát âm: ${speakResult.error}`)
+                stopAll()
+              }
+            }
+          } catch (error: any) {
+            stopAll()
+            toast.error(error?.message || 'Không thể kích hoạt giọng nói cho AI Teacher')
+          }
+        }
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || 'Không thể gửi tin nhắn')
+    }
+  })
+
   const handleSubmit = () => {
     if (message.trim()) {
-      console.log('Sending message:', message)
-      setMessage('')
+      messageMutation.mutate(message)
     } else if (inputRef.current) {
       inputRef.current.focus()
     }
@@ -309,7 +361,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const handleVoiceInput = () => {
     console.log('Voice input activated')
   }
-
+  
   return (
     <div ref={containerRef} className="absolute bottom-[1.65rem] left-1/2 -translate-x-1/2 flex items-center justify-center z-50">
       <div 
@@ -323,19 +375,29 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
           ref={collapseButtonContainerRef} 
           className="absolute -top-[1.2rem] left-1/2 -translate-x-1/2 z-20"
         >
-          <Tooltip
-            content="Minimize box"
-            contentClassName="text-[1.25rem] z-[60]"
-          >
+          {!messageMutation.isPending ? (
+            <Tooltip
+              content="Minimize box"
+              contentClassName="text-[1.25rem] z-[60]"
+            >
+              <Button
+                ref={collapseButtonRef}
+                onClick={toggleMessageBox}
+                variant="outline"
+                className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+              >
+                <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
+              </Button>
+            </Tooltip>
+          ) : (
             <Button
-              ref={collapseButtonRef}
-              onClick={toggleMessageBox}
               variant="outline"
-              className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+              className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg cursor-not-allowed opacity-70"
+              disabled
             >
               <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
             </Button>
-          </Tooltip>
+          )}
         </div>
         <div 
           ref={expandIconRef}
@@ -377,28 +439,53 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className={cn(
-                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg'
+                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg',
+                  messageMutation.isPending && 'pointer-events-none'
                 )}
                 placeholder="Ask something..."
-                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                onKeyDown={(e) => e.key === 'Enter' && !messageMutation.isPending && handleSubmit()}
               />
             </div>
             
             <div className="flex gap-3.5">
-              <Button 
-                onClick={handleVoiceInput}
-                variant="outline" 
-                className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
-              >
-                <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-              </Button>
-              
+              {!messageMutation.isPending ? (
+                <Tooltip
+                  content="Voice Chat"
+                  contentClassName="text-[1.25rem] z-[60]"
+                >
+                  <Button 
+                    onClick={handleVoiceInput}
+                    variant="outline" 
+                    className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
+                  >
+                    <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
+                  disabled
+                >
+                  <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                </Button>
+              )}
+
               <Button 
                 onClick={handleSubmit}
                 variant="default" 
-                className="rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg"
+                className={cn(
+                  'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
+                  messageMutation.isPending && 'pointer-events-none'
+                )}
               >
-                <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
+                {messageMutation.isPending ? (
+                  <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                    <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+                  </svg>
+                ) : (
+                  <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
+                )}
               </Button>
             </div>
           </div>

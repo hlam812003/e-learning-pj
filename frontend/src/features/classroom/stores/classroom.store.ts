@@ -1,24 +1,6 @@
 import { create } from 'zustand'
-import { SpeechMessage } from '../hooks'
-import { GeneralMode } from '../type'
 import { GENERAL_MODE } from '../constants'
-
-interface ClassroomState {
-  teacherMode: GeneralMode
-  currentMessage: SpeechMessage | null
-  isSpeaking: boolean
-  isThinking: boolean
-  cameraMode: GeneralMode
-
-  setTeacherMode: (mode: GeneralMode) => void
-  setCurrentMessage: (message: SpeechMessage | null) => void
-  setIsSpeaking: (isSpeaking: boolean) => void
-  setIsThinking: (isThinking: boolean) => void
-  setCameraMode: (mode: GeneralMode) => void
-
-  startThinking: () => void
-  stopAll: () => void
-}
+import { ClassroomState } from '../types'
 
 export const useClassroomStore = create<ClassroomState>((set) => ({
   teacherMode: GENERAL_MODE.IDLE,
