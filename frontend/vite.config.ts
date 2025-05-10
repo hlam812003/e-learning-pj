@@ -100,7 +100,7 @@ export default defineConfig({
       'class-variance-authority',
       'axios',
       '@tanstack/react-query',
-      'usehooks-ts'
+      '@iconify/react'
     ],
     esbuildOptions: {
       target: 'es2020'
