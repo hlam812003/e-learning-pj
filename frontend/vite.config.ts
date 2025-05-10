@@ -49,6 +49,7 @@ export default defineConfig({
     target: 'es2020',
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
+    cssMinify: 'lightningcss',
     terserOptions: {
       compress: {
         drop_console: true,
