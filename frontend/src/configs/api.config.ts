@@ -1,14 +1,14 @@
 import axios from 'axios'
 import { getCookie, useAuthStore } from '@/stores'
 
-const api = axios.create({
+const apiConfig = axios.create({
   baseURL: import.meta.env.VITE_API_BACKEND_URL,
   headers: {
     'Content-Type': 'application/json',
   }
 })
 
-api.interceptors.request.use(
+apiConfig.interceptors.request.use(
   (config) => {
     const token = getCookie('token')
     
@@ -24,7 +24,7 @@ api.interceptors.request.use(
   }
 )
 
-api.interceptors.response.use(
+apiConfig.interceptors.response.use(
   (response) => {
     return response
   },
@@ -52,4 +52,4 @@ api.interceptors.response.use(
   }
 )
 
-export default api
+export default apiConfig

@@ -1,10 +1,10 @@
-import { api } from '@/lib'
+import { apiConfig } from '@/configs'
 import { jwtDecode } from 'jwt-decode'
 import { getCookie } from '@/stores'
 
 export const authService = {
   login: async (email: string, password: string) => {
-    const response = await api.post('', {
+    const response = await apiConfig.post('', {
       query: `
         mutation Login($data: LoginInput!) {
           login(data: $data) {
@@ -25,7 +25,7 @@ export const authService = {
   },
   
   register: async (email: string, password: string) => {
-    const response = await api.post('', {
+    const response = await apiConfig.post('', {
       query: `
         mutation Register($data: RegisterInput!) {
           register(data: $data) {
@@ -45,7 +45,7 @@ export const authService = {
   },
   
   loginWithGoogle: async (googleId: string, email: string) => {
-    const response = await api.post('', {
+    const response = await apiConfig.post('', {
       query: `
         mutation GoogleLogin($data: GoogleLoginInput!) {
           googleLogin(data: $data) {
@@ -71,7 +71,7 @@ export const authService = {
     const decoded: any = jwtDecode(token)
     const userId = decoded.id || decoded.userId || decoded.sub
     if (!userId) throw new Error('No user id in token')
-    const response = await api.post('', {
+    const response = await apiConfig.post('', {
       query: `
         query User($id: String!) {
           user(id: $id) {

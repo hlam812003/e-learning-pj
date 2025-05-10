@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuthStore } from '@/stores'
-import { loginSchema, cn, api } from '@/lib'
+import { loginSchema, cn } from '@/lib'
+import { apiConfig } from '@/configs'
 import { LoginFormData, GoogleUserInfo } from '@/types'
 import { Icon } from '@iconify/react'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -72,7 +73,7 @@ export default function LoginPage() {
       try {
         setIsGoogleLoading(true)
         
-        const userInfoResponse = await api.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+        const userInfoResponse = await apiConfig.get('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${response.access_token}` }
         })
         
