@@ -1,4 +1,4 @@
-import { FC, useRef } from 'react'
+import { useRef } from 'react'
 import { gsap, useGSAP } from '@/lib'
 
 type ClassroomLoadingProps = {
@@ -9,13 +9,13 @@ type ClassroomLoadingProps = {
   onFadeComplete?: () => void
 }
 
-export const ClassroomLoading: FC<ClassroomLoadingProps> = ({ 
+export default function ClassroomLoading({ 
   progress, 
   sdkError, 
   sdkLoading,
   isLoaded,
   onFadeComplete
-}) => {
+}: ClassroomLoadingProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const spinnerRef = useRef<HTMLDivElement>(null)
   const textContainerRef = useRef<HTMLDivElement>(null)

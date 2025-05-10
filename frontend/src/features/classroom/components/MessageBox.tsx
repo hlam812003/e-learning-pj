@@ -1,4 +1,4 @@
-export const MessageBox = () => {
+const MessageBox = () => {
   return (
     <div
       className="absolute bottom-[2rem] left-1/2 -translate-x-1/2 z-50"
@@ -7,3 +7,5 @@ export const MessageBox = () => {
     </div>
   )
 }
+
+export default MessageBox

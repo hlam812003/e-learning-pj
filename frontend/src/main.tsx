@@ -1,4 +1,3 @@
-import { scan } from 'react-scan'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
@@ -8,14 +7,22 @@ import App from './App.tsx'
 import './index.css'
 import './lib/gsap'
 
-scan({
-  enabled: !import.meta.env.PROD
-})
+const isProduction = import.meta.env.PROD || process.env.NODE_ENV === 'production'
+
+if (!isProduction && typeof window !== 'undefined') {
+  import('react-scan').then(({ scan }) => {
+    scan({
+      enabled: true
+    })
+  }).catch(err => {
+    console.error('Failed to load react-scan:', err)
+  })
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: import.meta.env.PROD,
+      refetchOnWindowFocus: isProduction,
       refetchOnMount: false,
       refetchOnReconnect: true,
       retry: 3,
@@ -33,7 +40,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <QueryClientProvider client={queryClient}>
         <App />
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools 
+          initialIsOpen={false}
+        />
       </QueryClientProvider>
     </GoogleOAuthProvider>
   </React.StrictMode>,

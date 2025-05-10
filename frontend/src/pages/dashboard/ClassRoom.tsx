@@ -1,9 +1,8 @@
-import { useState, useEffect, Suspense, useCallback } from 'react'
+import { useState, useEffect, Suspense, useCallback, lazy } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useProgress, PerformanceMonitor, AdaptiveDpr, useGLTF } from '@react-three/drei'
 import { Button } from '@/components/ui/button'
 import { 
-  Scene,
   MessageBox,
   ClassroomLoading,
   useClassroomStore, 
@@ -11,6 +10,8 @@ import {
   checkAzureSpeechSDK,
   GENERAL_MODE
 } from '@/features/classroom'
+
+const Scene = lazy(() => import('@/features/classroom/components/Scene'))
 
 useGLTF.preload('/models/classroom_default.glb')
 useGLTF.preload('/models/teacher.glb')

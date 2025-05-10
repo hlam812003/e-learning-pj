@@ -6,7 +6,7 @@ import { Vector3 } from 'three'
 import { useClassroomStore } from '../store'
 import { CAMERA_POSITION, CAMERA_ZOOM, GENERAL_MODE } from '../constants'
 
-export const CameraManager = () => {
+const CameraManager = () => {
   const { camera } = useThree()
   const controlsRef = useRef<CameraControls>(null)
   
@@ -114,3 +114,5 @@ export const CameraManager = () => {
     />
   )
 }
+
+export default CameraManager

@@ -1,11 +1,13 @@
+import { lazy } from 'react'
 import { Gltf, Environment, Float } from '@react-three/drei'
 import { degToRad } from 'three/src/math/MathUtils.js'
 import { Leva } from 'leva'
 
-import { Teacher } from './Teacher'
-import { CameraManager } from './CameraManager'
+import CameraManager from './CameraManager'
 
-export const Scene = () => {
+const Teacher = lazy(() => import('./Teacher'))
+
+const Scene = () => {
   return (
     <Float speed={0.5} floatIntensity={0.2} rotationIntensity={0.1}>
       <ambientLight intensity={0.8} color="pink" />
@@ -25,3 +27,5 @@ export const Scene = () => {
     </Float>
   )
 }
+
+export default Scene

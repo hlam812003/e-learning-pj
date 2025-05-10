@@ -9,7 +9,7 @@ import { gsap, useGSAP } from '@/lib/gsap'
 
 type TeacherProps = ThreeElements['group']
 
-export const Teacher = (props: TeacherProps) => {
+const Teacher = (props: TeacherProps) => {
   const { scene } = useGLTF('/models/teacher.glb')
   const { animations } = useGLTF('/models/teacher_animation.glb')
   
@@ -294,3 +294,5 @@ export const Teacher = (props: TeacherProps) => {
     </group>
   )
 }
+
+export default Teacher

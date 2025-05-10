@@ -1,5 +1,3 @@
-export * from './Scene'
-export * from './Teacher'
-export * from './CameraManager'
-export * from './MessageBox'
-export * from './ClassRoomLoading'
+export { default as Scene } from './Scene'
+export { default as MessageBox } from './MessageBox'
+export { default as ClassroomLoading } from './ClassRoomLoading'
