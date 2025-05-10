@@ -34,5 +34,24 @@ export const coursesService = {
       variables: { id }
     })
     return response.data.data.getCourseById
+  },
+
+  getLessonsByCourseId: async (courseId: string) => {
+    const response = await apiConfig.post('', {
+      query: `
+        query GetLessonsByCourseId($id: String!) {
+          getLessonsByCourseId(id: $id) {
+            id
+            lessonName
+            abstract
+            courseId
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { id: courseId }
+    })
+    return response.data.data.getLessonsByCourseId
   }
 } 

@@ -10,16 +10,28 @@ interface Course {
   updatedAt: string
 }
 
+interface Lesson {
+  id: string
+  lessonName: string
+  abstract: string
+  courseId: string
+  createdAt: string
+  updatedAt: string
+}
+
 interface CoursesStore {
   courses: Course[]
+  lessons: Lesson[]
   isLoading: boolean
   error: string | null
   fetchCourses: () => Promise<void>
   getCourseById: (id: string) => Promise<Course | null>
+  getLessonsByCourseId: (courseId: string) => Promise<void>
 }
 
 const useCoursesStore = create<CoursesStore>((set, get) => ({
   courses: [],
+  lessons: [],
   isLoading: false,
   error: null,
 
@@ -46,6 +58,21 @@ const useCoursesStore = create<CoursesStore>((set, get) => ({
       console.error('Error fetching course:', error)
       toast.error('Failed to fetch course details')
       return null
+    }
+  },
+
+  getLessonsByCourseId: async (courseId: string) => {
+    try {
+      set({ isLoading: true, error: null })
+      const lessons = await coursesService.getLessonsByCourseId(courseId)
+      set({ lessons, isLoading: false })
+    } catch (error) {
+      console.error('Error fetching lessons:', error)
+      set({ 
+        error: 'Failed to fetch lessons. Please try again later.',
+        isLoading: false 
+      })
+      toast.error('Failed to fetch lessons')
     }
   }
 }))
