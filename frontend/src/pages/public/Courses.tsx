@@ -1,16 +1,20 @@
-import { useState, useMemo, ChangeEvent } from 'react'
+import { useState, useMemo, ChangeEvent, useEffect } from 'react'
 import { Icon } from '@iconify/react'
-
+import { useCoursesStore } from '@/stores/courses.store'
 import { CourseCard } from '@/features/courses'
 import { MainDropdown } from '@/components'
-import { courses, categories, levels, sortOptions } from '@/mocks'
+import { sortOptions } from '@/mocks'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CoursesPage() {
+  const { courses, isLoading, error, fetchCourses } = useCoursesStore()
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
-  const [selectedLevel, setSelectedLevel] = useState<string>('All Levels')
   const [sortBy, setSortBy] = useState<string>('popular')
   const [itemsPerPage, setItemsPerPage] = useState<number>(10)
+
+  useEffect(() => {
+    fetchCourses()
+  }, [fetchCourses])
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
@@ -21,42 +25,42 @@ export default function CoursesPage() {
       .filter(course => {
         const matchesSearch = 
           course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.abstract.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          false
+          course.abstract.toLowerCase().includes(searchTerm.toLowerCase())
 
-        const matchesCategory = 
-          selectedCategory === 'All Categories' || 
-          course.category === selectedCategory
-
-        const matchesLevel = 
-          selectedLevel === 'All Levels' || 
-          course.level === selectedLevel
-
-        return matchesSearch && matchesCategory && matchesLevel
+        return matchesSearch
       })
       .sort((a, b) => {
         switch (sortBy) {
           case 'popular':
-            return (b.students || 0) - (a.students || 0)
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           case 'newest':
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          case 'price-asc':
-            return (a.price || 0) - (b.price || 0)
-          case 'price-desc':
-            return (b.price || 0) - (a.price || 0)
-          case 'rating':
-            return (b.rating || 0) - (a.rating || 0)
           default:
             return 0
         }
       })
-  }, [searchTerm, selectedCategory, selectedLevel, sortBy])
+  }, [courses, searchTerm, sortBy])
 
   const handleClearFilters = () => {
     setSearchTerm('')
-    setSelectedCategory('All Categories')
-    setSelectedLevel('All Levels')
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-[10rem]">
+        <Icon icon="ph:warning-circle" className="text-[5.5rem] text-red-500 mb-6" />
+        <h3 className="text-3xl font-bold text-slate-700 mb-3">Error loading courses</h3>
+        <p className="text-[1.25rem] text-slate-500 max-w-xl mb-6">
+          {error}
+        </p>
+        <button
+          onClick={() => fetchCourses()}
+          className="rounded-full bg-primary text-white px-8.5 py-3.5 text-[1.45rem] border border-primary font-medium cursor-pointer"
+        >
+          Try Again
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -70,7 +74,7 @@ export default function CoursesPage() {
               <div className="element-animation relative w-[28rem]">
                 <input
                   type="text"
-                  placeholder="Search courses, instructors, or topics..."
+                  placeholder="Search courses..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="w-full pl-12 pr-4 py-3.5 text-[1.25rem] border border-slate-200 rounded-full focus:outline-none focus:border-primary/50 transition-colors"
@@ -79,22 +83,6 @@ export default function CoursesPage() {
                   <Icon icon="ph:magnifying-glass" className="text-2xl" />
                 </div>
               </div>
-              
-              <MainDropdown
-                value={selectedCategory}
-                options={categories}
-                onChange={setSelectedCategory}
-                placeholder="All Categories"
-                minWidth="200px"
-              />
-              
-              <MainDropdown
-                value={selectedLevel}
-                options={levels}
-                onChange={setSelectedLevel}
-                placeholder="All Levels"
-                minWidth="160px"
-              />
               
               <MainDropdown
                 value={sortBy}
@@ -111,7 +99,7 @@ export default function CoursesPage() {
           <div className="element-animation">
             <h2 className="text-[1.8rem] font-bold text-slate-800">All Courses ({filteredCourses.length})</h2>
             <div className="mt-1">
-              {selectedCategory !== 'All Categories' || selectedLevel !== 'All Levels' || searchTerm ? (
+              {searchTerm ? (
                 <p className="text-[1.25rem] text-slate-600">Showing filtered results</p>
               ) : (
                 <p className="text-[1.25rem] text-slate-600">Browse our collection of high-quality courses</p>
@@ -128,7 +116,17 @@ export default function CoursesPage() {
           />
         </div>
         
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+            {[...Array(10)].map((_, index) => (
+              <div key={index} className="space-y-4">
+                <Skeleton className="h-[200px] w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
           <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {filteredCourses.slice(0, itemsPerPage).map(course => (
               <CourseCard 
@@ -142,7 +140,7 @@ export default function CoursesPage() {
             <Icon icon="ph:magnifying-glass-light" className="text-[5.5rem] text-[#2b2b2b] mb-6" />
             <h3 className="text-3xl font-bold text-slate-700 mb-3">No courses found...</h3>
             <p className="text-[1.25rem] text-slate-500 max-w-xl">
-              We couldn't find any courses matching your current filters. Try changing your search terms or filters.
+              We couldn't find any courses matching your current filters. Try changing your search terms.
             </p>
             <button
               onClick={handleClearFilters}

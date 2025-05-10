@@ -1,1 +1,1 @@
-export { default as CourseCard } from './components/CourseCard'
+export { CourseCard } from './components/CourseCard'
