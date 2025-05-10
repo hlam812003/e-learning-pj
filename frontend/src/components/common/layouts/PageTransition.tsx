@@ -1,6 +1,6 @@
 import { ReactNode, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import { gsap, useGSAP } from '@/lib/gsap'
+import { gsap, useGSAP } from '@/lib'
 
 type PageTransitionProps = {
   children: ReactNode

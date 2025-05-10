@@ -78,7 +78,7 @@ export default defineConfig({
           'vendor-data': ['axios', '@tanstack/react-query'],
           'vendor-speech': ['microsoft-cognitiveservices-speech-sdk'],
           'vendor-icons': ['@iconify/react'],
-          'vendor-tools': ['leva', 'react-scan', 'jwt-decode'],
+          'vendor-tools': ['leva', 'react-scan', 'jwt-decode', 'usehooks-ts'],
           'vendor-spline': ['@splinetool/react-spline', '@splinetool/runtime']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -99,7 +99,8 @@ export default defineConfig({
       'framer-motion',
       'class-variance-authority',
       'axios',
-      '@tanstack/react-query'
+      '@tanstack/react-query',
+      'usehooks-ts'
     ],
     esbuildOptions: {
       target: 'es2020'

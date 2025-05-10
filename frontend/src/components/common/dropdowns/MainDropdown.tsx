@@ -1,7 +1,8 @@
-import { useRef, useState, useEffect, ReactNode } from 'react'
+import { useRef, useState, ReactNode, RefObject } from 'react'
 import { Icon } from '@iconify/react'
 import { motion, AnimatePresence } from 'motion/react'
 import { cn } from '@/lib'
+import { useOnClickOutside } from 'usehooks-ts'
 
 type Option = {
   label: string
@@ -41,21 +42,10 @@ const MainDropdown = <T extends string | number>({
   children,
   onChange
 }: DropdownProps<T>) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+  useOnClickOutside(dropdownRef as RefObject<HTMLElement>, () => setIsOpen(false))
 
   const normalizedOptions = options.map(option => 
     typeof option === 'object' 

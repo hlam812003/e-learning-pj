@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
-import { cn } from '@/lib/utils'
+import { useState, useRef, RefObject } from 'react'
+import { cn } from '@/lib'
 import { motion, AnimatePresence } from 'motion/react'
 import { Icon } from '@iconify/react'
+import { useOnClickOutside } from 'usehooks-ts'
 
 import { OptimizeImage } from '../images'
 
@@ -19,28 +20,16 @@ type LanguageDropdownProps = {
 }
 
 const LanguageDropdown = ({ options, value, onChange, className }: LanguageDropdownProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const selectedOption = options.find(option => option.id === value) || options[0]
   
   // Debug flag path
-  useEffect(() => {
-    console.log('Selected flag path:', selectedOption.flag)
-  }, [selectedOption])
+  // useEffect(() => {
+  //   console.log('Selected flag path:', selectedOption.flag)
+  // }, [selectedOption])
 
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
+  useOnClickOutside(dropdownRef as RefObject<HTMLElement>, () => setIsOpen(false))
 
   return (
     <div 
@@ -55,7 +44,7 @@ const LanguageDropdown = ({ options, value, onChange, className }: LanguageDropd
         onClick={() => setIsOpen(!isOpen)}
         className='flex items-center gap-2.5 py-2 px-3 rounded-full cursor-pointer'
       >
-        <div className="size-9.5 rounded-full border border-slate-200 overflow-hidden">
+        <div className="size-9.5 rounded-full border border-slate-200 shadow-md overflow-hidden">
           <OptimizeImage 
             src={selectedOption.flag}
             alt={selectedOption.name}

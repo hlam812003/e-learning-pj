@@ -130,7 +130,6 @@ export default function MainLayout() {
                 {isLoading ? (
                   <div className="flex-shrink-0 relative cursor-pointer">
                     <Skeleton className="size-[3rem] rounded-full shadow-md" />
-                    <Skeleton className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-white" />
                   </div>
                 ) : (
                   <div className="flex items-center">
