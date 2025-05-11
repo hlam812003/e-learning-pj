@@ -31,9 +31,6 @@ export function CourseCard({ course, className }: CourseCardProps) {
       'overflow-hidden rounded-xl border border-slate-200 hover:border-primary transition-all duration-(--duration-main) py-0 hover:shadow-xl bg-white relative group h-full',
       className
     )}>
-      {/* <div className="aspect-video w-full overflow-hidden">
-        <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5" />
-      </div> */}
 
       <CourseImage
         courseName={course.courseName}
