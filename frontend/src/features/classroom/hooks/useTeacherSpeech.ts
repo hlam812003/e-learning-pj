@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createAzureSpeechConfig, checkAzureSpeechSDK } from '../utils'
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
-import { GeneralMode } from '../type'
+import { GeneralMode } from '../types'
 import { GENERAL_MODE } from '../constants'
 
 export type Viseme = [number, number]

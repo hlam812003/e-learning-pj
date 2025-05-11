@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, useCallback, lazy } from 'react'
+import { useState, useEffect, Suspense, useCallback, lazy, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useProgress, PerformanceMonitor, AdaptiveDpr, useGLTF } from '@react-three/drei'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import {
   checkAzureSpeechSDK,
   GENERAL_MODE
 } from '@/features/classroom'
+import type { MessageBoxHandle } from '@/features/classroom/components/MessageBox'
 
 const Scene = lazy(() => import('@/features/classroom/components/Scene'))
 
@@ -47,6 +48,9 @@ export default function ClassRoomPage() {
   const [canvasLoaded, setCanvasLoaded] = useState<boolean>(false)
   const [initialLoadComplete, setInitialLoadComplete] = useState<boolean>(false)
   const [loaderVisible, setLoaderVisible] = useState<boolean>(true)
+  const [isMessageBoxVisible, setIsMessageBoxVisible] = useState<boolean>(true)
+
+  const messageBoxRef = useRef<MessageBoxHandle>(null)
 
   const sampleLectures = [
     'Xin chào các em, hôm nay chúng ta sẽ học về lập trình web cơ bản.',
@@ -178,6 +182,10 @@ export default function ClassRoomPage() {
     setCurrentLecture(nextIndex)
   }
 
+  const handleMessageBoxVisibilityChange = (visible: boolean) => {
+    setIsMessageBoxVisible(visible)
+  }
+
   return (
     <>
       {loaderVisible && (
@@ -191,35 +199,38 @@ export default function ClassRoomPage() {
       )}
       
       <div 
-        className="absolute top-0 left-0 z-50"
         style={{ opacity: canvasLoaded ? 1 : 0, transition: 'opacity 0.5s' }}
       >
-        <div className="flex gap-2 flex-col m-4">
-          <div className="flex gap-2">
-            <Button
-              onClick={handleSpeak}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={isThinking}
-            >
-              {isThinking ? 'Đang tải...' : isSpeaking ? 'Dừng' : 'Nói'}
-            </Button>
-            <Button 
-              onClick={handleNextLecture}
-              className="bg-gray-600 hover:bg-gray-700 text-white"
-              disabled={isThinking}
-            >
-              Bài tiếp theo
-            </Button>
-          </div>
-          
-          <div className="bg-gray-100 text-gray-800 text-xs p-2 rounded">
-            <strong>Bài đang phát:</strong> {sampleLectures[currentLecture]}
+        <div className="absolute top-0 left-0 z-50">
+          <div className="flex gap-2 flex-col m-4">
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSpeak}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isThinking}
+              >
+                {isThinking ? 'Đang tải...' : isSpeaking ? 'Dừng' : 'Nói'}
+              </Button>
+              <Button 
+                onClick={handleNextLecture}
+                className="bg-gray-600 hover:bg-gray-700 text-white"
+                disabled={isThinking}
+              >
+                Bài tiếp theo
+              </Button>
+            </div>
+            
+            <div className="bg-gray-100 text-gray-800 text-xs p-2 rounded">
+              <strong>Bài đang phát:</strong> {sampleLectures[currentLecture]}
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div style={{ opacity: canvasLoaded ? 1 : 0, transition: 'opacity 0.5s' }}>
-        <MessageBox />
+
+        <MessageBox 
+          ref={messageBoxRef}
+          visible={isMessageBoxVisible} 
+          onVisibilityChange={handleMessageBoxVisibilityChange}
+        />
       </div>
       
       <div className="size-full" style={{ backfaceVisibility: 'hidden' }}>

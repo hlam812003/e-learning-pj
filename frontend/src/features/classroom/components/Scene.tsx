@@ -18,7 +18,7 @@ const Scene = () => {
       <Teacher
         position={[-1.1, -1.75, -3.2]}
         scale={1.425}
-        rotation-y={degToRad(25)}
+        rotation-y={degToRad(205)}
       />
       <Gltf
         src="/models/classroom_default.glb"
