@@ -6,10 +6,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import CourseImage from '@/features/courses/components/CourseImage'
 import { Badge } from '@/components/ui/badge'
 
-import { ICourse } from '@/types'
-
-import { OptimizeImage } from '@/components'
-
 export default function CourseDetailsPage() {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
@@ -180,12 +176,11 @@ export default function CourseDetailsPage() {
           </div>
           
           <div className="w-full md:w-[45%]">
-            <div className="aspect-video rounded-lg overflow-hidden bg-zinc-800 shadow-xl relative">
-              {image && (
+            <div className="aspect-video rounded-lg overflow-hidden shadow-xl relative">
+              {courseName && (
                 <CourseImage 
-                  src={image.name}
+                  courseName={courseName}
                   alt={courseName}
-                  folder={image.folder}
                 />
               )}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -238,7 +233,7 @@ export default function CourseDetailsPage() {
                         </div>
                         <div className="bg-gradient-to-r from-zinc-50 to-white border border-zinc-200 rounded-lg p-6 w-full shadow-sm">
                           <h3 className="text-[1.6rem] font-semibold text-zinc-800 mb-3">{lesson.lessonName}</h3>
-                          <div className="relative">
+                          {/* <div className="relative">
                             <p className="text-[1.3rem] text-zinc-600 mb-4 whitespace-pre-line">
                               {lesson.abstract || 'No description available for this lesson.'}
                             </p>
@@ -250,7 +245,7 @@ export default function CourseDetailsPage() {
                                 Read More
                               </button>
                             )}
-                          </div>
+                          </div> */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 text-zinc-500">
                               <Icon icon="ph:clock-fill" className="text-[1.4rem]" />

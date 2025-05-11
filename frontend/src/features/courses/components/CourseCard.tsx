@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
 import { cn } from '@/lib'
-import { Badge } from '@/components/ui/badge'
 import CourseImage from './CourseImage'
 
 import { 
@@ -10,8 +9,7 @@ import {
   CardHeader, 
   CardTitle, 
   CardDescription,
-  CardFooter,
-  CardAction 
+  CardFooter
 } from '@/components/ui/card'
 
 interface Course {
@@ -33,9 +31,14 @@ export function CourseCard({ course, className }: CourseCardProps) {
       'overflow-hidden rounded-xl border border-slate-200 hover:border-primary transition-all duration-(--duration-main) py-0 hover:shadow-xl bg-white relative group h-full',
       className
     )}>
-      <div className="aspect-video w-full overflow-hidden">
+      {/* <div className="aspect-video w-full overflow-hidden">
         <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5" />
-      </div>
+      </div> */}
+
+      <CourseImage
+        courseName={course.courseName}
+        alt={course.courseName}
+      />
       
       <CardContent className="px-5 pb-[1.75rem] flex flex-col flex-grow">
         <CardHeader className="p-0 mb-3.5">
@@ -69,4 +72,4 @@ export function CourseCard({ course, className }: CourseCardProps) {
       </CardContent>
     </Card>
   )
-}
+} 
