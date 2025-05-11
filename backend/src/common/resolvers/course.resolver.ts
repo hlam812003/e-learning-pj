@@ -16,7 +16,7 @@ export class CourseResolver {
     const courses = await this.courseService.getAllCourses();
     return courses.map((course) => ({
       ...course,
-      abstract: course.abstract,
+      abstract: course.abstract
     }));
   }
 

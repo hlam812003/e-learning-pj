@@ -46,6 +46,7 @@ model Course {
   lessons    Lesson[]
   enrollments Enrollment[]
   progress Progress[] 
+  keyLearnings  String[]     @default([])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

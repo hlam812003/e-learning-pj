@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsString, IsUUID, IsOptional } from 'class-validator';
+import { IsString, IsUUID, IsOptional, IsArray } from 'class-validator';
 
 @ObjectType()
 export class CourseDto {
@@ -21,4 +21,10 @@ export class CourseDto {
 
   @Field(() => Date)
   updatedAt: Date;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  keyLearnings?: string[];
 }
