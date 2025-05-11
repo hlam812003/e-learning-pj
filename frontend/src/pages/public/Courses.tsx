@@ -1,62 +1,76 @@
 import { useState, useMemo, ChangeEvent } from 'react'
 import { Icon } from '@iconify/react'
+import { useQuery } from '@tanstack/react-query'
+import { useDebounceValue } from 'usehooks-ts'
 
-import { CourseCard } from '@/features/courses'
+import { Course, CourseCard, courseService } from '@/features/courses'
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
 import { MainDropdown } from '@/components'
-import { courses, categories, levels, sortOptions } from '@/mocks'
+// categories, levels, sortOptions
+import { sortOptions } from '@/mocks'
 
 export default function CoursesPage() {
-  const [searchTerm, setSearchTerm] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
-  const [selectedLevel, setSelectedLevel] = useState<string>('All Levels')
-  const [sortBy, setSortBy] = useState<string>('popular')
+  const [searchInputValue, setSearchInputValue] = useState<string>('')
+  const [debouncedSearchTerm] = useDebounceValue(searchInputValue, 500)
+  
+  // const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
+  // const [selectedLevel, setSelectedLevel] = useState<string>('All Levels')
+  const [sortBy, setSortBy] = useState<string>('newest')
   const [itemsPerPage, setItemsPerPage] = useState<number>(10)
 
+  const { data: courses = [], isLoading } = useQuery({
+    queryKey: ['courses'],
+    queryFn: () => courseService.getAllCourses()
+  })
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
+    setSearchInputValue(e.target.value)
   }
 
   const filteredCourses = useMemo(() => {
     return courses
-      .filter(course => {
+      .filter((course: Course) => {
         const matchesSearch = 
-          course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.abstract.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          false
+          course.courseName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+          course.abstract.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+          // || course.instructor?.toLowerCase().includes(searchTerm.toLowerCase())
 
-        const matchesCategory = 
-          selectedCategory === 'All Categories' || 
-          course.category === selectedCategory
+        // const matchesCategory = 
+        //   selectedCategory === 'All Categories' 
+        //   // || course.category === selectedCategory
 
-        const matchesLevel = 
-          selectedLevel === 'All Levels' || 
-          course.level === selectedLevel
+        // const matchesLevel = 
+        //   selectedLevel === 'All Levels'
+        //   // || course.level === selectedLevel
 
-        return matchesSearch && matchesCategory && matchesLevel
+        // return matchesSearch && matchesCategory && matchesLevel
+        
+        return matchesSearch
       })
-      .sort((a, b) => {
+      .sort((a: Course, b: Course) => {
         switch (sortBy) {
-          case 'popular':
-            return (b.students || 0) - (a.students || 0)
+          // case 'popular':
+          //   return (b.students || 0) - (a.students || 0)
           case 'newest':
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          case 'price-asc':
-            return (a.price || 0) - (b.price || 0)
-          case 'price-desc':
-            return (b.price || 0) - (a.price || 0)
-          case 'rating':
-            return (b.rating || 0) - (a.rating || 0)
+          // case 'price-asc':
+          //   return (a.price || 0) - (b.price || 0)
+          // case 'price-desc':
+          //   return (b.price || 0) - (a.price || 0)
+          // case 'rating':
+          //   return (b.rating || 0) - (a.rating || 0)
           default:
             return 0
         }
       })
-  }, [searchTerm, selectedCategory, selectedLevel, sortBy])
+  }, [debouncedSearchTerm, sortBy, courses])
 
   const handleClearFilters = () => {
-    setSearchTerm('')
-    setSelectedCategory('All Categories')
-    setSelectedLevel('All Levels')
+    setSearchInputValue('')
+    // setSelectedCategory('All Categories')
+    // setSelectedLevel('All Levels')
   }
 
   return (
@@ -67,20 +81,24 @@ export default function CoursesPage() {
         <div className="flex flex-col space-y-6 mb-8 border-b-[.125rem] border-gray-300 pb-9">
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-4 items-center">
-              <div className="element-animation relative w-[28rem]">
-                <input
-                  type="text"
-                  placeholder="Search courses, instructors, or topics..."
-                  value={searchTerm}
+              <div className="element-animation relative w-[26.5rem]">
+                <Input
+                  value={searchInputValue}
                   onChange={handleSearchChange}
-                  className="w-full pl-12 pr-4 py-3.5 text-[1.25rem] border border-slate-200 rounded-full focus:outline-none focus:border-primary/50 transition-colors"
+                  placeholder="Search courses..."
+                  className="w-full h-[3.785rem] pl-12 pr-10 text-[1.25rem] border border-slate-200 rounded-full focus:outline-none focus:border-primary/50 transition-colors"
                 />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">
                   <Icon icon="ph:magnifying-glass" className="text-2xl" />
                 </div>
+                {searchInputValue !== debouncedSearchTerm && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                    <Icon icon="ph:clock-light" className="text-xl" />
+                  </div>
+                )}
               </div>
               
-              <MainDropdown
+              {/* <MainDropdown
                 value={selectedCategory}
                 options={categories}
                 onChange={setSelectedCategory}
@@ -94,15 +112,15 @@ export default function CoursesPage() {
                 onChange={setSelectedLevel}
                 placeholder="All Levels"
                 minWidth="160px"
-              />
-              
+              /> */}
+                            
               <MainDropdown
                 value={sortBy}
                 options={sortOptions}
                 onChange={setSortBy}
                 placeholder="Sort by"
                 minWidth="140px"
-              />
+              /> 
             </div>
           </div>
         </div>
@@ -111,7 +129,8 @@ export default function CoursesPage() {
           <div className="element-animation">
             <h2 className="text-[1.8rem] font-bold text-slate-800">All Courses ({filteredCourses.length})</h2>
             <div className="mt-1">
-              {selectedCategory !== 'All Categories' || selectedLevel !== 'All Levels' || searchTerm ? (
+              {/* selectedCategory !== 'All Categories' || selectedLevel !== 'All Levels' || */}
+              {debouncedSearchTerm ? (
                 <p className="text-[1.25rem] text-slate-600">Showing filtered results</p>
               ) : (
                 <p className="text-[1.25rem] text-slate-600">Browse our collection of high-quality courses</p>
@@ -128,11 +147,33 @@ export default function CoursesPage() {
           />
         </div>
         
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
           <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
-            {filteredCourses.slice(0, itemsPerPage).map(course => (
+            {[...Array(10)].map((_, index) => (
+              <Card key={index} className="overflow-hidden rounded-xl border border-slate-200 hover:border-primary py-0 bg-white relative h-full">
+                <Skeleton className="w-full h-[14.35rem] rounded-t-xl" />
+                
+                <CardContent className="px-5 pb-[1.75rem] flex flex-col flex-grow">
+                  <CardHeader className="p-0 mb-3.5">
+                    <Skeleton className="h-7 w-full mb-2" />
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-5 w-5/6 mt-1.5" />
+                  </CardHeader>
+                  
+                  <div className="flex-grow" />
+                  
+                  <CardFooter className="p-0 mt-auto">
+                    <Skeleton className="h-12 w-full rounded-full" />
+                  </CardFooter>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
+          <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+            {filteredCourses.slice(0, itemsPerPage).map((course: Course) => (
               <CourseCard 
-                key={course.id} 
+                key={course.id}
                 course={course}
               />
             ))}

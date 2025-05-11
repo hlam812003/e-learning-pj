@@ -25,6 +25,7 @@ interface AuthUser {
 interface AuthStore {
   user: AuthUser | null
   googleInfo: GoogleUserInfo | null
+  userDetails: User | null
   login: (email: string, password: string) => Promise<any>
   register: (email: string, password: string) => Promise<any>
   loginWithGoogle: (googleId: string, email: string, googleInfo?: GoogleUserInfo) => Promise<any>

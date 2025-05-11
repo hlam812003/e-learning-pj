@@ -23,6 +23,7 @@ export const messageService = {
         }
       }
     })
+    console.log(response.data.data.createMessage)
     return response.data.data.createMessage
   }
 }

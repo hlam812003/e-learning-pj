@@ -24,9 +24,11 @@ const useAuthStore = create<AuthStore>()(
   persist(
     (set): AuthStore => ({
       user: null,
+      userDetails: null,
       googleInfo: null,
       login: async (email: string, password: string) => {
         const loginResult = await authService.login(email, password)
+        // console.log(loginResult)
         if (loginResult.success && loginResult.token) {
           const decoded: DecodedToken = jwtDecode(loginResult.token)
           set({ user: { ...decoded, token: loginResult.token } })
@@ -73,13 +75,15 @@ const useAuthStore = create<AuthStore>()(
       logout: () => {
         set({ 
           user: null,
-          googleInfo: null
+          googleInfo: null,
+          userDetails: null
         })
         deleteCookie('token')
       },
       getUserInfo: async () => {
         try {
           const userInfo = await authService.getCurrentUser()
+          set({ userDetails: userInfo })
           return userInfo
         } catch (error) {
           console.error('Error getting user info:', error)

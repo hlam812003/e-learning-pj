@@ -1,1 +1,3 @@
-export { default as CourseCard } from './components/CourseCard'
+export * from './components'
+export * from './types'
+export * from './services'

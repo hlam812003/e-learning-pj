@@ -4,8 +4,7 @@ import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores'
 
-import { PageTransition, LanguageDropdown } from '@/components'
-import MainDropdown from '@/components/common/dropdowns/MainDropdown'
+import { PageTransition, LanguageDropdown, MainDropdown } from '@/components'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function MainLayout() {
@@ -14,7 +13,6 @@ export default function MainLayout() {
   const { user: authUser, logout, initAuth, googleInfo, getUserInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
-  const [isImageLoading, setIsImageLoading] = useState<boolean>(true)
 
   useEffect(() => {
     initAuth()
@@ -151,14 +149,13 @@ export default function MainLayout() {
                           <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md overflow-hidden">
                             {avatar ? (
                               <>
-                                {isImageLoading && (
+                                {isLoading && (
                                   <Skeleton className="absolute inset-0 rounded-full" />
                                 )}
                                 <img 
                                   src={avatar} 
                                   alt={displayName} 
                                   className="size-full rounded-full object-cover"
-                                  onLoad={() => setIsImageLoading(false)}
                                 />
                               </>
                             ) : (
