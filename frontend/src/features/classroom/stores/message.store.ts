@@ -7,7 +7,7 @@ const TEST_CONVERSATION_ID = 'b4696dad-d103-497f-bf96-ca56fa992b2a'
 const TEST_COURSE_ID = '4d17dad2-a34f-46ae-83a7-abb7826d047b'
 const TEST_LESSON_ID = '475cf84c-326b-4c9f-a6cd-9e9cd881cf59'
 
-export const useMessageStore = create<MessageStore>((set, get) => ({
+export const useMessageStore = create<MessageStore>((set) => ({
   messages: [],
   error: null,
   
