@@ -8,12 +8,10 @@ import { AuthGuard, RolesGuard } from '../guards/auth.guard';
 import { Roles } from '../decorators/roles.decorator';
 
 @Resolver(() => LessonDto)
-@UseGuards(AuthGuard, RolesGuard)
 export class LessonResolver {
   constructor(private readonly lessonService: LessonService) {}
 
   @Query(() => [LessonDto])
-  @Roles('USER', 'ADMIN')
   async getAllLessons(): Promise<LessonDto[]> {
     const lessons = await this.lessonService.getAllLessons();
     return lessons.map((lesson) => ({
@@ -23,7 +21,6 @@ export class LessonResolver {
   }
 
   @Query(() => [LessonDto])
-  @Roles('USER', 'ADMIN')
   async getLessonsByCourseId(
     @Args('id', { type: () => String }) id: string,
   ): Promise<LessonDto[]> {
@@ -31,7 +28,6 @@ export class LessonResolver {
   }
 
   @Query(() => LessonDto, { nullable: true })
-  @Roles('USER', 'ADMIN')
   async getLessonById(
     @Args('id', { type: () => String }) id: string,
   ): Promise<LessonDto | null> {
@@ -39,18 +35,21 @@ export class LessonResolver {
   }
 
   @Mutation(() => LessonDto)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   async createLesson(@Args('data') data: CreateLessonDto): Promise<LessonDto> {
     return this.lessonService.createLesson(data);
   }
 
   @Mutation(() => LessonDto)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   async updateLesson(@Args('data') data: UpdateLessonDto): Promise<LessonDto> {
     return this.lessonService.updateLesson(data);
   }
 
   @Mutation(() => LessonDto)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   async deleteLesson(
     @Args('id', { type: () => String }) id: string,
