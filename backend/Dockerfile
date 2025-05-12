@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN npx @nestjs/cli build
 
 FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /
 
 # Sao chép các file cần thiết từ builder
 COPY --from=builder /app/dist ./dist
