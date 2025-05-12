@@ -178,8 +178,19 @@ export const sortOptions = [
   // { value: 'rating', label: 'Highest Rated' }
 ]
 
-export const MockCourseImage: Record<string, string> = {
+export const mockCourseImage: Record<string, string> = {
   'a4a5b1ec-62c3-4ee2-981c-97e27fdc3595': 'nestjs-graphql',
   '5b28193a-2307-4232-9108-48c7c07a569e': 'nhap-mon-lap-trinh',
   '4d17dad2-a34f-46ae-83a7-abb7826d047b': 'ctdl-giaithuat'
 }
+
+export const teamMembers = [
+  // Backend members
+  { name: 'Do Duc Anh', jobTitle: 'Backend Developer', image: { name: 'ducanhdo', folder: 'teammates' } },
+  { name: 'La Huy Hoang', jobTitle: 'Backend Developer', image: { name: 'hhoang', folder: 'teammates' } },
+  { name: 'Luu Trong Dung', jobTitle: 'AI Developer', image: { name: 'trongdung', folder: 'teammates' } },
+  
+  // Frontend members
+  { name: 'Lam Quoc Hung', jobTitle: 'Frontend Developer', image: { name: 'hwan', folder: 'teammates' } },
+  { name: 'Thai Bao Nhan', jobTitle: 'Frontend Developer', image: { name: 'nhancat', folder: 'teammates' } }
+]

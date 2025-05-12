@@ -1,5 +1,5 @@
 import { OptimizeImage } from '@/components'
-import { MockCourseImage } from '@/mocks'
+import { mockCourseImage } from '@/mocks'
 import { cn } from '@/lib'
 
 interface CourseImageProps {
@@ -17,7 +17,7 @@ const CourseImage = ({
   folder = 'courses',
   className
 }: CourseImageProps) => {
-  const mappedImage = courseId ? MockCourseImage[courseId] : null
+  const mappedImage = courseId ? mockCourseImage[courseId] : null
   const imageSrc = mappedImage || src
   
   return (
