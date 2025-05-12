@@ -263,7 +263,7 @@ export default function CourseDetailsPage() {
       <div className="px-24 py-14">
         <div className="flex flex-col lg:flex-row gap-16">
           <div className="w-full lg:w-8/12">
-            <div className="bg-white rounded-lg border border-zinc-200 p-10 mb-12">
+            <div className="bg-white rounded-lg border border-zinc-200 shadow-md hover:shadow-lg transition-shadow p-10 mb-12">
               <h2 className="text-[2.5rem] font-bold text-zinc-900 mb-8 flex items-center gap-4">
                 <Icon icon="ph:graduation-cap-fill" className="text-zinc-800 text-[2.5rem]" />
                 What You'll Learn
@@ -285,7 +285,7 @@ export default function CourseDetailsPage() {
               </ul>
             </div>
             
-            <div className="bg-white rounded-lg border border-zinc-200 p-10 mb-12">
+            <div className="bg-white rounded-lg border border-zinc-200 shadow-md hover:shadow-lg transition-shadow p-10 mb-12">
               <h2 className="text-[2.5rem] font-bold text-zinc-900 mb-8 flex items-center gap-4">
                 <Icon icon="ph:path-fill" className="text-zinc-800 text-[2.5rem]" />
                 Course Curriculum

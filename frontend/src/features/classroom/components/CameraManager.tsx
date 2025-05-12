@@ -29,6 +29,22 @@ const CameraManager = () => {
   useEffect(() => {
     if (!controlsRef.current) return
     
+    const position = CAMERA_POSITION[GENERAL_MODE.IDLE]
+    const zoom = CAMERA_ZOOM[GENERAL_MODE.IDLE]
+    
+    controlsRef.current.setPosition(
+      position[0],
+      position[1],
+      position[2],
+      true
+    )
+    
+    controlsRef.current.zoomTo(zoom, true)
+  }, [])
+
+  useEffect(() => {
+    if (!controlsRef.current) return
+    
     // console.log(`Camera mode changed to: ${cameraMode}`)
     
     setTimeout(() => {
