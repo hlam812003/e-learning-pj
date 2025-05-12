@@ -5,18 +5,18 @@ import { Icon } from '@iconify/react'
 import { cn } from '@/lib'
 // import { useParams } from 'react-router-dom'
 
-import { Tooltip } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
 import { 
   MessageBox,
+  ConversationBox,
   ClassroomLoading,
   useClassroomStore, 
   useTeacherSpeech, 
   checkAzureSpeechSDK,
   GENERAL_MODE
 } from '@/features/classroom'
-import type { MessageBoxHandle } from '@/features/classroom/components/MessageBox'
-
+import { MessageBoxHandle, ConversationBoxHandle } from '@/features/classroom'
+import { Tooltip } from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
 
 const Scene = lazy(() => import('@/features/classroom/components/Scene'))
 
@@ -56,8 +56,10 @@ export default function ClassRoomPage() {
   const [initialLoadComplete, setInitialLoadComplete] = useState<boolean>(false)
   const [loaderVisible, setLoaderVisible] = useState<boolean>(true)
   const [isMessageBoxVisible, setIsMessageBoxVisible] = useState<boolean>(true)
+  const [isConversationBoxVisible, setIsConversationBoxVisible] = useState<boolean>(false)
 
   const messageBoxRef = useRef<MessageBoxHandle>(null)
+  const conversationBoxRef = useRef<ConversationBoxHandle>(null)
 
   const sampleLectures = [
     'Xin chào các em, hôm nay chúng ta sẽ học về lập trình web cơ bản.',
@@ -198,6 +200,10 @@ export default function ClassRoomPage() {
   const handleMessageBoxVisibilityChange = (visible: boolean) => {
     setIsMessageBoxVisible(visible)
   }
+  
+  const handleConversationBoxVisibilityChange = (visible: boolean) => {
+    setIsConversationBoxVisible(visible)
+  }
 
   return (
     <>
@@ -262,6 +268,12 @@ export default function ClassRoomPage() {
           ref={messageBoxRef}
           visible={isMessageBoxVisible} 
           onVisibilityChange={handleMessageBoxVisibilityChange}
+        />
+        
+        <ConversationBox
+          ref={conversationBoxRef}
+          visible={isConversationBoxVisible}
+          onVisibilityChange={handleConversationBoxVisibilityChange}
         />
       </div>
       

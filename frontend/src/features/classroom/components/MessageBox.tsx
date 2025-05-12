@@ -1,9 +1,9 @@
 import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import { Icon } from '@iconify/react'
-import { cn, gsap, useGSAP } from '@/lib'
+import { cn, useGSAP } from '@/lib'
 import { useClassroomStore } from '../stores'
 import { messageService } from '../services'
-import { useTeacherSpeech } from '../hooks'
+import { useTeacherSpeech, useAnimatedBox } from '../hooks'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -34,9 +34,6 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const stopAll = useClassroomStore((state) => state.stopAll)
 
   const [message, setMessage] = useState<string>('')
-  const [isVisible, setIsVisible] = useState(visible)
-  const [isAnimating, setIsAnimating] = useState<boolean>(false)
-  
   
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -49,67 +46,44 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const expandIconRef = useRef<HTMLDivElement>(null)
   
-  useGSAP(() => {
-    if (messageBoxRef.current) {
-      if (isVisible) {
-        gsap.set(messageBoxRef.current, {
-          width: '53rem',
-          height: '13.5rem',
-          borderRadius: '1.25rem',
-          opacity: 1
-        })
-
-        if (contentRef.current) {
-          gsap.set(contentRef.current, { opacity: 1, display: 'flex' })
-        }
-
-        if (controlsRef.current) {
-          gsap.set(controlsRef.current, { opacity: 1, display: 'flex' })
-        }
-
-        if (collapseButtonContainerRef.current) {
-          gsap.set(collapseButtonContainerRef.current, { 
-            opacity: 1,
-            display: 'block'
-          })
-        }
-
-        if (expandIconRef.current) {
-          gsap.set(expandIconRef.current, { 
-            opacity: 0,
-            display: 'none' 
-          })
-        }
-      } else {
-        gsap.set(messageBoxRef.current, {
-          width: '3.5rem',
-          height: '3.5rem',
-          borderRadius: '50%',
-          opacity: 1
-        })
-        
-        if (contentRef.current) {
-          gsap.set(contentRef.current, { opacity: 0, display: 'none' })
-        }
-
-        if (controlsRef.current) {
-          gsap.set(controlsRef.current, { opacity: 0, display: 'none' })
-        }
-
-        if (collapseButtonContainerRef.current) {
-          gsap.set(collapseButtonContainerRef.current, { 
-            opacity: 0,
-            display: 'none'
-          })
-        }
-        
-        if (expandIconRef.current) {
-          gsap.set(expandIconRef.current, { 
-            opacity: 1,
-            display: 'flex' 
-          })
-        }
+  const { 
+    isVisible,
+    isAnimating,
+    showBox: showMessageBox,
+    hideBox: hideMessageBox,
+    toggleBox: toggleMessageBox,
+    setupVisibleState,
+    setupHiddenState
+  } = useAnimatedBox(
+    {
+      containerRef,
+      boxRef: messageBoxRef,
+      expandIconRef,
+      collapseButtonContainerRef,
+      contentRef,
+      titleRef,
+      subtitleRef,
+      controlsRef
+    },
+    {
+      expandedWidth: '53rem',
+      expandedHeight: '13.5rem',
+      collapsedSize: '3.5rem',
+      expandedBorderRadius: '1.25rem',
+      collapsedBorderRadius: '50%',
+      onShowComplete: () => {
+        if (inputRef.current) inputRef.current.focus()
       }
+    },
+    visible,
+    onVisibilityChange
+  )
+  
+  useGSAP(() => {
+    if (isVisible) {
+      setupVisibleState()
+    } else {
+      setupHiddenState()
     }
     
     if (visible !== isVisible && !isAnimating) {
@@ -117,192 +91,6 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
       else hideMessageBox()
     }
   }, { scope: containerRef, dependencies: [isVisible, visible, isAnimating] })
-
-  const showMessageBox = () => {
-    if (isAnimating || isVisible) return
-    
-    setIsAnimating(true)
-    
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsAnimating(false)
-        if (inputRef.current) inputRef.current.focus()
-      }
-    })
-    
-    if (messageBoxRef.current) {
-      messageBoxRef.current.style.pointerEvents = 'auto'
-      
-      if (expandIconRef.current) {
-        tl.to(expandIconRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.15,
-          ease: 'power1.in',
-          onComplete: () => {
-            if (expandIconRef.current) {
-              expandIconRef.current.style.display = 'none'
-            }
-          }
-        })
-      }
-      
-      tl.to(messageBoxRef.current, {
-        width: '53rem',
-        height: '13.5rem',
-        borderRadius: '1.25rem',
-        duration: 0.35,
-        ease: 'back.out(1.2)',
-      }, '-=0.1')
-      
-      if (collapseButtonContainerRef.current) {
-        tl.set(collapseButtonContainerRef.current, {
-          display: 'block',
-          opacity: 0
-        }, '-=0.25')
-        .to(collapseButtonContainerRef.current, {
-          opacity: 1,
-          duration: 0.2,
-          ease: 'power1.out'
-        }, '-=0.2')
-      }
-      
-      if (contentRef.current) {
-        tl.set(contentRef.current, { 
-          display: 'flex',
-          opacity: 0,
-          y: 10
-        }, '-=0.15')
-        .to(contentRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.2,
-          ease: 'power2.out'
-        }, '-=0.1')
-      }
-      
-      if (titleRef.current && subtitleRef.current) {
-        tl.fromTo([titleRef.current, subtitleRef.current], 
-          { y: 10, opacity: 0 },
-          { 
-            y: 0, 
-            opacity: 1, 
-            duration: 0.2,
-            stagger: 0.05,
-            ease: 'power2.out' 
-          },
-          '-=0.1'
-        )
-      }
-      
-      if (controlsRef.current) {
-        tl.set(controlsRef.current, { 
-          display: 'flex',
-          opacity: 0,
-          y: 10
-        }, '-=0.1')
-        .to(controlsRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.25,
-          ease: 'power2.out'
-        }, '-=0.1')
-      }
-    }
-    
-    tl.call(() => {
-      setIsVisible(true)
-      onVisibilityChange?.(true)
-    })
-  }
-
-  const hideMessageBox = () => {
-    if (isAnimating || !isVisible) return
-    
-    setIsAnimating(true)
-    
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsAnimating(false)
-      }
-    })
-    
-    if (messageBoxRef.current) {
-      if (controlsRef.current) {
-        tl.to(controlsRef.current, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          ease: 'power2.in',
-          onComplete: () => {
-            if (controlsRef.current) controlsRef.current.style.display = 'none'
-          }
-        })
-      }
-      
-      if (contentRef.current) {
-        tl.to(contentRef.current, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          ease: 'power2.in',
-          onComplete: () => {
-            if (contentRef.current) contentRef.current.style.display = 'none'
-          }
-        }, '-=0.1')
-      }
-      
-      if (collapseButtonContainerRef.current) {
-        tl.to(collapseButtonContainerRef.current, {
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power1.in',
-          onComplete: () => {
-            if (collapseButtonContainerRef.current) {
-              collapseButtonContainerRef.current.style.display = 'none'
-            }
-          }
-        }, '-=0.1')
-      }
-      
-      tl.to(messageBoxRef.current, {
-        width: '3.5rem',
-        height: '3.5rem',
-        borderRadius: '50%',
-        duration: 0.4,
-        ease: 'back.in(1.2)'
-      }, '-=0.2')
-      
-      if (expandIconRef.current) {
-        tl.set(expandIconRef.current, {
-          display: 'flex',
-          opacity: 0,
-          scale: 0.8
-        }, '-=0.2')
-        .to(expandIconRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.25,
-          ease: 'back.out(1.7)'
-        }, '-=0.1')
-      }
-    }
-    
-    tl.call(() => {
-      setIsVisible(false)
-      onVisibilityChange?.(false)
-    })
-  }
-
-  const toggleMessageBox = () => {
-    if (isAnimating) return
-    
-    if (isVisible) {
-      hideMessageBox()
-    } else {
-      showMessageBox()
-    }
-  }
 
   useImperativeHandle(ref, () => ({
     show: showMessageBox,

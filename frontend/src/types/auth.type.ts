@@ -31,7 +31,7 @@ interface AuthStore {
   loginWithGoogle: (googleId: string, email: string, googleInfo?: GoogleUserInfo) => Promise<any>
   logout: () => void
   getUserInfo: () => Promise<User>
-  initAuth: () => void
+  initAuth: () => Promise<void>
   setGoogleInfo: (info: GoogleUserInfo) => void
   clearGoogleInfo: () => void
 }
