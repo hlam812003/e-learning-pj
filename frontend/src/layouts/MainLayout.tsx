@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { JSX, useState, useEffect } from 'react'
+import { JSX, useState } from 'react'
 import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores'
@@ -10,13 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, initAuth, googleInfo, getUserInfo } = useAuthStore()
+  const { user: authUser, logout, googleInfo, getUserInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
-
-  useEffect(() => {
-    initAuth()
-  }, [initAuth])
 
   const { data: user, isLoading } = useQuery({
     queryKey: ['currentUser'],
