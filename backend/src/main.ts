@@ -12,7 +12,7 @@ async function bootstrap() {
       logger: true,
     }),
   );
-  const port = process.env.PORT ;
+  const port = process.env.PORT || 10000;
   const address =
     process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
