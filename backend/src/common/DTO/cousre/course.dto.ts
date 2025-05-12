@@ -22,8 +22,7 @@ export class CourseDto {
   @Field(() => Date)
   updatedAt: Date;
 
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
+  @Field(() => [String])
   @IsArray()
   @IsString({ each: true })
   keyLearnings: string[];
