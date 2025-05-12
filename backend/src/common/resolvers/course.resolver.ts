@@ -16,7 +16,9 @@ export class CourseResolver {
     const courses = await this.courseService.getAllCourses();
     return courses.map((course) => ({
       ...course,
-      abstract: course.abstract
+      abstract: course.abstract,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      keyLearnings: course.keyLearnings,
     }));
   }
 

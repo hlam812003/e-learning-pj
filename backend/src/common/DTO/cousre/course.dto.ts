@@ -26,5 +26,5 @@ export class CourseDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  keyLearnings?: string[];
+  keyLearnings: string[];
 }
