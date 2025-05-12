@@ -33,7 +33,7 @@ export default function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginFormData) => login(data.email, data.password),
     onSuccess: () => {
-      navigate('/')
+      navigate('/', { replace: true })
     },
     onError: (error: Error) => {
       console.log(error.message)
@@ -248,7 +248,7 @@ export default function LoginPage() {
           variant="outline"
           className={cn(
             'w-full h-[4rem] flex items-center justify-center gap-2 text-[1.35rem] border-[1px]',
-            isLoading && 'pointer-events-none'
+            (isLoading || loginMutation.isPending) && 'pointer-events-none'
           )}
           disabled={isLoading}
           onClick={handleGoogleLogin}

@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounceValue } from 'usehooks-ts'
 
-import { Course, CourseCard, courseService } from '@/features/courses'
+import { CourseCard, courseService } from '@/features/courses'
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ export default function CoursesPage() {
 
   const filteredCourses = useMemo(() => {
     return courses
-      .filter((course: Course) => {
+      .filter((course) => {
         const matchesSearch = 
           course.courseName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
           course.abstract.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
@@ -49,7 +49,7 @@ export default function CoursesPage() {
         
         return matchesSearch
       })
-      .sort((a: Course, b: Course) => {
+      .sort((a, b) => {
         switch (sortBy) {
           // case 'popular':
           //   return (b.students || 0) - (a.students || 0)
@@ -72,6 +72,8 @@ export default function CoursesPage() {
     // setSelectedCategory('All Categories')
     // setSelectedLevel('All Levels')
   }
+
+  const showNoResults = !isLoading && filteredCourses.length === 0
 
   return (
     <div className="w-full px-24 py-10">
@@ -150,7 +152,7 @@ export default function CoursesPage() {
         {isLoading ? (
           <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
             {[...Array(10)].map((_, index) => (
-              <Card key={index} className="overflow-hidden rounded-xl border border-slate-200 hover:border-primary py-0 bg-white relative h-full">
+              <Card key={index} className="overflow-hidden rounded-xl border border-slate-200 py-0 bg-white relative h-full">
                 <Skeleton className="w-full h-[14.35rem] rounded-t-xl" />
                 
                 <CardContent className="px-5 pb-[1.75rem] flex flex-col flex-grow">
@@ -169,16 +171,7 @@ export default function CoursesPage() {
               </Card>
             ))}
           </div>
-        ) : filteredCourses.length > 0 ? (
-          <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
-            {filteredCourses.slice(0, itemsPerPage).map((course: Course) => (
-              <CourseCard 
-                key={course.id}
-                course={course}
-              />
-            ))}
-          </div>
-        ) : (
+        ) : showNoResults ? (
           <div className="flex flex-col items-center justify-center text-center py-[10rem]">
             <Icon icon="ph:magnifying-glass-light" className="text-[5.5rem] text-[#2b2b2b] mb-6" />
             <h3 className="text-3xl font-bold text-slate-700 mb-3">No courses found...</h3>
@@ -191,6 +184,15 @@ export default function CoursesPage() {
             >
               Clear Filters
             </button>
+          </div>
+        ) : (
+          <div className="element-animation grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
+            {filteredCourses.slice(0, itemsPerPage).map((course) => (
+              <CourseCard 
+                key={course.id}
+                course={course}
+              />
+            ))}
           </div>
         )}
       </section>

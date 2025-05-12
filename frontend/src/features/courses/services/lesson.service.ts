@@ -1,4 +1,5 @@
 import { apiConfig } from '@/configs'
+import { Lesson } from '../types'
 
 export const lessonService = {
   getAllLessons: async () => {
@@ -18,7 +19,7 @@ export const lessonService = {
     })
     return response.data.data.getAllLessons
   },
-  getLessonsByCourseId: async (id: string) => {
+  getLessonsByCourseId: async (id: string): Promise<Lesson[]> => {
     const response = await apiConfig.post('', {
       query: `
         query GetLessonsByCourseId($id: String!) {
@@ -36,7 +37,7 @@ export const lessonService = {
     })
     return response.data.data.getLessonsByCourseId
   },
-  getLessonById: async (id: string) => {
+  getLessonById: async (id: string): Promise<Lesson> => {
     const response = await apiConfig.post('', {
       query: `
         query GetLessonById($id: String!) {

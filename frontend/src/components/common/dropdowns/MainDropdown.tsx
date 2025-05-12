@@ -89,7 +89,7 @@ const MainDropdown = <T extends string | number>({
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={cn(
-              'absolute top-full mt-2 py-2 rounded-xl bg-white shadow-lg border border-slate-200 z-50',
+              'absolute top-full mt-2 py-2 rounded-xl bg-white shadow-lg border border-slate-200 z-[51]',
               align === 'left' ? 'left-0' : 'right-0'
             )}
             style={{ minWidth }}

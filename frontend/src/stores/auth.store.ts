@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import { authService } from '@/features/auth'
 import { toast } from 'sonner'
 import { AuthStore, DecodedToken, GoogleUserInfo } from '@/types'
+import { queryClient } from '@/configs'
 
 const setCookie = (name: string, value: string, days: number = 7) => {
   const date = new Date()
@@ -79,6 +80,10 @@ const useAuthStore = create<AuthStore>()(
           userDetails: null
         })
         deleteCookie('token')
+
+        if (queryClient) {
+          queryClient.clear()
+        }
       },
       getUserInfo: async () => {
         try {

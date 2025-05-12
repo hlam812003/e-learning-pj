@@ -6,6 +6,7 @@ interface Course {
   abstract: string
   createdAt: string
   updatedAt: string
+  keyLearnings: string[]
   // instructor?: string
   // level?: Level
   // duration?: string

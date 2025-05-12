@@ -1,9 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { AuthProvider } from '@/providers'
+import { queryClient } from '@/configs'
 import reactArrayToTree from 'react-array-to-tree'
 import App from './App.tsx'
 import './index.css'
@@ -20,22 +21,6 @@ if (!isProduction && typeof window !== 'undefined') {
     console.error('Failed to load react-scan:', err)
   })
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: isProduction,
-      refetchOnMount: false,
-      refetchOnReconnect: true,
-      retry: 3,
-      staleTime: 5 * 60 * 1000
-    },
-    mutations: {
-      retry: 2,
-      networkMode: 'always'
-    }
-  }
-})
 
 const Provider = reactArrayToTree([
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>{null}</GoogleOAuthProvider>,

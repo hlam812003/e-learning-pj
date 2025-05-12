@@ -1,6 +1,11 @@
 import { useState, useEffect, Suspense, useCallback, lazy, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useProgress, PerformanceMonitor, AdaptiveDpr, useGLTF } from '@react-three/drei'
+import { Icon } from '@iconify/react'
+import { cn } from '@/lib'
+// import { useParams } from 'react-router-dom'
+
+import { Tooltip } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { 
   MessageBox,
@@ -12,6 +17,7 @@ import {
 } from '@/features/classroom'
 import type { MessageBoxHandle } from '@/features/classroom/components/MessageBox'
 
+
 const Scene = lazy(() => import('@/features/classroom/components/Scene'))
 
 useGLTF.preload('/models/classroom_default.glb')
@@ -19,6 +25,7 @@ useGLTF.preload('/models/teacher.glb')
 useGLTF.preload('/models/teacher_animation.glb')
 
 export default function ClassRoomPage() {
+  // const { courseId } = useParams<{ courseId: string }>()
   const { active, progress } = useProgress()
   const isThinking = useClassroomStore((state) => state.isThinking)
   const isSpeaking = useClassroomStore((state) => state.isSpeaking)
@@ -182,6 +189,12 @@ export default function ClassRoomPage() {
     setCurrentLecture(nextIndex)
   }
 
+  const handleGoBack = () => {
+    stopAzure()
+    stopAll()
+    window.location.href = '/courses'
+  }
+
   const handleMessageBoxVisibilityChange = (visible: boolean) => {
     setIsMessageBoxVisible(visible)
   }
@@ -224,6 +237,25 @@ export default function ClassRoomPage() {
               <strong>Bài đang phát:</strong> {sampleLectures[currentLecture]}
             </div>
           </div>
+        </div>
+
+        <div className="absolute top-32 left-4.5 z-50">
+          <Tooltip
+            content="Back to Courses"
+            contentClassName="text-[1.25rem] z-[60]"
+            position='right'
+          >
+            <Button
+              onClick={handleGoBack}
+              variant="outline"
+              className={cn(
+                'rounded-full bg-white/20 backdrop-blur-[16px] border-white/30 hover:bg-white/30 text-white hover:text-white size-12 drop-shadow-lg',
+                isThinking && 'pointer-events-none opacity-70'
+              )}
+            >
+              <Icon icon="lucide:arrow-left" className="text-[1.5rem] drop-shadow-lg" />
+            </Button>
+          </Tooltip>
         </div>
 
         <MessageBox 

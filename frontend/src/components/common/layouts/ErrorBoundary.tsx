@@ -25,7 +25,7 @@ const ErrorBoundary = () => {
             ? error.statusText 
             : 'An unexpected error occurred'}
         </h1>
-        <p className="text-[1.35rem] text-slate-600 max-w-[30rem] mb-[1.5rem]">
+        <p className="text-[1.35rem] text-slate-600 max-w-[35rem] mb-[1.5rem]">
           {isRouteErrorResponse(error) 
             ? 'The page you are looking for might have been removed, renamed, or is temporarily unavailable.'
             : 'We have noted this error and will fix it as soon as possible.'}

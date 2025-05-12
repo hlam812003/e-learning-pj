@@ -3,6 +3,7 @@ import { JSX, useState } from 'react'
 import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores'
+import { User } from '@/types/user.type'
 
 import { PageTransition, LanguageDropdown, MainDropdown } from '@/components'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -10,13 +11,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, googleInfo, getUserInfo } = useAuthStore()
+  const { user: authUser, logout, googleInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getUserInfo,
+  const { data: user, isLoading } = useQuery<User>({
+    queryKey: ['currentUser', authUser?.id],
     enabled: !!authUser
   })
 
@@ -58,13 +58,13 @@ export default function MainLayout() {
   const handleUserMenuSelect = (value: string) => {
     switch (value) {
       case 'profile':
-        navigate('/dashboard/profile')
+        window.location.href = '/dashboard/profile'
         break
       case 'dashboard':
-        navigate('/dashboard')
+        window.location.href = '/dashboard'
         break
       case 'settings':
-        navigate('/dashboard/settings')
+        window.location.href = '/dashboard/settings'
         break
       case 'logout':
         logout()
@@ -82,7 +82,7 @@ export default function MainLayout() {
 
   const MainNav = (): JSX.Element => {
     return (
-      <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center">
+      <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center relative z-[998]">
         <div className="w-1/3">
           <Link to="/">
             <h1 className="text-[3rem] font-bold">Learnify.</h1>

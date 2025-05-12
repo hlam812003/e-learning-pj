@@ -71,9 +71,9 @@ export const router = createBrowserRouter([
     path: '/dashboard/classroom',
     element: <ClassRoomLayout />,
     loader: authGuard,
-    children: [{ 
-      index: true,
-      element: <Pages.Dashboard.ClassRoom />
-    }]
+    children: [
+      { index: true, element: <Pages.Dashboard.ClassRoom /> },
+      { path: ':courseId/lessons/:lessonId', element: <Pages.Dashboard.ClassRoom /> }
+    ]
   }
 ])

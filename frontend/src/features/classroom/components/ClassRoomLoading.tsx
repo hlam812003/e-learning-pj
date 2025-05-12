@@ -99,7 +99,8 @@ export default function ClassroomLoading({
               strokeWidth="6" 
               strokeLinecap="round" 
               strokeDasharray="251" 
-              strokeDashoffset={251 - (251 * progress) / 100} 
+              strokeDashoffset={251 - (251 * progress) / 100}
+              transform="rotate(-90, 45, 45)" 
               style={{ transition: 'stroke-dashoffset .5s ease' }} 
             />
           </svg>
