@@ -5,6 +5,7 @@ import { useClassroomStore } from '../stores'
 import { messageService } from '../services'
 import { useTeacherSpeech } from '../hooks'
 import { useMutation } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
@@ -26,6 +27,8 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   visible = true,
   onVisibilityChange
 }, ref) => {
+  const { courseId, lessonId } = useParams()
+
   const { speak: speakAzure, isReady: isAzureReady } = useTeacherSpeech()
   const startThinking = useClassroomStore((state) => state.startThinking)
   const stopAll = useClassroomStore((state) => state.stopAll)
@@ -308,11 +311,11 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   }))
 
   const messageMutation = useMutation({
-    mutationFn: (content: string) => messageService.createMessage(
+    mutationFn: (content: string | null) => messageService.createMessage(
       content,
       'b4696dad-d103-497f-bf96-ca56fa992b2a', // TEST_CONVERSATION_ID
-      '1', // TEST_COURSE_ID 
-      '1'  // TEST_LESSON_ID
+      courseId || '1',
+      lessonId || '1'
     ),
     onSuccess: async (result) => {
       if (result) {

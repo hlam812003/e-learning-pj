@@ -3,7 +3,6 @@ import { JSX, useState } from 'react'
 import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores'
-import { User } from '@/types/user.type'
 
 import { PageTransition, LanguageDropdown, MainDropdown } from '@/components'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,18 +10,19 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, googleInfo } = useAuthStore()
+  const { user: authUser, logout, googleInfo, getUserInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
 
-  const { data: user, isLoading } = useQuery<User>({
+  const { data: userDetails, isLoading } = useQuery({
     queryKey: ['currentUser', authUser?.id],
+    queryFn: getUserInfo,
     enabled: !!authUser
   })
 
-  const displayName = googleInfo?.name || user?.username || authUser?.email || 'User'
-  const email = googleInfo?.email || user?.email || ''
-  const avatar = googleInfo?.picture || user?.avatar || null
+  const displayName = googleInfo?.name || userDetails?.username || authUser?.email || 'User'
+  const email = googleInfo?.email || userDetails?.email || ''
+  const avatar = googleInfo?.picture || userDetails?.avatar || null
 
   const navItems = [
     {
