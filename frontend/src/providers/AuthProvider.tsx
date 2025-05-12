@@ -6,17 +6,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { initAuth, user: authUser, getUserInfo } = useAuthStore()
   const queryClient = useQueryClient()
   
-  const { data } = useQuery({
+  const { data: userDetails } = useQuery({
     queryKey: ['currentUser', authUser?.id],
     queryFn: getUserInfo,
     enabled: !!authUser
   })
 
   useEffect(() => {
-    if (data && authUser?.id) {
-      queryClient.setQueryData(['currentUser', authUser.id], data)
+    if (userDetails && authUser?.id) {
+      queryClient.setQueryData(['currentUser', authUser.id], userDetails)
     }
-  }, [data, authUser?.id, queryClient])
+  }, [userDetails, authUser?.id, queryClient])
 
   useEffect(() => {
     initAuth()
