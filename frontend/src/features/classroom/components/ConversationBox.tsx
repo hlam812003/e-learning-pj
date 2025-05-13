@@ -1,14 +1,20 @@
 import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import { Icon } from '@iconify/react'
-import { cn, useGSAP, formatDate } from '@/lib'
-import { useQuery } from '@tanstack/react-query'
+import { cn, useGSAP } from '@/lib'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { queryClient } from '@/configs'
 import { conversationService } from '../services'
 import { Conversation } from '../types'
 import { useAnimatedBox } from '../hooks'
 import { useAuthStore } from '@/stores'
+import { useClassroomStore } from '../stores'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
+import { Input } from '@/components/ui/input'
+import ConversationItem from './ConversationItem'
+import ConversationSkeleton from './ConversationSkeleton'
 
 export interface ConversationBoxHandle {
   show: () => void
@@ -26,8 +32,11 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   onVisibilityChange
 }, ref) => {
   const { user: authUser } = useAuthStore()
-
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
+  const { selectedConversationId, setSelectedConversationId } = useClassroomStore()
+  
+  const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
+  const [newConversationName, setNewConversationName] = useState<string>('')
+  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null)
   
   const containerRef = useRef<HTMLDivElement>(null)
   const conversationBoxRef = useRef<HTMLDivElement>(null)
@@ -37,11 +46,58 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   const titleRef = useRef<HTMLParagraphElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const expandIconRef = useRef<HTMLDivElement>(null)
+  const newConversationInputRef = useRef<HTMLInputElement>(null)
   
-  const { data: conversations, isLoading, isError } = useQuery({
+  const { 
+    data: conversations, 
+    isLoading, 
+    isError,
+    isFetching 
+  } = useQuery({
     queryKey: ['myConversations', authUser?.id],
     queryFn: conversationService.getMyConversations,
     enabled: !!authUser?.id
+  })
+  
+  const createConversationMutation = useMutation({
+    mutationFn: (name: string) => conversationService.createConversation(name, authUser?.id || ''),
+    onSuccess: (newConversation) => {
+      queryClient.invalidateQueries({ queryKey: ['myConversations', authUser?.id] })
+      // setSelectedConversationId(newConversation.id)
+      setNewConversationName('')
+      setShowCreateForm(false)
+      
+      toast.success(`Conversation "${newConversation.name}" created successfully`, {
+        duration: 2000
+      })
+    },
+    onError: (error) => {
+      toast.error(`Failed to create conversation: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        duration: 3000
+      })
+    }
+  })
+  
+  const deleteConversationMutation = useMutation({
+    mutationFn: (id: string) => conversationService.deleteConversation(id),
+    onSuccess: (deletedConversation) => {
+      queryClient.invalidateQueries({ queryKey: ['myConversations', authUser?.id] })
+      
+      if (selectedConversationId === deletedConversation.id) {
+        setSelectedConversationId(null)
+      }
+      
+      toast.success(`Conversation "${deletedConversation.name}" deleted successfully`, {
+        duration: 2000
+      })
+      setDeletingConversationId(null)
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete conversation: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        duration: 3000
+      })
+      setDeletingConversationId(null)
+    }
   })
   
   const { 
@@ -93,8 +149,43 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   }))
 
   const handleSelectConversation = (conversation: Conversation) => {
-    setSelectedConversation(conversation.id)
+    if (selectedConversationId === conversation.id) {
+      setSelectedConversationId(null)
+      return
+    }
+    
+    setSelectedConversationId(conversation.id)
   }
+  
+  const handleCreateConversation = () => {
+    if (!newConversationName.trim()) {
+      return
+    }
+    
+    createConversationMutation.mutate(newConversationName.trim())
+  }
+  
+  const handleDeleteConversation = (conversation: Conversation) => {
+    if (conversation.id) {
+      setDeletingConversationId(conversation.id)
+      deleteConversationMutation.mutate(conversation.id)
+    }
+  }
+  
+  const toggleCreateForm = () => {
+    setShowCreateForm(!showCreateForm)
+    
+    if (!showCreateForm) {
+      setTimeout(() => {
+        newConversationInputRef.current?.focus()
+      }, 100)
+    } else {
+      setNewConversationName('')
+    }
+  }
+  
+  const isRefetching = isFetching && !isLoading && !deleteConversationMutation.isPending
+  const isLoadingData = isLoading || isRefetching
   
   return (
     <div ref={containerRef} className="absolute top-1/2 -translate-y-1/2 right-[1.65rem] flex items-center justify-center z-50">
@@ -119,6 +210,7 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
               onClick={toggleConversationBox}
               variant="outline"
               className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+              disabled={createConversationMutation.isPending || deleteConversationMutation.isPending}
             >
               <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
             </Button>
@@ -155,82 +247,142 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
               ref={subtitleRef}
               className="text-[1.2rem] text-white/80 font-normal drop-shadow-lg"
             >
-              Select a conversation to continue
+              {isRefetching
+                ? 'Updating conversations...'
+                : isLoading
+                  ? 'Loading conversations...'
+                  : showCreateForm 
+                    ? 'Enter a name for your conversation'
+                    : 'Select a conversation to continue'}
             </p>
           </div>
           
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="size-10">
-                  <svg viewBox="25 25 50 50" className="loading__svg">
-                    <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
-                  </svg>
-                </div>
+          {showCreateForm ? (
+            <div className="flex-1 flex flex-col">
+              <div className="mt-auto mb-4.5">
+                <Input
+                  ref={newConversationInputRef}
+                  value={newConversationName}
+                  onChange={(e) => setNewConversationName(e.target.value)}
+                  placeholder="Enter conversation name"
+                  className={cn(
+                    'drop-shadow-lg h-15 !text-[1.25rem] text-white bg-white/10 border-white/20 focus:border-white/40 placeholder:text-white/50 rounded-full px-6',
+                    createConversationMutation.isPending && 'pointer-events-none'
+                  )}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !createConversationMutation.isPending) {
+                      handleCreateConversation()
+                    } else if (e.key === 'Escape' && !createConversationMutation.isPending) {
+                      toggleCreateForm()
+                    }
+                  }}
+                />
               </div>
-            ) : isError ? (
-              <div className="flex flex-col items-center justify-center h-full text-white/80">
-                <Icon icon="lucide:alert-circle" className="text-[2rem] mb-2" />
-                <p className="text-center">Cannot load conversation list</p>
+              
+              <div className="flex gap-3">
                 <Button 
-                  onClick={() => window.location.reload()}
-                  variant="outline" 
-                  className="mt-4 bg-white/10 hover:bg-white/20 text-white"
+                  variant="outline"
+                  className="flex-1 h-16 bg-white/10 hover:bg-white/20 rounded-full text-white hover:text-white border-white/20 text-[1.3rem] drop-shadow-lg"
+                  onClick={toggleCreateForm}
+                  disabled={createConversationMutation.isPending}
                 >
-                  Try again
+                  Cancel
                 </Button>
-              </div>
-            ) : conversations?.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-white/80">
-                <Icon icon="lucide:message-square" className="text-[2rem] mb-2" />
-                <p className="text-center">No conversations.</p>
                 <Button 
-                  variant="outline" 
-                  className="mt-4 bg-white/10 hover:bg-white/20 text-white"
+                  variant="default"
+                  className={`flex-1 h-16 bg-primary/80 hover:bg-primary rounded-full text-white text-[1.3rem] drop-shadow-lg transition-all duration-(--duration-main) ${(!newConversationName || createConversationMutation.isPending) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  onClick={handleCreateConversation}
+                  disabled={!newConversationName.trim() || createConversationMutation.isPending}
                 >
-                  Create new
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {conversations?.map((conversation) => (
-                  <div 
-                    key={conversation.id}
-                    onClick={() => handleSelectConversation(conversation)}
-                    className={cn(
-                      'p-4 rounded-lg bg-white/10 hover:bg-white/15 cursor-pointer transition-colors',
-                      'border border-white/10 hover:border-white/20',
-                      selectedConversation === conversation.id && 'bg-white/20 border-white/30'
-                    )}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className="p-2 bg-white/10 rounded-full">
-                        <Icon icon="lucide:message-square" className="text-[1.5rem] text-white" />
-                      </div>
-                      <div className="flex-1 overflow-hidden">
-                        <h3 className="text-[1.4rem] font-medium text-white truncate -mb-[.05rem]">
-                          {conversation.name}
-                        </h3>
-                        <p className="text-[1.1rem] text-white/70">
-                          {formatDate(conversation.updatedAt)}
-                        </p>
-                      </div>
+                  {createConversationMutation.isPending ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <svg viewBox="25 25 50 50" className="size-5">
+                        <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+                      </svg>
+                      <span>Creating...</span>
                     </div>
-                  </div>
-                ))}
+                  ) : (
+                    'Create'
+                  )}
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto pr-3 conversation__list relative">
+              {isError ? (
+                <div className="flex flex-col items-center justify-center h-full text-white/80">
+                  <Icon icon="lucide:alert-circle" className="text-[2rem] mb-2" />
+                  <p className="text-center">Cannot load conversation list</p>
+                  <Button 
+                    onClick={() => window.location.reload()}
+                    variant="outline" 
+                    className="mt-4 bg-white/10 hover:bg-white/20 text-white hover:text-white rounded-full drop-shadow-lg"
+                  >
+                    Try again
+                  </Button>
+                </div>
+              ) : conversations?.length === 0 && !isLoadingData ? (
+                <div className="flex flex-col items-center justify-center h-full text-white/80">
+                  <Icon icon="lucide:message-square" className="text-[2rem] mb-2" />
+                  <p className="text-center">No conversations yet.</p>
+                  <p className="text-center text-sm mb-3">Create a new conversation to start chatting!</p>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/10 hover:bg-white/20 text-white hover:text-white rounded-full drop-shadow-lg"
+                    onClick={toggleCreateForm}
+                  >
+                    Create new
+                  </Button>
+                </div>
+              ) : deleteConversationMutation.isPending ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="size-14">
+                      <svg viewBox="25 25 50 50" className="loading__svg">
+                        <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+                      </svg>
+                    </div>
+                    <p className="text-white text-[1.25rem] font-medium drop-shadow-lg">Deleting...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {isLoadingData ? (
+                    Array(isRefetching ? conversations?.length || 3 : 3).fill(0).map((_, index) => (
+                      <ConversationSkeleton key={`skeleton-${index}`} />
+                    ))
+                  ) : (
+                    conversations?.map((conversation) => (
+                      <ConversationItem
+                        key={conversation.id}
+                        conversation={conversation}
+                        isSelected={selectedConversationId === conversation.id}
+                        onClick={handleSelectConversation}
+                        onDelete={handleDeleteConversation}
+                        isDeleteLoading={deletingConversationId === conversation.id}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           
-          <div className="mt-4">
-            <Button 
-              variant="default"
-              className="w-full bg-primary/80 hover:bg-primary text-white rounded-full h-16 text-[1.3rem]"
-            >
-              Create new
-              <Icon icon="lucide:plus" className="text-[1.4rem]" /> 
-            </Button>
-          </div>
+          {!showCreateForm && conversations && conversations.length > 0 && (
+            <div className="mt-4">
+              <Button 
+                variant="default"
+                className={cn(
+                  'w-full bg-primary/80 hover:bg-primary text-white rounded-full h-16 text-[1.3rem]',
+                  (createConversationMutation.isPending || deleteConversationMutation.isPending || isLoadingData) && 'opacity-70 pointer-events-none'
+                )}
+                onClick={toggleCreateForm}
+              >
+                Create new
+                <Icon icon="lucide:plus" className="text-[1.4rem]" /> 
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

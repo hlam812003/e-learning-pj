@@ -194,3 +194,67 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .conversation__list::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  .conversation__list::-webkit-scrollbar-track {
+    @apply bg-white/10;
+  }
+
+  .conversation__list::-webkit-scrollbar-thumb {
+    @apply bg-white/20 rounded-full;
+  }
+
+  .ld-ripple {
+    @apply relative size-13;
+  }
+
+  .ld-ripple div {
+    @apply absolute border-[.325rem] border-white/50 opacity-100 rounded-full animate-[ld-ripple_1.5s_infinite_ease-in-out];
+  }
+
+  .ld-ripple div:nth-child(2) {
+    @apply delay-[-0.5s];
+  }
+  
+  @keyframes ld-ripple {
+    0% {
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+  
+    4.9% {
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+  
+    5% {
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  
+    100% {
+      top: 50%;
+      left: 50%;
+      width: 52px;
+      height: 52px;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+  }
+}

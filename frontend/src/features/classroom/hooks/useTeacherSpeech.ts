@@ -3,6 +3,7 @@ import { createAzureSpeechConfig, checkAzureSpeechSDK } from '../utils'
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
 import { GeneralMode } from '../types'
 import { GENERAL_MODE } from '../constants'
+import { useClassroomStore } from '../stores'
 
 export type Viseme = [number, number]
 
@@ -34,7 +35,8 @@ export const useTeacherSpeech = ({
   const [state, setState] = useState<GeneralMode>(GENERAL_MODE.IDLE)
   const [error, setError] = useState<string | null>(null)
   const [isReady, setIsReady] = useState<boolean>(false)
-  const [currentMessage, setCurrentMessage] = useState<SpeechMessage | null>(null)
+  
+  const setCurrentMessage = useClassroomStore((state) => state.setCurrentMessage)
   
   const synthesisRef = useRef<any>(null)
   const isSynthesizerClosedRef = useRef<boolean>(false)
@@ -132,7 +134,7 @@ export const useTeacherSpeech = ({
     
     setCurrentMessage(null)
     setState(GENERAL_MODE.IDLE)
-  }, [])
+  }, [setCurrentMessage])
   
   useEffect(() => {
     let mounted = true
@@ -256,7 +258,7 @@ export const useTeacherSpeech = ({
     }
     
     setCurrentMessage(null)
-  }, [])
+  }, [setCurrentMessage])
   
   const speakWithVisemes = useCallback(async (text: string) => {
     if (!isReady) {
@@ -454,7 +456,7 @@ export const useTeacherSpeech = ({
         error: errorMessage
       }
     }
-  }, [isReady, synthesisRef, language, voice, ensureSynthesizerReady, stopAudioAndSynthesizer])
+  }, [isReady, synthesisRef, language, voice, ensureSynthesizerReady, stopAudioAndSynthesizer, setCurrentMessage])
   
   const stop = useCallback(() => {
     // console.log('Force stopping all Azure speech')
@@ -463,7 +465,7 @@ export const useTeacherSpeech = ({
     
     setCurrentMessage(null)
     setState(GENERAL_MODE.IDLE)
-  }, [stopAudioAndSynthesizer])
+  }, [stopAudioAndSynthesizer, setCurrentMessage])
   
   return {
     speak: speakWithVisemes,
@@ -472,7 +474,6 @@ export const useTeacherSpeech = ({
     state,
     error,
     isReady,
-    currentMessage,
     isSpeaking: state === 'speaking',
     isThinking: state === 'thinking',
     isError: state === 'error'

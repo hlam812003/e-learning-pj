@@ -8,12 +8,14 @@ export const useClassroomStore = create<ClassroomState>((set) => ({
   isSpeaking: false,
   isThinking: false,
   cameraMode: GENERAL_MODE.IDLE,
+  selectedConversationId: null,
 
   setTeacherMode: (mode) => set({ teacherMode: mode }),
   setCurrentMessage: (message) => set({ currentMessage: message }),
   setIsSpeaking: (isSpeaking) => set({ isSpeaking }),
   setIsThinking: (isThinking) => set({ isThinking }),
   setCameraMode: (mode) => set({ cameraMode: mode }),
+  setSelectedConversationId: (id) => set({ selectedConversationId: id }),
 
   startThinking: () => set({
     teacherMode: GENERAL_MODE.THINKING,

@@ -1,12 +1,13 @@
-import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { Icon } from '@iconify/react'
-import { cn, useGSAP } from '@/lib'
+import { cn, gsap, useGSAP } from '@/lib'
 import { useClassroomStore } from '../stores'
 import { messageService } from '../services'
 import { useTeacherSpeech, useAnimatedBox } from '../hooks'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { GENERAL_MODE } from '../constants'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -29,12 +30,26 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
 }, ref) => {
   const { courseId, lessonId } = useParams()
 
-  const { speak: speakAzure, isReady: isAzureReady } = useTeacherSpeech()
+  const { 
+    speak: speakAzure, 
+    isReady: isAzureReady,
+    isSpeaking: isAzureSpeaking,
+    isThinking: isAzureThinking,
+    error: azureError,
+    cleanup: cleanupAzure
+  } = useTeacherSpeech()
   const startThinking = useClassroomStore((state) => state.startThinking)
   const stopAll = useClassroomStore((state) => state.stopAll)
+  const setIsThinking = useClassroomStore((state) => state.setIsThinking)
+  const setIsSpeaking = useClassroomStore((state) => state.setIsSpeaking)
+  const setCameraMode = useClassroomStore((state) => state.setCameraMode)
+  const setTeacherMode = useClassroomStore((state) => state.setTeacherMode)
+  const currentMessage = useClassroomStore((state) => state.currentMessage)
+  const selectedConversationId = useClassroomStore((state) => state.selectedConversationId)
 
   const [message, setMessage] = useState<string>('')
-  
+  const [_, setSdkError] = useState<string | null>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const messageBoxRef = useRef<HTMLDivElement>(null)
@@ -45,6 +60,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const titleRef = useRef<HTMLParagraphElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const expandIconRef = useRef<HTMLDivElement>(null)
+  const contentContainerRef = useRef<HTMLDivElement>(null)
   
   const { 
     isVisible,
@@ -92,18 +108,102 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
     }
   }, { scope: containerRef, dependencies: [isVisible, visible, isAnimating] })
 
+  useGSAP(() => {
+    gsap.killTweensOf([
+      contentContainerRef.current,
+      titleRef.current,
+      subtitleRef.current,
+      controlsRef.current
+    ])
+    
+    if (selectedConversationId) {
+      const elementsToAnimate = [
+        contentContainerRef.current,
+        subtitleRef.current,
+        controlsRef.current
+      ].filter(Boolean)
+      
+      gsap.set(elementsToAnimate, { opacity: 0, y: 10 })
+      
+      gsap.to(elementsToAnimate, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.1,
+        overwrite: true
+      })
+    } else {
+      const defaultElements = [
+        titleRef.current,
+        subtitleRef.current,
+        controlsRef.current
+      ].filter(Boolean)
+      
+      gsap.set(defaultElements, { opacity: 0, y: 10 })
+      
+      gsap.to(defaultElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.1,
+        overwrite: true
+      })
+    }
+  }, { scope: containerRef, dependencies: [selectedConversationId] })
+
+  useEffect(() => {
+    setIsThinking(isAzureThinking)
+    setIsSpeaking(isAzureSpeaking)
+    
+    if (isAzureThinking) {
+      setCameraMode(GENERAL_MODE.THINKING)
+      setTeacherMode(GENERAL_MODE.THINKING)
+    } else if (isAzureSpeaking) {
+      setCameraMode(GENERAL_MODE.SPEAKING) 
+      setTeacherMode(GENERAL_MODE.SPEAKING)
+    } else {
+      setCameraMode(GENERAL_MODE.IDLE)
+      setTeacherMode(GENERAL_MODE.IDLE)
+    }
+  }, [isAzureThinking, isAzureSpeaking, setIsThinking, setIsSpeaking, setCameraMode, setTeacherMode])
+
+  useEffect(() => {
+    if (!currentMessage && !isAzureThinking && !isAzureSpeaking) {
+      stopAll()
+    }
+  }, [currentMessage, isAzureThinking, isAzureSpeaking, stopAll])
+  
+  useEffect(() => {
+    return () => {
+      cleanupAzure()
+      stopAll()
+    }
+  }, [cleanupAzure, stopAll])
+
+  useEffect(() => {
+    if (azureError) {
+      console.warn('Azure Speech Error:', azureError)
+      setSdkError(azureError)
+    } else {
+      setSdkError(null)
+    }
+  }, [azureError])
+
   useImperativeHandle(ref, () => ({
     show: showMessageBox,
     hide: hideMessageBox,
     toggle: toggleMessageBox
   }))
 
-  const messageMutation = useMutation({
+  const messageMutation = useMutation(
+    {
     mutationFn: (content: string | null) => messageService.createMessage(
       content,
-      'b4696dad-d103-497f-bf96-ca56fa992b2a', // TEST_CONVERSATION_ID
-      courseId || '1',
-      lessonId || '1'
+      selectedConversationId,
+      courseId || null,
+      lessonId || null
     ),
     onSuccess: async (result) => {
       if (result) {
@@ -116,7 +216,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
             if (!isAzureReady) return
             
             const speakResult = await speakAzure(result.content)
-            
+
             if (!speakResult?.success && speakResult?.error) {
               stopAll()
               
@@ -141,15 +241,24 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
       }
     },
     onError: (error: any) => {
+      console.error('Message mutation error:', error)
       toast.error(error?.message || 'Không thể gửi tin nhắn')
     }
   })
 
   const handleSubmit = () => {
-    if (message.trim()) {
+    if (!selectedConversationId) return
+    
+    if (!message.trim()) {
+      if (inputRef.current) inputRef.current.focus()
+      return
+    }
+    
+    try {
       messageMutation.mutate(message)
-    } else if (inputRef.current) {
-      inputRef.current.focus()
+    } catch (error: any) {
+      console.error('Error submitting message:', error)
+      toast.error(error?.message || 'Có lỗi khi gửi tin nhắn')
     }
   }
 
@@ -163,7 +272,8 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
         ref={messageBoxRef}
         className={cn(
           'bg-white/20 backdrop-blur-[16px] border border-white/20',
-          'flex items-center justify-center overflow-visible relative'
+          'flex items-center justify-center overflow-visible relative',
+          !selectedConversationId && 'opacity-90'
         )}
       >
         <div 
@@ -214,75 +324,98 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
           <div className="flex flex-col">
             <p 
               ref={titleRef}
-              className="text-[1.8rem] font-semibold text-white drop-shadow-lg -mb-[.05rem]"
+              className="text-[1.8rem] font-semibold text-white drop-shadow-lg -mb-[.05rem] flex items-center flex-wrap"
             >
-              Ask a question about today's lesson
+              {selectedConversationId ? (
+                <span ref={contentContainerRef} className="flex items-center">
+                  Ask a question about today's lesson
+                </span>
+              ) : (
+                <>
+                  Select a conversation
+                </>
+              )}
             </p>
             <p 
               ref={subtitleRef}
               className="text-[1.2rem] text-white/80 font-normal drop-shadow-lg"
             >
-              Type your question here! Be specific and clear.
+              {selectedConversationId ? (
+                <>Type your question here! Be specific and clear.</>
+              ) : (
+                <>Use the conversation box to select or create a conversation</>
+              )}
             </p>
           </div>
           
           <div ref={controlsRef} className="flex items-center gap-5">
-            <div className="flex-1 relative">
-              <Input 
-                ref={inputRef}
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className={cn(
-                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg',
-                  messageMutation.isPending && 'pointer-events-none'
-                )}
-                placeholder="Ask something..."
-                onKeyDown={(e) => e.key === 'Enter' && !messageMutation.isPending && handleSubmit()}
-              />
-            </div>
-            
-            <div className="flex gap-3.5">
-              {!messageMutation.isPending ? (
-                <Tooltip
-                  content="Voice Chat"
-                  contentClassName="text-[1.25rem] z-[60]"
-                >
-                  <Button 
-                    onClick={handleVoiceInput}
-                    variant="outline" 
-                    className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
-                  >
-                    <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-                  </Button>
-                </Tooltip>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
-                  disabled
-                >
-                  <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-                </Button>
-              )}
+            {selectedConversationId ? (
+              <>
+                <div className="flex-1 relative">
+                  <Input 
+                    ref={inputRef}
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className={cn(
+                      'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg',
+                      messageMutation.isPending && 'pointer-events-none'
+                    )}
+                    placeholder="Ask something..."
+                    onKeyDown={(e) => e.key === 'Enter' && !messageMutation.isPending && handleSubmit()}
+                  />
+                </div>
+                
+                <div className="flex gap-3.5">
+                  {!messageMutation.isPending ? (
+                    <Tooltip
+                      content="Voice Chat"
+                      contentClassName="text-[1.25rem] z-[60]"
+                    >
+                      <Button 
+                        onClick={handleVoiceInput}
+                        variant="outline" 
+                        className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
+                      >
+                        <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                      </Button>
+                    </Tooltip>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
+                      disabled
+                    >
+                      <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                    </Button>
+                  )}
 
-              <Button 
-                onClick={handleSubmit}
-                variant="default" 
-                className={cn(
-                  'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
-                  messageMutation.isPending && 'pointer-events-none'
-                )}
-              >
-                {messageMutation.isPending ? (
-                  <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
-                    <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
-                  </svg>
-                ) : (
-                  <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
-                )}
-              </Button>
-            </div>
+                  <Button 
+                    onClick={handleSubmit}
+                    variant="default" 
+                    className={cn(
+                      'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
+                      messageMutation.isPending && 'pointer-events-none'
+                    )}
+                  >
+                    {messageMutation.isPending ? (
+                      <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                        <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+                      </svg>
+                    ) : (
+                      <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
+                    )}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="size-full flex items-center justify-center relative pointer-events-none -mt-[4.7rem]">
+                <div className="ld-ripple drop-shadow-lg">
+                  <div />
+                  <div />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
