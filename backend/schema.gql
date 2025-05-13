@@ -41,6 +41,13 @@ type UserResponse {
   updatedAt: DateTime!
 }
 
+type LessonExplanationResponse {
+  id: String!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type EnrollmentResponse {
   userId: String!
   courseId: String!
@@ -90,6 +97,8 @@ type Query {
   getLessonById(id: String!): LessonDto
   users: [UserResponse!]!
   user(id: String!): UserResponse!
+  lessonExplanation(id: String!): LessonExplanationResponse
+  lessonExplanationByLessonAndUser(lessonId: String!, userId: String!): LessonExplanationResponse
   getUserEnrollments(userId: String!): [EnrollmentResponse!]!
   getProgress(progressId: String!): ProgressResponse!
   systemPrompts: [SystemPromptResponse!]!
@@ -114,6 +123,9 @@ type Mutation {
   createUser(data: CreateUserInput!): UserResponse!
   updateUser(data: UpdateUserInput!): UserResponse!
   deleteUser(id: String!): Boolean!
+  createLessonExplanation(data: CreateLessonExplanationInput!): LessonExplanationResponse!
+  updateLessonExplanation(data: UpdateLessonExplanationInput!): LessonExplanationResponse!
+  deleteLessonExplanation(id: String!): LessonExplanationResponse!
   enrollCourse(input: CreateEnrollmentInput!): EnrollmentResponse!
   updateProgress(input: UpdateProgressInput!): ProgressResponse!
   createSystemPrompt(data: CreateSystemPromptInput!): SystemPromptResponse!
@@ -178,6 +190,18 @@ input UpdateUserInput {
   username: String
   email: String
   phoneNumber: String
+}
+
+input CreateLessonExplanationInput {
+  emotion: String!
+  lessonId: String!
+  userId: String!
+  courseId: String!
+}
+
+input UpdateLessonExplanationInput {
+  id: String!
+  content: String!
 }
 
 input CreateEnrollmentInput {
