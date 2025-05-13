@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react'
 import { cn, gsap, useGSAP } from '@/lib'
 import { useClassroomStore } from '../stores'
 import { messageService } from '../services'
-import { useTeacherSpeech, useAnimatedBox } from '../hooks'
+import { useTeacherSpeech, useAnimatedBox, useVoiceRecognition } from '../hooks'
 import { useMutation } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -262,9 +262,40 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
     }
   }
 
+  const { isListening, startListening, stopListening } = useVoiceRecognition({
+    continuous: true,
+    silenceTimeout: 5000,
+    onResult: (text) => {
+      setMessage(text)
+    },
+    onError: (error) => {
+      toast.error(`Lỗi nhận dạng giọng nói: ${error}`)
+    }
+  })
+
   const handleVoiceInput = () => {
-    console.log('Voice input activated')
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
+    }
   }
+
+  useEffect(() => {
+    if (inputRef.current && message) {
+      setTimeout(() => {
+        inputRef.current?.setSelectionRange(message.length, message.length)
+        
+        if (inputRef.current && inputRef.current.scrollWidth > inputRef.current.clientWidth) {
+          inputRef.current.scrollLeft = inputRef.current.scrollWidth
+        }
+        
+        if (isListening) {
+          inputRef.current?.focus()
+        }
+      }, 0)
+    }
+  }, [message, isListening])
   
   return (
     <div ref={containerRef} className="absolute bottom-[1.65rem] left-1/2 -translate-x-1/2 flex items-center justify-center z-50">
@@ -291,7 +322,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 variant="outline"
                 className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
               >
-                <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
+                <Icon icon="tabler:minimize" className="!size-[1.4rem] drop-shadow-lg" />
               </Button>
             </Tooltip>
           ) : (
@@ -300,7 +331,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
               className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg cursor-not-allowed opacity-70"
               disabled
             >
-              <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
+              <Icon icon="tabler:minimize" className="!size-[1.4rem] drop-shadow-lg" />
             </Button>
           )}
         </div>
@@ -367,43 +398,39 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
                 </div>
                 
                 <div className="flex gap-3.5">
-                  {!messageMutation.isPending ? (
-                    <Tooltip
-                      content="Voice Chat"
-                      contentClassName="text-[1.25rem] z-[60]"
-                    >
-                      <Button 
-                        onClick={handleVoiceInput}
-                        variant="outline" 
-                        className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
-                      >
-                        <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-                      </Button>
-                    </Tooltip>
-                  ) : (
+                  <Tooltip
+                    content="Voice Chat"
+                    contentClassName="text-[1.25rem] z-[60]"
+                  >
                     <Button 
+                      onClick={handleVoiceInput}
                       variant="outline" 
-                      className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
-                      disabled
+                      className={cn(
+                        'rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg !p-0',
+                        isListening && 'bg-white border-white/30 hover:bg-white/30'
+                      )}
                     >
-                      <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                      <Icon icon={isListening ? 'si:mic-fill' : 'si:mic-line'} className={cn(
+                        '!size-[1.4rem] drop-shadow-lg',
+                        isListening && 'text-black'
+                      )} />
                     </Button>
-                  )}
+                  </Tooltip>
 
                   <Button 
                     onClick={handleSubmit}
                     variant="default" 
                     className={cn(
-                      'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
+                      'rounded-full bg-primary/80 hover:bg-primary size-14 !p-0 drop-shadow-lg',
                       messageMutation.isPending && 'pointer-events-none'
                     )}
                   >
                     {messageMutation.isPending ? (
-                      <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                      <svg viewBox="25 25 50 50" className="!size-[1.75rem] loading__svg">
                         <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
                       </svg>
                     ) : (
-                      <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
+                      <Icon icon="akar-icons:send" className="!size-[1.4rem] drop-shadow-lg" />
                     )}
                   </Button>
                 </div>

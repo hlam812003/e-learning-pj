@@ -159,7 +159,7 @@ export default function RegisterPage() {
         >
           {registerMutation.isPending ? (
             <>
-              <svg viewBox="25 25 50 50" className="!size-[1.5rem] loading__svg">
+              <svg viewBox="25 25 50 50" className="!size-[1.75rem] loading__svg">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
               </svg>
               <span>Signing up...</span>

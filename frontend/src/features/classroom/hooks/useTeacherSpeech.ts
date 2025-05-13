@@ -70,7 +70,7 @@ export const useTeacherSpeech = ({
         try {
           (speechConfig as any).speechSynthesisPitchHz = pitch
         } catch (e) {
-          console.warn('Failed to set pitch, this property might not be supported in this SDK version')
+          console.warn('Failed to set pitch, this property might not be supported in this SDK version', e)
         }
       }
       
@@ -78,7 +78,7 @@ export const useTeacherSpeech = ({
         try {
           (speechConfig as any).speechSynthesisRate = rate
         } catch (e) {
-          console.warn('Failed to set rate, this property might not be supported in this SDK version')
+          console.warn('Failed to set rate, this property might not be supported in this SDK version', e)
         }
       }
       
