@@ -43,6 +43,29 @@ export const conversationService = {
     return response.data.data.createConversation
   },
 
+  updateConversation: async (id: string, name: string): Promise<Conversation> => {
+    const response = await apiConfig.post('', {
+      query: `
+        mutation UpdateConversation($data: UpdateConversationInput!) {
+          updateConversation(data: $data) {
+            id
+            name
+            creatorId
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: {
+        data: {
+          id,
+          name
+        }
+      }
+    })
+    return response.data.data.updateConversation
+  },
+
   deleteConversation: async (id: string): Promise<Conversation> => {
     const response = await apiConfig.post('', {
       query: `

@@ -37,6 +37,7 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
   const [newConversationName, setNewConversationName] = useState<string>('')
   const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null)
+  const [updatingConversationId, setUpdatingConversationId] = useState<string | null>(null)
   
   const containerRef = useRef<HTMLDivElement>(null)
   const conversationBoxRef = useRef<HTMLDivElement>(null)
@@ -75,6 +76,24 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
       toast.error(`Failed to create conversation: ${error instanceof Error ? error.message : 'Unknown error'}`, {
         duration: 3000
       })
+    }
+  })
+  
+  const updateConversationMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string, name: string }) => conversationService.updateConversation(id, name),
+    onSuccess: (updatedConversation) => {
+      queryClient.invalidateQueries({ queryKey: ['myConversations', authUser?.id] })
+      
+      toast.success(`Conversation renamed to "${updatedConversation.name}" successfully`, {
+        duration: 2000
+      })
+      setUpdatingConversationId(null)
+    },
+    onError: (error) => {
+      toast.error(`Failed to update conversation: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        duration: 3000
+      })
+      setUpdatingConversationId(null)
     }
   })
   
@@ -165,6 +184,13 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
     createConversationMutation.mutate(newConversationName.trim())
   }
   
+  const handleUpdateConversation = (conversation: Conversation, newName: string) => {
+    if (conversation.id && newName.trim() !== conversation.name) {
+      setUpdatingConversationId(conversation.id)
+      updateConversationMutation.mutate({ id: conversation.id, name: newName.trim() })
+    }
+  }
+  
   const handleDeleteConversation = (conversation: Conversation) => {
     if (conversation.id) {
       setDeletingConversationId(conversation.id)
@@ -186,6 +212,9 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   
   const isRefetching = isFetching && !isLoading && !deleteConversationMutation.isPending
   const isLoadingData = isLoading || isRefetching
+  const isMutating = createConversationMutation.isPending || 
+    deleteConversationMutation.isPending || 
+    updateConversationMutation.isPending
   
   return (
     <div ref={containerRef} className="absolute top-1/2 -translate-y-1/2 right-[1.65rem] flex items-center justify-center z-50">
@@ -210,7 +239,7 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
               onClick={toggleConversationBox}
               variant="outline"
               className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
-              disabled={createConversationMutation.isPending || deleteConversationMutation.isPending}
+              disabled={isMutating}
             >
               <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
             </Button>
@@ -311,8 +340,8 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
             <div className="flex-1 overflow-y-auto pr-3 conversation__list relative">
               {isError ? (
                 <div className="flex flex-col items-center justify-center h-full text-white/80">
-                  <Icon icon="lucide:alert-circle" className="text-[2rem] mb-2" />
-                  <p className="text-center">Cannot load conversation list</p>
+                  <Icon icon="lucide:alert-circle" className="text-[2rem] mb-2 drop-shadow-lg" />
+                  <p className="text-center drop-shadow-lg">Cannot load conversation list</p>
                   <Button 
                     onClick={() => window.location.reload()}
                     variant="outline" 
@@ -323,9 +352,9 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
                 </div>
               ) : conversations?.length === 0 && !isLoadingData ? (
                 <div className="flex flex-col items-center justify-center h-full text-white/80">
-                  <Icon icon="lucide:message-square" className="text-[2rem] mb-2" />
-                  <p className="text-center">No conversations yet.</p>
-                  <p className="text-center text-sm mb-3">Create a new conversation to start chatting!</p>
+                  <Icon icon="lucide:message-square" className="text-[2rem] mb-2 drop-shadow-lg" />
+                  <p className="text-center text-white/80 drop-shadow-lg">No conversations yet.</p>
+                  <p className="text-center text-sm mb-3 text-white/80 drop-shadow-lg">Create a new conversation to start chatting!</p>
                   <Button 
                     variant="outline" 
                     className="bg-white/10 hover:bg-white/20 text-white hover:text-white rounded-full drop-shadow-lg"
@@ -334,18 +363,20 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
                     Create new
                   </Button>
                 </div>
-              ) : deleteConversationMutation.isPending ? (
+              ) : updateConversationMutation.isPending || deleteConversationMutation.isPending ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="size-14">
+                    <div className="size-14 drop-shadow-lg">
                       <svg viewBox="25 25 50 50" className="loading__svg">
                         <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
                       </svg>
                     </div>
-                    <p className="text-white text-[1.25rem] font-medium drop-shadow-lg">Deleting...</p>
+                    <p className="text-white text-[1.25rem] font-medium drop-shadow-lg">
+                      {updateConversationMutation.isPending ? 'Updating...' : 'Deleting...'}
+                    </p>
                   </div>
                 </div>
-              ) : (
+              ): (
                 <div className="flex flex-col gap-4">
                   {isLoadingData ? (
                     Array(isRefetching ? conversations?.length || 3 : 3).fill(0).map((_, index) => (
@@ -357,9 +388,11 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
                         key={conversation.id}
                         conversation={conversation}
                         isSelected={selectedConversationId === conversation.id}
-                        onClick={handleSelectConversation}
-                        onDelete={handleDeleteConversation}
+                        isUpdateLoading={updatingConversationId === conversation.id}
                         isDeleteLoading={deletingConversationId === conversation.id}
+                        onClick={handleSelectConversation}
+                        onUpdate={handleUpdateConversation}
+                        onDelete={handleDeleteConversation}
                       />
                     ))
                   )}
@@ -374,7 +407,7 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
                 variant="default"
                 className={cn(
                   'w-full bg-primary/80 hover:bg-primary text-white rounded-full h-16 text-[1.3rem]',
-                  (createConversationMutation.isPending || deleteConversationMutation.isPending || isLoadingData) && 'opacity-70 pointer-events-none'
+                  isMutating && 'opacity-70 pointer-events-none'
                 )}
                 onClick={toggleCreateForm}
               >

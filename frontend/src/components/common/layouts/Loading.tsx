@@ -1,5 +1,3 @@
-import './Loading.css'
-
 interface LoadingProps {
   content?: string
 }

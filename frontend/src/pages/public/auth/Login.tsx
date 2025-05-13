@@ -227,7 +227,7 @@ export default function LoginPage() {
         >
           {loginMutation.isPending ? (
             <>
-              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+              <svg viewBox="25 25 50 50" className="!size-[1.5rem] loading__svg">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
               </svg>
               <span>Signing in...</span>
@@ -255,7 +255,7 @@ export default function LoginPage() {
         >
           {isLoading ? (
             <>
-              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+              <svg viewBox="25 25 50 50" className="!size-[1.5rem] loading__svg">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-black" />
               </svg>
               <span>Connecting to Google...</span>
