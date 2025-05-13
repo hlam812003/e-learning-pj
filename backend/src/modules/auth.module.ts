@@ -17,7 +17,7 @@ import { AuthDAO } from '../common/DAO/auth.dao';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '12h' },
       }),
       inject: [ConfigService],
     }),
