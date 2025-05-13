@@ -1,34 +1,28 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { JSX, useState, useEffect } from 'react'
+import { JSX, useState } from 'react'
 import { cn } from '@/lib'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores'
 
-import { PageTransition, LanguageDropdown } from '@/components'
-import MainDropdown from '@/components/common/dropdowns/MainDropdown'
+import { PageTransition, LanguageDropdown, MainDropdown } from '@/components'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user: authUser, logout, initAuth, googleInfo, getUserInfo } = useAuthStore()
+  const { user: authUser, logout, googleInfo, getUserInfo } = useAuthStore()
   
   const [language, setLanguage] = useState<string>('en')
-  const [isImageLoading, setIsImageLoading] = useState<boolean>(true)
 
-  useEffect(() => {
-    initAuth()
-  }, [initAuth])
-
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['currentUser'],
+  const { data: userDetails, isLoading } = useQuery({
+    queryKey: ['currentUser', authUser?.id],
     queryFn: getUserInfo,
     enabled: !!authUser
   })
 
-  const displayName = googleInfo?.name || user?.username || authUser?.email || 'User'
-  const email = googleInfo?.email || user?.email || ''
-  const avatar = googleInfo?.picture || user?.avatar || null
+  const displayName = googleInfo?.name || userDetails?.username || authUser?.email || 'User'
+  const email = googleInfo?.email || userDetails?.email || ''
+  const avatar = googleInfo?.picture || userDetails?.avatar || null
 
   const navItems = [
     {
@@ -64,13 +58,13 @@ export default function MainLayout() {
   const handleUserMenuSelect = (value: string) => {
     switch (value) {
       case 'profile':
-        navigate('/dashboard/profile')
+        window.location.href = '/dashboard/profile'
         break
       case 'dashboard':
-        navigate('/dashboard')
+        window.location.href = '/dashboard'
         break
       case 'settings':
-        navigate('/dashboard/settings')
+        window.location.href = '/dashboard/settings'
         break
       case 'logout':
         logout()
@@ -88,7 +82,7 @@ export default function MainLayout() {
 
   const MainNav = (): JSX.Element => {
     return (
-      <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center">
+      <header className="w-full py-5 px-24 border-b-[.2rem] border-border flex items-center relative z-[998]">
         <div className="w-1/3">
           <Link to="/">
             <h1 className="text-[3rem] font-bold">Learnify.</h1>
@@ -151,14 +145,13 @@ export default function MainLayout() {
                           <div className="size-[3rem] rounded-full bg-primary text-white flex items-center justify-center text-[1.2rem] font-medium shadow-md overflow-hidden">
                             {avatar ? (
                               <>
-                                {isImageLoading && (
+                                {isLoading && (
                                   <Skeleton className="absolute inset-0 rounded-full" />
                                 )}
                                 <img 
                                   src={avatar} 
                                   alt={displayName} 
                                   className="size-full rounded-full object-cover"
-                                  onLoad={() => setIsImageLoading(false)}
                                 />
                               </>
                             ) : (

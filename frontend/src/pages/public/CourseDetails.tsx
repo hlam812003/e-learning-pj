@@ -1,85 +1,227 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Icon } from '@iconify/react'
+import { useQueries, useMutation, useQueryClient } from '@tanstack/react-query'
+import { cn } from '@/lib'
+import { toast } from 'sonner'
 
-import { courses } from '@/mocks'
-import { ICourse } from '@/types'
+import { courseService, lessonService, CourseImage } from '@/features/courses'
+import { useAuthStore } from '@/stores'
 
-import { OptimizeImage } from '@/components'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Loading } from '@/components'
+// import { Badge } from '@/components/ui/badge'
 
-export default function CourseDetails() {
+export default function CourseDetailsPage() {
   const { courseId } = useParams<{ courseId: string }>()
-  const [course, setCourse] = useState<ICourse | null>(null)
+  const navigate = useNavigate()
+  const { userDetails, user } = useAuthStore()
+  const queryClient = useQueryClient()
+  
+  const queryResults = useQueries({
+    queries: [
+      {
+        queryKey: ['course', courseId],
+        queryFn: () => courseService.getCourseById(courseId as string),
+        enabled: !!courseId
+      },
+      {
+        queryKey: ['lessons', courseId],
+        queryFn: () => lessonService.getLessonsByCourseId(courseId as string),
+        enabled: !!courseId
+      },
+      {
+        queryKey: ['enrollments', userDetails?.id],
+        queryFn: () => {
+          if (!userDetails?.id) return []
+          return courseService.getUserEnrollments(userDetails.id)
+        },
+        enabled: !!userDetails?.id
+      }
+    ],
+    combine: (results) => {
+      const [courseResult, lessonsResult, enrollmentsResult] = results
 
-  useEffect(() => {
-    const foundCourse = courses.find(c => c.id === courseId)
-    setCourse(foundCourse || null)
-  }, [courseId])
+      return {
+        course: courseResult.data,
+        lessons: lessonsResult.data || [],
+        enrollments: enrollmentsResult.data || [],
+        isLoading: courseResult.isLoading || lessonsResult.isLoading || enrollmentsResult.isLoading,
+        courseError: courseResult.error
+      }
+    }
+  })
 
-  if (!course) {
+  const { course, lessons, enrollments, isLoading, courseError } = queryResults
+  const isEnrolled = enrollments?.some(enrollment => enrollment.courseId === courseId)
+
+  const enrollMutation = useMutation({
+    mutationFn: () => {
+      if (!userDetails?.id || !courseId) {
+        throw new Error('Missing user or course information')
+      }
+      
+      if (!courseService || typeof courseService.enrollCourse !== 'function') {
+        throw new Error('Course service not available')
+      }
+      
+      const totalLessons = parseFloat(lessons.length.toFixed(1))
+      
+      return courseService.enrollCourse(
+        userDetails.id,
+        courseId,
+        totalLessons
+      )
+    },
+    onSuccess: () => {
+      toast.success('Enrollment successful!')
+      queryClient.invalidateQueries({ queryKey: ['enrollments', userDetails?.id] })
+    },
+    onError: (error: Error) => {
+      console.error('Enrollment failed:', error)
+      toast.error(error.message || 'Enrollment failed. Please try again later.')
+    }
+  })
+
+  const handleEnroll = () => {
+    if (!user) {
+      toast.info('Please login to enroll in the course.')
+      navigate('/auth/login')
+      return
+    }
+
+    enrollMutation.mutate()
+  }
+
+  const goToFirstLesson = () => {
+    if (lessons.length > 0) {
+      navigate(`/dashboard/classroom/${courseId}/lessons/${lessons[0].id}`)
+    } else {
+      toast.info('This course does not have any lessons yet.')
+    }
+  }
+
+  const renderEnrollmentAction = () => {
     return (
-      <div className="w-full py-20 flex flex-col items-center justify-center text-center">
-        <Icon icon="ph:warning-circle" className="text-[6rem] text-zinc-500 mb-4" />
-        <h2 className="text-[2rem] font-bold text-zinc-800 mb-2">Course Not Found</h2>
-        <p className="text-[1.25rem] text-zinc-600 mb-6">
-          The course you're looking for doesn't exist or has been removed.
-        </p>
-        <button 
-          onClick={() => window.history.back()}
-          className="rounded-full bg-black text-white px-8 py-3 text-[1.25rem] inline-flex items-center gap-2 hover:bg-zinc-800 transition-colors"
-        >
-          <Icon icon="ph:arrow-left" />
-          Go Back
-        </button>
+      <Button
+        className={cn(
+          'w-full rounded-full py-4 text-[1.35rem] font-medium h-auto shadow-sm bg-black hover:bg-zinc-800',
+          enrollMutation.isPending && !isEnrolled && 'pointer-events-none'
+        )}
+        onClick={isEnrolled ? goToFirstLesson : handleEnroll}
+      > 
+        {enrollMutation.isPending ? (
+          <>
+            <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem] mr-2">
+              <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+            </svg>
+            Enrolling...
+          </>
+        ) : isEnrolled ? (
+          <>
+            Go To Course
+          </>
+        ) : (
+          <>
+            Enroll Now
+            <Icon icon="ph:arrow-right" className="text-[1.5rem] ml-2" />
+          </>
+        )}
+      </Button>
+    )
+  }
+
+  if (isLoading) return <Loading content="Loading course details..." />
+
+  if (courseError || !course) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div
+          className={cn(
+            'absolute inset-0',
+            '[background-size:40px_40px]',
+            '[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]',
+            'dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]',
+            'pointer-events-none'
+          )}
+        />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <div className="text-[14rem] font-bold text-primary -mb-[3.5rem]">
+            404
+          </div>
+          <h1 className="text-[3.5rem] font-bold capitalize text-slate-900 mb-[.75rem]">
+            Course Not Found
+          </h1>
+          <p className="text-[1.35rem] text-slate-600 max-w-[35rem] mb-[1.5rem]">
+            {courseError instanceof Error ? courseError.message : 'The course you are looking for might have been removed, renamed, or is temporarily unavailable.'}
+          </p>
+          <div className="flex items-center gap-10 mt-4">
+            <Link
+              to="/courses"
+              className="rounded-full bg-primary text-white px-7 py-3.5 border border-primary font-medium flex items-center gap-5"
+            >
+              <Icon icon="ri:arrow-left-long-line" className="text-[1.75rem]" />
+              <span className="text-[1.35rem]">Back to Courses</span>
+            </Link>
+            <div 
+              onClick={() => window.location.reload()}
+              className="relative group cursor-pointer"
+            > 
+              <span className="text-primary text-[1.35rem] font-medium">Reload Page</span>
+              <span className="absolute opacity-0 left-0 right-0 bottom-0 h-[.15rem] bg-primary group-hover:opacity-100 transition-all duration-(--duration-main)" />
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   const { 
+    id,
     courseName, 
     abstract, 
-    instructor, 
-    level, 
-    duration, 
-    rating, 
-    students, 
-    price, 
-    category,
+    keyLearnings,
+    // instructor, 
+    // level, 
+    // duration, 
+    // rating, 
+    // students, 
+    // price, 
+    // category,
     image 
   } = course
 
-  const learningItems = [
-    'Master Flutter framework fundamentals and Dart programming',
-    'Build beautiful, responsive UIs with Flutter widgets',
-    'Implement state management with Provider and Riverpod',
-    'Connect to REST APIs and Firebase backends',
-    'Deploy apps to Google Play Store and Apple App Store',
-    'Create animations and custom UI components'
-  ]
-  
-  const courseIncludes = [
-    { icon: 'ph:video-fill', text: '20 hours on-demand video' },
-    { icon: 'ph:file-text-fill', text: '15 downloadable resources' },
-    { icon: 'ph:infinity-fill', text: 'Full lifetime access' },
-    { icon: 'ph:device-mobile-fill', text: 'Access on mobile and TV' },
-    { icon: 'ph:medal-fill', text: 'Certificate of completion' }
-  ]
+  const renderLessonButton = (lessonId: string) => {
+    if (isEnrolled) {
+      return (
+        <Button 
+          onClick={() => navigate(`/dashboard/classroom/${courseId}/lessons/${lessonId}`)}
+          variant="default"
+          className="rounded-full !px-5 py-3 text-[1.15rem] bg-black hover:bg-zinc-800 h-auto"
+        >
+          Start Lesson
+          <Icon icon="ph:arrow-right" className="text-[1.2rem] ml-1" />
+        </Button>
+      )
+    }
+    
+    return (
+      <Button 
+        onClick={handleEnroll}
+        variant="outline"
+        className="rounded-full !px-5 py-3 text-[1.15rem] bg-white/80 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 h-auto"
+      >
+        <Icon icon="ph:lock-simple" className="text-[1.2rem] mr-1" />
+        Enroll to Unlock
+      </Button>
+    )
+  }
 
   return (
     <div className="w-full bg-white text-zinc-900">
       <div className="bg-[#1d1d1d] py-16 relative">
         <div className="w-full flex flex-col md:flex-row items-center px-6 sm:px-12 md:px-24">
           <div className="w-full md:w-[55%] mb-10 md:mb-0">
-            <div className="flex flex-wrap gap-4 mb-8">
-              <Badge variant="default" className="rounded-full bg-zinc-700 hover:bg-zinc-600 text-white text-[1.2rem] px-6 py-2 transition-all shadow-sm">
-                {category}
-              </Badge>
-              <Badge variant="outline" className="rounded-full text-zinc-300 border-zinc-600 bg-zinc-800/40 hover:bg-zinc-800 text-[1.2rem] px-6 py-2 transition-all">
-                {level}
-              </Badge>
-            </div>
-            
             <h1 className="text-[3rem] md:text-[4rem] font-bold text-white mb-8 leading-tight">
               {courseName}
             </h1>
@@ -93,62 +235,21 @@ export default function CourseDetails() {
                 <Icon icon="ph:user-circle-fill" className="text-[3.5rem] text-zinc-400" />
               </div>
               <div>
-                <h3 className="text-[1.5rem] font-semibold text-white">{instructor}</h3>
+                <h3 className="text-[1.5rem] font-semibold text-white">AI Teacher</h3>
                 <p className="text-[1.2rem] text-zinc-400">Course Instructor</p>
               </div>
             </div>
-            
-            <div className="flex flex-wrap items-center gap-10 mb-10">
-              <div className="flex items-center gap-3">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Icon 
-                      key={star}
-                      icon={star <= Math.round(rating || 0) ? 'ph:star-fill' : 'ph:star'} 
-                      className="text-[1.7rem] text-yellow-400 filter drop-shadow-sm transition-all hover:scale-110" 
-                    />
-                  ))}
-                </div>
-                <span className="text-[1.4rem] font-bold text-white">
-                  {rating?.toFixed(1)} ({students?.toLocaleString()} students)
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-zinc-300">
-                <Icon icon="ph:clock-fill" className="text-[1.7rem]" />
-                <span className="text-[1.4rem]">{duration}</span>
-              </div>
-            </div>
-
-            <div className="flex gap-5 md:hidden">
-              <button className="flex-1 py-4 rounded-full text-[1.25rem] font-semibold
-                bg-white text-black hover:bg-zinc-100 transition-colors
-                flex items-center justify-center gap-3"
-              >
-                Enroll Now
-                <Icon icon="ph:arrow-right" className="text-[1.4rem]" />
-              </button>
-              
-              <button className="flex-1 py-4 rounded-full text-[1.25rem] font-semibold
-                border border-zinc-700 text-white hover:bg-zinc-800 transition-colors
-                flex items-center justify-center gap-3"
-              >
-                <Icon icon="ph:shopping-cart" className="text-[1.4rem]" />
-                Add to Cart
-              </button>
-            </div>
           </div>
           
-          <div className="w-[45%]">
-            <div className="aspect-video rounded-lg overflow-hidden bg-zinc-800 shadow-xl relative">
-              {image && (
-                <OptimizeImage 
-                  src={image.name}
+          <div className="w-full md:w-[45%]">
+            <div className="aspect-video rounded-lg overflow-hidden shadow-xl relative">
+                <CourseImage 
+                courseId={id}
+                src={image?.name}
                   alt={courseName}
-                  folder={image.folder}
-                  className="size-full object-cover"
+                folder={image?.folder}
+                className="h-full"
                 />
-              )}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center cursor-pointer shadow-xl hover:bg-zinc-100 transition-colors duration-300">
                   <Icon icon="ph:play-fill" className="text-black text-[1.8rem] ml-1" />
@@ -162,243 +263,64 @@ export default function CourseDetails() {
       <div className="px-24 py-14">
         <div className="flex flex-col lg:flex-row gap-16">
           <div className="w-full lg:w-8/12">
-            <div className="bg-white rounded-lg border border-zinc-200 p-10 mb-12">
+            <div className="bg-white rounded-lg border border-zinc-200 shadow-md hover:shadow-lg transition-shadow p-10 mb-12">
               <h2 className="text-[2.5rem] font-bold text-zinc-900 mb-8 flex items-center gap-4">
                 <Icon icon="ph:graduation-cap-fill" className="text-zinc-800 text-[2.5rem]" />
                 What You'll Learn
               </h2>
               
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {learningItems.map((item, index) => (
+                {keyLearnings && keyLearnings.length > 0 ? (
+                  keyLearnings.map((item, index) => (
                   <li key={index} className="flex items-start gap-4">
                     <Icon icon="ph:check-circle-fill" className="text-[1.6rem] text-zinc-800 mt-0.5 flex-shrink-0" />
                     <span className="text-[1.35rem] text-zinc-700">{item}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="col-span-2 text-center py-4">
+                    <p className="text-[1.35rem] text-zinc-500">No learning points available for this course yet.</p>
                   </li>
-                ))}
+                )}
               </ul>
             </div>
             
-            {/* Course Curriculum Section */}
-            <div className="bg-white rounded-lg border border-zinc-200 p-10 mb-12">
+            <div className="bg-white rounded-lg border border-zinc-200 shadow-md hover:shadow-lg transition-shadow p-10 mb-12">
               <h2 className="text-[2.5rem] font-bold text-zinc-900 mb-8 flex items-center gap-4">
                 <Icon icon="ph:path-fill" className="text-zinc-800 text-[2.5rem]" />
-                Learning Path
+                Course Curriculum
               </h2>
               
               <div className="relative">
-                {/* Timeline line */}
                 <div className="absolute left-[27px] top-0 bottom-0 w-1 bg-zinc-200"></div>
                 
-                {/* Path items */}
                 <div className="space-y-8">
-                  <div className="relative flex items-start gap-6">
-                    <div className="z-10 flex-shrink-0 w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-[1.4rem] font-bold border-4 border-white shadow-md">
-                      1
-                    </div>
-                    <div className="bg-gradient-to-r from-zinc-50 to-white border border-zinc-200 rounded-lg p-6 w-full shadow-sm">
-                      <h3 className="text-[1.6rem] font-semibold text-zinc-800 mb-3">Master Path</h3>
-                      <p className="text-[1.3rem] text-zinc-600 mb-4">Duration: 12 months</p>
-                      <div className="mb-4">
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Learning Objectives:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li className="text-[1.2rem] text-zinc-600">Become a Full-Stack Master</li>
-                          <li className="text-[1.2rem] text-zinc-600">Optimize application performance</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Topics:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">Advanced React</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">GraphQL</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">DevOps</span>
+                  {lessons && lessons.length > 0 ? (
+                    lessons.map((lesson, index) => (
+                      <div key={lesson.id} className="relative flex items-start gap-6">
+                        <div className="z-10 flex-shrink-0 w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-[1.4rem] font-bold border-4 border-white shadow-md">
+                          {index + 1}
+                        </div>
+                        <div className="bg-gradient-to-r from-zinc-50 to-white border border-zinc-200 rounded-lg p-6 w-full shadow-sm">
+                          <h3 className="text-[1.6rem] font-semibold text-zinc-800 mb-3">{lesson.lessonName}</h3>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-zinc-500">
+                              <Icon icon="ph:clock-fill" className="text-[1.4rem]" />
+                              <span className="text-[1.2rem]">
+                                Updated: {new Date(lesson.updatedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {renderLessonButton(lesson.id)}
+                          </div>
                         </div>
                       </div>
-                      <button className="mt-5 bg-black text-white rounded-full px-6 py-2.5 text-[1.1rem] inline-flex items-center gap-2 hover:bg-zinc-800 transition-colors">
-                        Choose this path
-                        <Icon icon="ph:arrow-right" className="text-[1.2rem]" />
-                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Icon icon="ph:book-open" className="text-[4rem] text-zinc-400 mx-auto mb-4" />
+                      <p className="text-[1.4rem] text-zinc-600">No lessons available for this course yet.</p>
                     </div>
-                  </div>
-                  
-                  <div className="relative flex items-start gap-6">
-                    <div className="z-10 flex-shrink-0 w-14 h-14 rounded-full bg-zinc-700 text-white flex items-center justify-center text-[1.4rem] font-bold border-4 border-white shadow-md">
-                      2
-                    </div>
-                    <div className="bg-white border border-zinc-200 rounded-lg p-6 w-full shadow-sm">
-                      <h3 className="text-[1.6rem] font-semibold text-zinc-800 mb-3">Basic Path</h3>
-                      <p className="text-[1.3rem] text-zinc-600 mb-4">Duration: 3 months</p>
-                      <div className="mb-4">
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Learning Objectives:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li className="text-[1.2rem] text-zinc-600">Understand basic concepts</li>
-                          <li className="text-[1.2rem] text-zinc-600">Build a solid foundation</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Topics:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">HTML</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">CSS</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">Basic JavaScript</span>
-                        </div>
-                      </div>
-                      <button className="mt-5 bg-zinc-200 text-zinc-700 rounded-full px-6 py-2.5 text-[1.1rem] inline-flex items-center gap-2 hover:bg-zinc-300 transition-colors">
-                        Choose this path
-                        <Icon icon="ph:arrow-right" className="text-[1.2rem]" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="relative flex items-start gap-6">
-                    <div className="z-10 flex-shrink-0 w-14 h-14 rounded-full bg-zinc-500 text-white flex items-center justify-center text-[1.4rem] font-bold border-4 border-white shadow-md">
-                      3
-                    </div>
-                    <div className="bg-white border border-zinc-200 rounded-lg p-6 w-full shadow-sm">
-                      <h3 className="text-[1.6rem] font-semibold text-zinc-800 mb-3">Advanced Path</h3>
-                      <p className="text-[1.3rem] text-zinc-600 mb-4">Duration: 6 months</p>
-                      <div className="mb-4">
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Learning Objectives:</h4>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li className="text-[1.2rem] text-zinc-600">Develop advanced skills</li>
-                          <li className="text-[1.2rem] text-zinc-600">Build real-world projects</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-[1.3rem] font-medium text-zinc-700 mb-2">Topics:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">React</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">Node.js</span>
-                          <span className="bg-zinc-100 text-zinc-700 px-3 py-1 rounded-full text-[0.95rem]">Database Design</span>
-                        </div>
-                      </div>
-                      <button className="mt-5 bg-zinc-200 text-zinc-700 rounded-full px-6 py-2.5 text-[1.1rem] inline-flex items-center gap-2 hover:bg-zinc-300 transition-colors">
-                        Choose this path
-                        <Icon icon="ph:arrow-right" className="text-[1.2rem]" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Student Reviews */}
-            <div className="bg-white rounded-lg border border-zinc-200 p-10 mb-12">
-              <h2 className="text-[2.5rem] font-bold text-zinc-900 mb-8 flex items-center gap-4">
-                <Icon icon="ph:chat-fill" className="text-zinc-800 text-[2.5rem]" />
-                Student Reviews
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                {/* Review Card 1 */}
-                <div className="border border-zinc-200 rounded-md p-7 hover:border-zinc-300 transition-colors">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-zinc-100 flex items-center justify-center">
-                        <Icon icon="ph:user-circle-fill" className="text-[3rem] text-zinc-400" />
-                      </div>
-                      <div>
-                        <h4 className="text-[1.5rem] font-semibold text-zinc-800">Alex Johnson</h4>
-                        <p className="text-[1.2rem] text-zinc-500">2 months ago</p>
-                      </div>
-                    </div>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Icon key={star} icon="ph:star-fill" className="text-[1.4rem] text-yellow-400" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-[1.35rem] text-zinc-700 leading-relaxed">
-                    This course exceeded my expectations! The instructor explains complex concepts in a way that's easy to understand. I was able to build my first Flutter app within a week of starting the course.
-                  </p>
-                </div>
-                
-                {/* Review Card 2 */}
-                <div className="border border-zinc-200 rounded-md p-7 hover:border-zinc-300 transition-colors">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-zinc-100 flex items-center justify-center">
-                        <Icon icon="ph:user-circle-fill" className="text-[3rem] text-zinc-400" />
-                      </div>
-                      <div>
-                        <h4 className="text-[1.5rem] font-semibold text-zinc-800">Sarah Miller</h4>
-                        <p className="text-[1.2rem] text-zinc-500">1 month ago</p>
-                      </div>
-                    </div>
-                    <div className="flex">
-                      {[1, 2, 3, 4].map((star) => (
-                        <Icon key={star} icon="ph:star-fill" className="text-[1.4rem] text-yellow-400" />
-                      ))}
-                      <Icon icon="ph:star" className="text-[1.4rem] text-yellow-400" />
-                    </div>
-                  </div>
-                  <p className="text-[1.35rem] text-zinc-700 leading-relaxed">
-                    Great course with practical examples. The section on state management was particularly helpful. I would have liked more content on testing Flutter applications, but overall it's a solid course.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Rating Breakdown */}
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-10 p-8 bg-zinc-50 rounded-md">
-                <div className="text-center">
-                  <div className="text-[3rem] font-bold text-zinc-900">4.7</div>
-                  <div className="flex mb-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Icon key={star} icon="ph:star-fill" className="text-[1.4rem] text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-[1.1rem] text-zinc-500">1,543 ratings</p>
-                </div>
-                
-                <div className="flex-1">
-                  {/* 5 stars */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-[1.1rem] font-medium text-zinc-700 w-4">5</span>
-                    <Icon icon="ph:star-fill" className="text-[1.1rem] text-yellow-400" />
-                    <div className="flex-1 h-4 bg-zinc-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: '78%' }}></div>
-                    </div>
-                    <span className="text-[1.1rem] text-zinc-500 w-14 text-right">78%</span>
-                  </div>
-                  
-                  {/* 4 stars */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-[1.1rem] font-medium text-zinc-700 w-4">4</span>
-                    <Icon icon="ph:star-fill" className="text-[1.1rem] text-yellow-400" />
-                    <div className="flex-1 h-4 bg-zinc-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: '15%' }}></div>
-                    </div>
-                    <span className="text-[1.1rem] text-zinc-500 w-14 text-right">15%</span>
-                  </div>
-                  
-                  {/* 3 stars */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-[1.1rem] font-medium text-zinc-700 w-4">3</span>
-                    <Icon icon="ph:star-fill" className="text-[1.1rem] text-yellow-400" />
-                    <div className="flex-1 h-4 bg-zinc-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: '5%' }}></div>
-                    </div>
-                    <span className="text-[1.1rem] text-zinc-500 w-14 text-right">5%</span>
-                  </div>
-                  
-                  {/* 2 stars */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-[1.1rem] font-medium text-zinc-700 w-4">2</span>
-                    <Icon icon="ph:star-fill" className="text-[1.1rem] text-yellow-400" />
-                    <div className="flex-1 h-4 bg-zinc-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: '1%' }}></div>
-                    </div>
-                    <span className="text-[1.1rem] text-zinc-500 w-14 text-right">1%</span>
-                  </div>
-                  
-                  {/* 1 star */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-[1.1rem] font-medium text-zinc-700 w-4">1</span>
-                    <Icon icon="ph:star-fill" className="text-[1.1rem] text-yellow-400" />
-                    <div className="flex-1 h-4 bg-zinc-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-yellow-400 rounded-full" style={{ width: '1%' }}></div>
-                    </div>
-                    <span className="text-[1.1rem] text-zinc-500 w-14 text-right">1%</span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -406,111 +328,66 @@ export default function CourseDetails() {
           
           <div className="w-full lg:w-4/12">
             <div className="sticky top-6">
-              <div className="md:hidden mb-8 aspect-video rounded-md overflow-hidden bg-zinc-100 relative shadow-md">
-                {image && (
-                  <OptimizeImage 
-                    src={image.name}
-                    alt={courseName}
-                    folder={image.folder}
-                    className="size-full object-cover"
-                  />
-                )}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-zinc-100 transition-colors duration-300">
-                    <Icon icon="ph:play-fill" className="text-black text-[1.5rem] ml-1" />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-md hover:shadow-lg transition-shadow mb-10">
+              <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                 <div className="p-8 border-b border-zinc-200 bg-gradient-to-r from-zinc-50 to-white">
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-[2.75rem] font-bold text-zinc-900">${price?.toFixed(2)}</span>
-                    <Badge variant="outline" className="text-[1.1rem] rounded-full bg-zinc-100 text-zinc-800 border-zinc-300 px-4 py-1.5">
-                      {category}
-                    </Badge>
+                    <h3 className="text-[2rem] font-bold text-zinc-900">Free</h3>
+                    <div className="bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-[1.1rem] font-medium">
+                      Open Access
+                    </div>
                   </div>
                   
-                  <button className="w-full py-4 rounded-full text-[1.35rem] font-semibold 
-                    bg-black text-white hover:bg-zinc-800 transition-all
-                    flex items-center justify-center gap-3 mb-5 shadow-sm hover:shadow-md"
-                  >
-                    Enroll Now
-                    <Icon icon="ph:arrow-right" className="text-[1.5rem]" />
-                  </button>
+                  {renderEnrollmentAction()}
                   
-                  <button className="w-full py-4 rounded-full text-[1.35rem] font-semibold
-                    border border-zinc-300 text-zinc-700 hover:bg-zinc-50 transition-all
-                    flex items-center justify-center gap-3"
-                  >
-                    <Icon icon="ph:shopping-cart" className="text-[1.5rem]" />
-                    Add to Cart
-                  </button>
+                  <p className="text-center text-zinc-500 text-[1.25rem] mt-3.5">
+                    {isEnrolled
+                      ? 'Continue your learning journey' 
+                      : 'Access the course content immediately'}
+                  </p>
                 </div>
                 
                 <div className="p-8">
                   <h3 className="text-[1.8rem] font-bold text-zinc-900 mb-5">This Course Includes</h3>
                   <ul className="space-y-5">
-                    {courseIncludes.map((item, index) => (
-                      <li key={index} className="flex items-center gap-4">
-                        <Icon icon={item.icon} className="text-[1.4rem] text-zinc-700" />
-                        <span className="text-[1.35rem] text-zinc-700">{item.text}</span>
+                    <li className="flex items-center gap-4">
+                      <Icon icon="ph:video-fill" className="text-[1.4rem] text-zinc-700" />
+                      <span className="text-[1.35rem] text-zinc-700">Video lectures</span>
+                    </li>
+                    <li className="flex items-center gap-4">
+                      <Icon icon="ph:file-text-fill" className="text-[1.4rem] text-zinc-700" />
+                      <span className="text-[1.35rem] text-zinc-700">Practice materials</span>
+                    </li>
+                    <li className="flex items-center gap-4">
+                      <Icon icon="ph:chat-circle-text-fill" className="text-[1.4rem] text-zinc-700" />
+                      <span className="text-[1.35rem] text-zinc-700">AI Teacher interaction</span>
+                    </li>
+                    <li className="flex items-center gap-4">
+                      <Icon icon="ph:certificate-fill" className="text-[1.4rem] text-zinc-700" />
+                      <span className="text-[1.35rem] text-zinc-700">Completion certificate</span>
+                    </li>
+                    <li className="flex items-center gap-4">
+                      <Icon icon="ph:infinity-fill" className="text-[1.4rem] text-zinc-700" />
+                      <span className="text-[1.35rem] text-zinc-700">Lifetime access</span>
                       </li>
-                    ))}
                   </ul>
                 </div>
                 
-                <div className="p-8 border-t border-zinc-200 bg-gradient-to-r from-zinc-50 to-white">
-                  <h3 className="text-[1.8rem] font-bold text-zinc-900 mb-5">Share This Course</h3>
-                  <div className="flex items-center gap-4">
-                    <button className="bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-800 p-4 rounded-full hover:scale-105">
-                      <Icon icon="ph:facebook-logo-fill" className="text-[1.4rem]" />
-                    </button>
-                    <button className="bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-800 p-4 rounded-full hover:scale-105">
-                      <Icon icon="ph:twitter-logo-fill" className="text-[1.4rem]" />
-                    </button>
-                    <button className="bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-800 p-4 rounded-full hover:scale-105">
-                      <Icon icon="ph:instagram-logo-fill" className="text-[1.4rem]" />
-                    </button>
-                    <button className="bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-800 p-4 rounded-full hover:scale-105">
-                      <Icon icon="ph:linkedin-logo-fill" className="text-[1.4rem]" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                <div className="p-8">
-                  <h3 className="text-[1.8rem] font-bold text-zinc-900 mb-5 flex items-center gap-3">
-                    <Icon icon="ph:robot-fill" className="text-zinc-800 text-[1.8rem]" />
-                    AI Instructor
-                  </h3>
-                  
-                  <div className="flex items-center gap-5 mb-5">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Icon icon="ph:robot-fill" className="text-[2.5rem] text-white" />
-                    </div>
+                <div className="p-8 bg-zinc-50 border-t border-zinc-200">
+                  <div className="flex items-start gap-4 mb-5">
+                    <Icon icon="ph:users-three-fill" className="text-[1.8rem] text-zinc-800" />
                     <div>
-                      <h4 className="text-[1.5rem] font-semibold text-zinc-800">AI Assistant</h4>
-                      <p className="text-[1.2rem] text-zinc-500">Virtual Teaching Environment</p>
+                      <p className="text-[1.4rem] font-semibold text-zinc-800">Join 2000+ students</p>
+                      <p className="text-[1.2rem] text-zinc-600">Learning with AI Teacher</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-8 mb-5 text-[1.1rem] text-zinc-600">
-                    <div className="flex items-center gap-2">
-                      <Icon icon="ph:star-fill" className="text-yellow-400 text-[1.25rem]" />
-                      <span>4.9 System Rating</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon icon="ph:users-three-fill" className="text-[1.25rem]" />
-                      <span>24,650+ Students</span>
+                  <div className="flex items-start gap-4">
+                    <Icon icon="ph:clock-countdown-fill" className="text-[1.8rem] text-zinc-800" />
+                    <div>
+                      <p className="text-[1.4rem] font-semibold text-zinc-800">Start learning today</p>
+                      <p className="text-[1.2rem] text-zinc-600">At your own pace</p>
                     </div>
                   </div>
-                  
-                  <p className="text-[1.35rem] text-zinc-700 leading-relaxed">
-                    Our advanced AI teaching system creates personalized learning experiences in an immersive 3D environment. 
-                    The course adapts to your learning pace and provides real-time feedback to optimize your progress.
-                  </p>
                 </div>
               </div>
             </div>

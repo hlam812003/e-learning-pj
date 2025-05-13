@@ -1,10 +1,13 @@
-import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { Icon } from '@iconify/react'
 import { cn, gsap, useGSAP } from '@/lib'
-import { useMessageStore, useClassroomStore } from '../stores'
-import { useTeacherSpeech } from '../hooks'
+import { useClassroomStore } from '../stores'
+import { messageService } from '../services'
+import { useTeacherSpeech, useAnimatedBox } from '../hooks'
 import { useMutation } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { GENERAL_MODE } from '../constants'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -25,17 +28,28 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   visible = true,
   onVisibilityChange
 }, ref) => {
-  const createMessage = useMessageStore((state) => state.createMessage)
-  
-  const { speak: speakAzure, isReady: isAzureReady } = useTeacherSpeech()
+  const { courseId, lessonId } = useParams()
+
+  const { 
+    speak: speakAzure, 
+    isReady: isAzureReady,
+    isSpeaking: isAzureSpeaking,
+    isThinking: isAzureThinking,
+    error: azureError,
+    cleanup: cleanupAzure
+  } = useTeacherSpeech()
   const startThinking = useClassroomStore((state) => state.startThinking)
   const stopAll = useClassroomStore((state) => state.stopAll)
+  const setIsThinking = useClassroomStore((state) => state.setIsThinking)
+  const setIsSpeaking = useClassroomStore((state) => state.setIsSpeaking)
+  const setCameraMode = useClassroomStore((state) => state.setCameraMode)
+  const setTeacherMode = useClassroomStore((state) => state.setTeacherMode)
+  const currentMessage = useClassroomStore((state) => state.currentMessage)
+  const selectedConversationId = useClassroomStore((state) => state.selectedConversationId)
 
   const [message, setMessage] = useState<string>('')
-  const [isVisible, setIsVisible] = useState(visible)
-  const [isAnimating, setIsAnimating] = useState<boolean>(false)
-  
-  
+  const [_, setSdkError] = useState<string | null>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const messageBoxRef = useRef<HTMLDivElement>(null)
@@ -46,68 +60,46 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const titleRef = useRef<HTMLParagraphElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const expandIconRef = useRef<HTMLDivElement>(null)
+  const contentContainerRef = useRef<HTMLDivElement>(null)
+  
+  const { 
+    isVisible,
+    isAnimating,
+    showBox: showMessageBox,
+    hideBox: hideMessageBox,
+    toggleBox: toggleMessageBox,
+    setupVisibleState,
+    setupHiddenState
+  } = useAnimatedBox(
+    {
+      containerRef,
+      boxRef: messageBoxRef,
+      expandIconRef,
+      collapseButtonContainerRef,
+      contentRef,
+      titleRef,
+      subtitleRef,
+      controlsRef
+    },
+    {
+      expandedWidth: '53rem',
+      expandedHeight: '13.5rem',
+      collapsedSize: '3.5rem',
+      expandedBorderRadius: '1.25rem',
+      collapsedBorderRadius: '50%',
+      onShowComplete: () => {
+        if (inputRef.current) inputRef.current.focus()
+      }
+    },
+    visible,
+    onVisibilityChange
+  )
   
   useGSAP(() => {
-    if (messageBoxRef.current) {
-      if (isVisible) {
-        gsap.set(messageBoxRef.current, {
-          width: '53rem',
-          height: '13.5rem',
-          borderRadius: '1.25rem',
-          opacity: 1
-        })
-
-        if (contentRef.current) {
-          gsap.set(contentRef.current, { opacity: 1, display: 'flex' })
-        }
-
-        if (controlsRef.current) {
-          gsap.set(controlsRef.current, { opacity: 1, display: 'flex' })
-        }
-
-        if (collapseButtonContainerRef.current) {
-          gsap.set(collapseButtonContainerRef.current, { 
-            opacity: 1,
-            display: 'block'
-          })
-        }
-
-        if (expandIconRef.current) {
-          gsap.set(expandIconRef.current, { 
-            opacity: 0,
-            display: 'none' 
-          })
-        }
-      } else {
-        gsap.set(messageBoxRef.current, {
-          width: '3.5rem',
-          height: '3.5rem',
-          borderRadius: '50%',
-          opacity: 1
-        })
-        
-        if (contentRef.current) {
-          gsap.set(contentRef.current, { opacity: 0, display: 'none' })
-        }
-
-        if (controlsRef.current) {
-          gsap.set(controlsRef.current, { opacity: 0, display: 'none' })
-        }
-
-        if (collapseButtonContainerRef.current) {
-          gsap.set(collapseButtonContainerRef.current, { 
-            opacity: 0,
-            display: 'none'
-          })
-        }
-        
-        if (expandIconRef.current) {
-          gsap.set(expandIconRef.current, { 
-            opacity: 1,
-            display: 'flex' 
-          })
-        }
-      }
+    if (isVisible) {
+      setupVisibleState()
+    } else {
+      setupHiddenState()
     }
     
     if (visible !== isVisible && !isAnimating) {
@@ -116,191 +108,88 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
     }
   }, { scope: containerRef, dependencies: [isVisible, visible, isAnimating] })
 
-  const showMessageBox = () => {
-    if (isAnimating || isVisible) return
+  useGSAP(() => {
+    gsap.killTweensOf([
+      contentContainerRef.current,
+      titleRef.current,
+      subtitleRef.current,
+      controlsRef.current
+    ])
     
-    setIsAnimating(true)
-    
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsAnimating(false)
-        if (inputRef.current) inputRef.current.focus()
-      }
-    })
-    
-    if (messageBoxRef.current) {
-      messageBoxRef.current.style.pointerEvents = 'auto'
+    if (selectedConversationId) {
+      const elementsToAnimate = [
+        contentContainerRef.current,
+        subtitleRef.current,
+        controlsRef.current
+      ].filter(Boolean)
       
-      if (expandIconRef.current) {
-        tl.to(expandIconRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.15,
-          ease: 'power1.in',
-          onComplete: () => {
-            if (expandIconRef.current) {
-              expandIconRef.current.style.display = 'none'
-            }
-          }
-        })
-      }
+      gsap.set(elementsToAnimate, { opacity: 0, y: 10 })
       
-      tl.to(messageBoxRef.current, {
-        width: '53rem',
-        height: '13.5rem',
-        borderRadius: '1.25rem',
-        duration: 0.35,
-        ease: 'back.out(1.2)',
-      }, '-=0.1')
-      
-      if (collapseButtonContainerRef.current) {
-        tl.set(collapseButtonContainerRef.current, {
-          display: 'block',
-          opacity: 0
-        }, '-=0.25')
-        .to(collapseButtonContainerRef.current, {
-          opacity: 1,
-          duration: 0.2,
-          ease: 'power1.out'
-        }, '-=0.2')
-      }
-      
-      if (contentRef.current) {
-        tl.set(contentRef.current, { 
-          display: 'flex',
-          opacity: 0,
-          y: 10
-        }, '-=0.15')
-        .to(contentRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.2,
-          ease: 'power2.out'
-        }, '-=0.1')
-      }
-      
-      if (titleRef.current && subtitleRef.current) {
-        tl.fromTo([titleRef.current, subtitleRef.current], 
-          { y: 10, opacity: 0 },
-          { 
-            y: 0, 
-            opacity: 1, 
-            duration: 0.2,
-            stagger: 0.05,
-            ease: 'power2.out' 
-          },
-          '-=0.1'
-        )
-      }
-      
-      if (controlsRef.current) {
-        tl.set(controlsRef.current, { 
-          display: 'flex',
-          opacity: 0,
-          y: 10
-        }, '-=0.1')
-        .to(controlsRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.25,
-          ease: 'power2.out'
-        }, '-=0.1')
-      }
-    }
-    
-    tl.call(() => {
-      setIsVisible(true)
-      onVisibilityChange?.(true)
-    })
-  }
-
-  const hideMessageBox = () => {
-    if (isAnimating || !isVisible) return
-    
-    setIsAnimating(true)
-    
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsAnimating(false)
-      }
-    })
-    
-    if (messageBoxRef.current) {
-      if (controlsRef.current) {
-        tl.to(controlsRef.current, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          ease: 'power2.in',
-          onComplete: () => {
-            if (controlsRef.current) controlsRef.current.style.display = 'none'
-          }
-        })
-      }
-      
-      if (contentRef.current) {
-        tl.to(contentRef.current, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          ease: 'power2.in',
-          onComplete: () => {
-            if (contentRef.current) contentRef.current.style.display = 'none'
-          }
-        }, '-=0.1')
-      }
-      
-      if (collapseButtonContainerRef.current) {
-        tl.to(collapseButtonContainerRef.current, {
-          opacity: 0,
-          duration: 0.2,
-          ease: 'power1.in',
-          onComplete: () => {
-            if (collapseButtonContainerRef.current) {
-              collapseButtonContainerRef.current.style.display = 'none'
-            }
-          }
-        }, '-=0.1')
-      }
-      
-      tl.to(messageBoxRef.current, {
-        width: '3.5rem',
-        height: '3.5rem',
-        borderRadius: '50%',
-        duration: 0.4,
-        ease: 'back.in(1.2)'
-      }, '-=0.2')
-      
-      if (expandIconRef.current) {
-        tl.set(expandIconRef.current, {
-          display: 'flex',
-          opacity: 0,
-          scale: 0.8
-        }, '-=0.2')
-        .to(expandIconRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.25,
-          ease: 'back.out(1.7)'
-        }, '-=0.1')
-      }
-    }
-    
-    tl.call(() => {
-      setIsVisible(false)
-      onVisibilityChange?.(false)
-    })
-  }
-
-  const toggleMessageBox = () => {
-    if (isAnimating) return
-    
-    if (isVisible) {
-      hideMessageBox()
+      gsap.to(elementsToAnimate, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.1,
+        overwrite: true
+      })
     } else {
-      showMessageBox()
+      const defaultElements = [
+        titleRef.current,
+        subtitleRef.current,
+        controlsRef.current
+      ].filter(Boolean)
+      
+      gsap.set(defaultElements, { opacity: 0, y: 10 })
+      
+      gsap.to(defaultElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        stagger: 0.1,
+        overwrite: true
+      })
     }
-  }
+  }, { scope: containerRef, dependencies: [selectedConversationId] })
+
+  useEffect(() => {
+    setIsThinking(isAzureThinking)
+    setIsSpeaking(isAzureSpeaking)
+    
+    if (isAzureThinking) {
+      setCameraMode(GENERAL_MODE.THINKING)
+      setTeacherMode(GENERAL_MODE.THINKING)
+    } else if (isAzureSpeaking) {
+      setCameraMode(GENERAL_MODE.SPEAKING) 
+      setTeacherMode(GENERAL_MODE.SPEAKING)
+    } else {
+      setCameraMode(GENERAL_MODE.IDLE)
+      setTeacherMode(GENERAL_MODE.IDLE)
+    }
+  }, [isAzureThinking, isAzureSpeaking, setIsThinking, setIsSpeaking, setCameraMode, setTeacherMode])
+
+  useEffect(() => {
+    if (!currentMessage && !isAzureThinking && !isAzureSpeaking) {
+      stopAll()
+    }
+  }, [currentMessage, isAzureThinking, isAzureSpeaking, stopAll])
+  
+  useEffect(() => {
+    return () => {
+      cleanupAzure()
+      stopAll()
+    }
+  }, [cleanupAzure, stopAll])
+
+  useEffect(() => {
+    if (azureError) {
+      console.warn('Azure Speech Error:', azureError)
+      setSdkError(azureError)
+    } else {
+      setSdkError(null)
+    }
+  }, [azureError])
 
   useImperativeHandle(ref, () => ({
     show: showMessageBox,
@@ -308,8 +197,14 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
     toggle: toggleMessageBox
   }))
 
-  const messageMutation = useMutation({
-    mutationFn: (content: string) => createMessage(content),
+  const messageMutation = useMutation(
+    {
+    mutationFn: (content: string | null) => messageService.createMessage(
+      content,
+      selectedConversationId,
+      courseId || null,
+      lessonId || null
+    ),
     onSuccess: async (result) => {
       if (result) {
         setMessage('')
@@ -321,7 +216,7 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
             if (!isAzureReady) return
             
             const speakResult = await speakAzure(result.content)
-            
+
             if (!speakResult?.success && speakResult?.error) {
               stopAll()
               
@@ -346,15 +241,24 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
       }
     },
     onError: (error: any) => {
+      console.error('Message mutation error:', error)
       toast.error(error?.message || 'Không thể gửi tin nhắn')
     }
   })
 
   const handleSubmit = () => {
-    if (message.trim()) {
+    if (!selectedConversationId) return
+    
+    if (!message.trim()) {
+      if (inputRef.current) inputRef.current.focus()
+      return
+    }
+    
+    try {
       messageMutation.mutate(message)
-    } else if (inputRef.current) {
-      inputRef.current.focus()
+    } catch (error: any) {
+      console.error('Error submitting message:', error)
+      toast.error(error?.message || 'Có lỗi khi gửi tin nhắn')
     }
   }
 
@@ -368,7 +272,8 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
         ref={messageBoxRef}
         className={cn(
           'bg-white/20 backdrop-blur-[16px] border border-white/20',
-          'flex items-center justify-center overflow-visible relative'
+          'flex items-center justify-center overflow-visible relative',
+          !selectedConversationId && 'opacity-90'
         )}
       >
         <div 
@@ -419,75 +324,98 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
           <div className="flex flex-col">
             <p 
               ref={titleRef}
-              className="text-[1.8rem] font-semibold text-white drop-shadow-lg -mb-[.05rem]"
+              className="text-[1.8rem] font-semibold text-white drop-shadow-lg -mb-[.05rem] flex items-center flex-wrap"
             >
-              Ask a question about today's lesson
+              {selectedConversationId ? (
+                <span ref={contentContainerRef} className="flex items-center">
+                  Ask a question about today's lesson
+                </span>
+              ) : (
+                <>
+                  Select a conversation
+                </>
+              )}
             </p>
             <p 
               ref={subtitleRef}
               className="text-[1.2rem] text-white/80 font-normal drop-shadow-lg"
             >
-              Type your question here! Be specific and clear.
+              {selectedConversationId ? (
+                <>Type your question here! Be specific and clear.</>
+              ) : (
+                <>Use the conversation box to select or create a conversation</>
+              )}
             </p>
           </div>
           
           <div ref={controlsRef} className="flex items-center gap-5">
-            <div className="flex-1 relative">
-              <Input 
-                ref={inputRef}
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className={cn(
-                  'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg',
-                  messageMutation.isPending && 'pointer-events-none'
-                )}
-                placeholder="Ask something..."
-                onKeyDown={(e) => e.key === 'Enter' && !messageMutation.isPending && handleSubmit()}
-              />
-            </div>
-            
-            <div className="flex gap-3.5">
-              {!messageMutation.isPending ? (
-                <Tooltip
-                  content="Voice Chat"
-                  contentClassName="text-[1.25rem] z-[60]"
-                >
-                  <Button 
-                    onClick={handleVoiceInput}
-                    variant="outline" 
-                    className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
-                  >
-                    <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-                  </Button>
-                </Tooltip>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
-                  disabled
-                >
-                  <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
-                </Button>
-              )}
+            {selectedConversationId ? (
+              <>
+                <div className="flex-1 relative">
+                  <Input 
+                    ref={inputRef}
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className={cn(
+                      'w-full h-12 bg-transparent border-t-0 border-l-0 border-r-0 rounded-none border-b-[.1rem] border-b-white text-white placeholder:text-white/80 !text-[1.4rem] focus:outline-none drop-shadow-lg',
+                      messageMutation.isPending && 'pointer-events-none'
+                    )}
+                    placeholder="Ask something..."
+                    onKeyDown={(e) => e.key === 'Enter' && !messageMutation.isPending && handleSubmit()}
+                  />
+                </div>
+                
+                <div className="flex gap-3.5">
+                  {!messageMutation.isPending ? (
+                    <Tooltip
+                      content="Voice Chat"
+                      contentClassName="text-[1.25rem] z-[60]"
+                    >
+                      <Button 
+                        onClick={handleVoiceInput}
+                        variant="outline" 
+                        className="rounded-full bg-white/10 border-white/30 hover:bg-white/20 text-white hover:text-white size-14 drop-shadow-lg"
+                      >
+                        <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                      </Button>
+                    </Tooltip>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="rounded-full bg-white/10 border-white/30 text-white size-14 drop-shadow-lg cursor-not-allowed opacity-70"
+                      disabled
+                    >
+                      <Icon icon="si:mic-line" className="text-[1.4rem] drop-shadow-lg" />
+                    </Button>
+                  )}
 
-              <Button 
-                onClick={handleSubmit}
-                variant="default" 
-                className={cn(
-                  'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
-                  messageMutation.isPending && 'pointer-events-none'
-                )}
-              >
-                {messageMutation.isPending ? (
-                  <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
-                    <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
-                  </svg>
-                ) : (
-                  <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
-                )}
-              </Button>
-            </div>
+                  <Button 
+                    onClick={handleSubmit}
+                    variant="default" 
+                    className={cn(
+                      'rounded-full bg-primary/80 hover:bg-primary size-14 drop-shadow-lg',
+                      messageMutation.isPending && 'pointer-events-none'
+                    )}
+                  >
+                    {messageMutation.isPending ? (
+                      <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+                        <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
+                      </svg>
+                    ) : (
+                      <Icon icon="akar-icons:send" className="text-[1.4rem] drop-shadow-lg" />
+                    )}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="size-full flex items-center justify-center relative pointer-events-none -mt-[4.7rem]">
+                <div className="ld-ripple drop-shadow-lg">
+                  <div />
+                  <div />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

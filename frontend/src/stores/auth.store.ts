@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'
 import { authService } from '@/features/auth'
 import { toast } from 'sonner'
 import { AuthStore, DecodedToken, GoogleUserInfo } from '@/types'
+import { queryClient } from '@/configs'
 
 const setCookie = (name: string, value: string, days: number = 7) => {
   const date = new Date()
@@ -16,17 +17,30 @@ const getCookie = (name: string): string | null => {
   return match ? match[2] : null
 }
 
-const deleteCookie = (name: string) => {
+export const deleteCookie = (name: string) => {
   document.cookie = `${name}=; Max-Age=-99999999; path=/; SameSite=Strict; Secure`
+}
+
+export const isTokenValid = (token: string): boolean => {
+  try {
+    const decoded: DecodedToken = jwtDecode(token)
+    const currentTime = Date.now() / 1000
+    return decoded.exp ? decoded.exp > currentTime : false
+  } catch (error) {
+    console.error('Error decoding token:', error)
+    return false
+  }
 }
 
 const useAuthStore = create<AuthStore>()(
   persist(
     (set): AuthStore => ({
       user: null,
+      userDetails: null,
       googleInfo: null,
       login: async (email: string, password: string) => {
         const loginResult = await authService.login(email, password)
+        // console.log(loginResult)
         if (loginResult.success && loginResult.token) {
           const decoded: DecodedToken = jwtDecode(loginResult.token)
           set({ user: { ...decoded, token: loginResult.token } })
@@ -73,20 +87,26 @@ const useAuthStore = create<AuthStore>()(
       logout: () => {
         set({ 
           user: null,
-          googleInfo: null
+          googleInfo: null,
+          userDetails: null
         })
         deleteCookie('token')
+
+        if (queryClient) {
+          queryClient.clear()
+        }
       },
       getUserInfo: async () => {
         try {
           const userInfo = await authService.getCurrentUser()
+          set({ userDetails: userInfo })
           return userInfo
         } catch (error) {
           console.error('Error getting user info:', error)
           throw error
         }
       },
-      initAuth: () => {
+      initAuth: async () => {
         const token = getCookie('token')
         if (token) {
           try {
@@ -95,6 +115,13 @@ const useAuthStore = create<AuthStore>()(
             const currentTime = Date.now() / 1000
             if (decoded.exp && decoded.exp > currentTime) {
               set({ user: { ...decoded, token } })
+              
+              try {
+                const userInfo = await authService.getCurrentUser()
+                set({ userDetails: userInfo })
+              } catch (error) {
+                console.error('Error getting user info during init:', error)
+              }
             } else {
               deleteCookie('token')
             }
@@ -103,6 +130,7 @@ const useAuthStore = create<AuthStore>()(
             deleteCookie('token')
           }
         }
+        return Promise.resolve()
       },
       setGoogleInfo: (info: GoogleUserInfo) => {
         set({ 

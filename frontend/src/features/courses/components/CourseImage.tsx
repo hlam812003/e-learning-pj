@@ -1,20 +1,29 @@
 import { OptimizeImage } from '@/components'
+import { mockCourseImage } from '@/mocks'
+import { cn } from '@/lib'
 
-type CourseImageProps = {
+interface CourseImageProps {
+  courseId?: string
   src?: string
   alt: string
   folder?: string
+  className?: string
 }
 
 const CourseImage = ({ 
+  courseId = '',
   src = '', 
   alt,
-  folder
+  folder = 'courses',
+  className
 }: CourseImageProps) => {
+  const mappedImage = courseId ? mockCourseImage[courseId] : null
+  const imageSrc = mappedImage || src
+  
   return (
-    <div className="w-full h-[14.35rem] flex-shrink-0 -mb-[.5vh]">
+    <div className={cn('w-full', className)}>
       <OptimizeImage
-        src={src}
+        src={imageSrc}
         alt={alt}
         folder={folder}
         className="size-full"

@@ -33,7 +33,7 @@ export default function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginFormData) => login(data.email, data.password),
     onSuccess: () => {
-      navigate('/')
+      navigate('/', { replace: true })
     },
     onError: (error: Error) => {
       console.log(error.message)
@@ -227,7 +227,7 @@ export default function LoginPage() {
         >
           {loginMutation.isPending ? (
             <>
-              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+              <svg viewBox="25 25 50 50" className="!size-[1.5rem] loading__svg">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-white" />
               </svg>
               <span>Signing in...</span>
@@ -248,14 +248,14 @@ export default function LoginPage() {
           variant="outline"
           className={cn(
             'w-full h-[4rem] flex items-center justify-center gap-2 text-[1.35rem] border-[1px]',
-            isLoading && 'pointer-events-none'
+            (isLoading || loginMutation.isPending) && 'pointer-events-none'
           )}
           disabled={isLoading}
           onClick={handleGoogleLogin}
         >
           {isLoading ? (
             <>
-              <svg viewBox="25 25 50 50" className="loading__svg !w-[1.75rem]">
+              <svg viewBox="25 25 50 50" className="!size-[1.5rem] loading__svg">
                 <circle r="20" cy="50" cx="50" className="loading__circle !stroke-black" />
               </svg>
               <span>Connecting to Google...</span>

@@ -1,19 +1,26 @@
-import { ICourse } from '@/types'
+import { Course } from '@/features/courses'
 
-export const courses: ICourse[] = [
+export const courses: Course[] = [
   {
     id: 'a4a5b1ec-62c3-4ee2-981c-97e27fdc3595',
     courseName: 'NestJS GraphQL',
     abstract: 'Learn GraphQL in NestJS with hands-on projects and real-world examples. Master schema design, resolvers, and authentication in a modern backend framework.',
     createdAt: '2025-03-21T17:01:44.981Z',
     updatedAt: '2025-03-21T17:01:44.981Z',
-    instructor: 'Thomas Smith',
-    level: 'Intermediate',
-    duration: '10 weeks',
-    rating: 4.8,
-    students: 1245,
-    price: 79.99,
-    category: 'Backend',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'Thomas Smith',
+    // level: 'Intermediate',
+    // duration: '10 weeks',
+    // rating: 4.8,
+    // students: 1245,
+    // price: 79.99,
+    // category: 'Backend',
     image: {
       name: 'nestjs-graphql',
       folder: 'courses'
@@ -25,13 +32,20 @@ export const courses: ICourse[] = [
     abstract: 'Build robust frontend applications with React and TypeScript. Learn component patterns, state management, and advanced typing techniques.',
     createdAt: '2025-02-15T09:30:22.345Z',
     updatedAt: '2025-03-10T14:15:33.789Z',
-    instructor: 'Emma Johnson',
-    level: 'Intermediate',
-    duration: '8 weeks',
-    rating: 4.9,
-    students: 2340,
-    price: 89.99,
-    category: 'Frontend',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'Emma Johnson',
+    // level: 'Intermediate',
+    // duration: '8 weeks',
+    // rating: 4.9,
+    // students: 2340,
+    // price: 89.99,
+    // category: 'Frontend',
     image: {
       name: 'react-typescript',
       folder: 'courses'
@@ -43,13 +57,20 @@ export const courses: ICourse[] = [
     abstract: 'Master both frontend and backend development with JavaScript. Build complete applications from database to user interface.',
     createdAt: '2025-01-05T11:20:55.123Z',
     updatedAt: '2025-03-15T16:40:12.456Z',
-    instructor: 'Michael Williams',
-    level: 'Advanced',
-    duration: '12 weeks',
-    rating: 4.7,
-    students: 1876,
-    price: 99.99,
-    category: 'Fullstack',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'Michael Williams',
+    // level: 'Advanced',
+    // duration: '12 weeks',
+    // rating: 4.7,
+    // students: 1876,
+    // price: 99.99,
+    // category: 'Fullstack',
     image: {
       name: 'fullstack-javascript',
       folder: 'courses'
@@ -61,13 +82,20 @@ export const courses: ICourse[] = [
     abstract: 'Introduction to machine learning algorithms and techniques. Learn data preprocessing, model training, and deployment.',
     createdAt: '2025-03-01T08:45:30.789Z',
     updatedAt: '2025-03-18T10:25:40.123Z',
-    instructor: 'Sophia Chen',
-    level: 'Beginner',
-    duration: '6 weeks',
-    rating: 4.6,
-    students: 957,
-    price: 69.99,
-    category: 'Data Science',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'Sophia Chen',
+    // level: 'Beginner',
+    // duration: '6 weeks',
+    // rating: 4.6,
+    // students: 957,
+    // price: 69.99,
+    // category: 'Data Science',
     image: {
       name: 'machine-learning',
       folder: 'courses'
@@ -79,13 +107,20 @@ export const courses: ICourse[] = [
     abstract: 'Learn to implement continuous integration and deployment pipelines. Master Docker, Kubernetes, and cloud services.',
     createdAt: '2025-02-20T13:15:22.456Z',
     updatedAt: '2025-03-05T09:30:44.789Z',
-    instructor: 'David Kim',
-    level: 'Advanced',
-    duration: '9 weeks',
-    rating: 4.8,
-    students: 1123,
-    price: 94.99,
-    category: 'DevOps',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'David Kim',
+    // level: 'Advanced',
+    // duration: '9 weeks',
+    // rating: 4.8,
+    // students: 1123,
+    // price: 94.99,
+    // category: 'DevOps',
     image: {
       name: 'devops-cicd',
       folder: 'courses'
@@ -97,13 +132,20 @@ export const courses: ICourse[] = [
     abstract: 'Build cross-platform mobile applications with Flutter. Create beautiful UIs and integrate with backend services.',
     createdAt: '2025-01-25T15:40:33.123Z',
     updatedAt: '2025-03-12T11:20:55.456Z',
-    instructor: 'Olivia Davis',
-    level: 'Intermediate',
-    duration: '8 weeks',
-    rating: 4.7,
-    students: 1543,
-    price: 84.99,
-    category: 'Mobile',
+    keyLearnings: [
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+      'Learn how to preprocess data for machine learning',
+      'Understand the basics of machine learning algorithms',
+    ],
+    // instructor: 'Olivia Davis',
+    // level: 'Intermediate',
+    // duration: '8 weeks',
+    // rating: 4.7,
+    // students: 1543,
+    // price: 84.99,
+    // category: 'Mobile',
     image: {
       name: 'flutter-mobile',
       folder: 'courses'
@@ -129,9 +171,26 @@ export const levels = [
 ]
 
 export const sortOptions = [
-  { value: 'popular', label: 'Most Popular' },
   { value: 'newest', label: 'Newest First' },
-  { value: 'price-asc', label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Highest Rated' }
+  // { value: 'popular', label: 'Most Popular' },
+  // { value: 'price-asc', label: 'Price: Low to High' },
+  // { value: 'price-desc', label: 'Price: High to Low' },
+  // { value: 'rating', label: 'Highest Rated' }
+]
+
+export const mockCourseImage: Record<string, string> = {
+  'a4a5b1ec-62c3-4ee2-981c-97e27fdc3595': 'nestjs-graphql',
+  '5b28193a-2307-4232-9108-48c7c07a569e': 'nhap-mon-lap-trinh',
+  '4d17dad2-a34f-46ae-83a7-abb7826d047b': 'ctdl-giaithuat'
+}
+
+export const teamMembers = [
+  // Backend members
+  { name: 'Do Duc Anh', jobTitle: 'Backend Developer', image: { name: 'ducanhdo', folder: 'teammates' } },
+  { name: 'La Huy Hoang', jobTitle: 'Backend Developer', image: { name: 'hhoang', folder: 'teammates' } },
+  { name: 'Luu Trong Dung', jobTitle: 'AI Developer', image: { name: 'trongdung', folder: 'teammates' } },
+  
+  // Frontend members
+  { name: 'Lam Quoc Hung', jobTitle: 'Frontend Developer', image: { name: 'hwan', folder: 'teammates' } },
+  { name: 'Thai Bao Nhan', jobTitle: 'Frontend Developer', image: { name: 'nhancat', folder: 'teammates' } }
 ]

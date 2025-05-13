@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, useState, useEffect } from 'react'
 import { Gltf, Environment, Float } from '@react-three/drei'
 import { degToRad } from 'three/src/math/MathUtils.js'
 import { Leva } from 'leva'
@@ -8,11 +8,37 @@ import CameraManager from './CameraManager'
 const Teacher = lazy(() => import('./Teacher'))
 
 const Scene = () => {
+  const [envPreset, setEnvPreset] = useState<'warehouse' | 'sunset'>('warehouse')
+
+  function checkTimeForEnvironment() {
+    const currentHour = new Date().getHours()
+    
+    if (currentHour >= 15 && currentHour < 19) {
+      setEnvPreset('sunset')
+    } else {
+      setEnvPreset('warehouse')
+    }
+  }
+
+  useEffect(() => {
+    checkTimeForEnvironment()
+    
+    const hourlyInterval = setInterval(checkTimeForEnvironment, 60 * 60 * 1000)
+    
+    return () => clearInterval(hourlyInterval)
+  }, [])
+
+  const lightColor = envPreset === 'sunset' ? 'orange' : 'pink'
+  const lightIntensity = envPreset === 'sunset' ? 0.8 : 1
+
   return (
     <Float speed={0.5} floatIntensity={0.2} rotationIntensity={0.1}>
-      <ambientLight intensity={0.8} color="pink" />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <Environment preset="warehouse" />
+      <ambientLight intensity={0.8} color={lightColor} />
+      <directionalLight 
+        position={[10, 10, 5]} 
+        intensity={lightIntensity} 
+      />
+      <Environment preset={envPreset} />
       <Leva hidden />
       <CameraManager />
       <Teacher

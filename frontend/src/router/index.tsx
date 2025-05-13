@@ -3,7 +3,7 @@ import { createBrowserRouter, redirect } from 'react-router-dom'
 
 import { AuthLayout, MainLayout, ClassRoomLayout, DashboardLayout } from '@/layouts'
 import { ErrorBoundary } from '@/components'
-import { getCookie } from '@/stores'
+import { getCookie, isTokenValid, deleteCookie } from '@/stores'
 
 const Pages = {
   Main: {
@@ -24,7 +24,11 @@ const Pages = {
 
 const authGuard = () => {
   const token = getCookie('token')
-  if (!token) {
+  
+  if (!token || !isTokenValid(token)) {
+    if (token) {
+      deleteCookie('token')
+    }
     return redirect('/auth/login')
   }
   return null
@@ -32,7 +36,7 @@ const authGuard = () => {
 
 const redirectIfAuthenticated = () => {
   const token = getCookie('token')
-  if (token) {
+  if (token && isTokenValid(token)) {
     return redirect('/')
   }
   return null
@@ -71,9 +75,9 @@ export const router = createBrowserRouter([
     path: '/dashboard/classroom',
     element: <ClassRoomLayout />,
     loader: authGuard,
-    children: [{ 
-      index: true,
-      element: <Pages.Dashboard.ClassRoom />
-    }]
+    children: [
+      { index: true, element: <Pages.Dashboard.ClassRoom /> },
+      { path: ':courseId/lessons/:lessonId', element: <Pages.Dashboard.ClassRoom /> }
+    ]
   }
 ])

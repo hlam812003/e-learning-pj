@@ -63,7 +63,7 @@ const LanguageDropdown = ({ options, value, onChange, className }: LanguageDropd
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className='absolute top-full right-0 mt-2 w-full min-w-[160px] py-2 rounded-xl bg-white shadow-lg border border-slate-200 z-50'
+            className='absolute top-full right-0 mt-2 w-full min-w-[160px] py-2 rounded-xl bg-white shadow-lg border border-slate-200 z-[51]'
           >
             <div className='py-1'>
               {options.map((option) => (

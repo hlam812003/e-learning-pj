@@ -1,8 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { AuthProvider } from '@/providers'
+import { queryClient } from '@/configs'
+import reactArrayToTree from 'react-array-to-tree'
 import App from './App.tsx'
 import './index.css'
 import './lib/gsap'
@@ -19,31 +22,17 @@ if (!isProduction && typeof window !== 'undefined') {
   })
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: isProduction,
-      refetchOnMount: false,
-      refetchOnReconnect: true,
-      retry: 3,
-      staleTime: 5 * 60 * 1000
-    },
-    mutations: {
-      retry: 2,
-      networkMode: 'always'
-    }
-  }
-})
+const Provider = reactArrayToTree([
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>{null}</GoogleOAuthProvider>,
+  <QueryClientProvider client={queryClient}>{null}</QueryClientProvider>,
+  <AuthProvider>{null}</AuthProvider>
+])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <QueryClientProvider client={queryClient}>
-        <App />
-        <ReactQueryDevtools 
-          initialIsOpen={false}
-        />
-      </QueryClientProvider>
-    </GoogleOAuthProvider>
-  </React.StrictMode>,
+    <Provider>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </Provider>
+  </React.StrictMode>
 )
