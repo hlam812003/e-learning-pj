@@ -7,10 +7,10 @@ import {
 import { LessonExplanationResponse } from '../DTO/lesson-explanation/lesson-explanation.response';
 import { plainToClass } from 'class-transformer';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import axios from 'axios';
 
 interface PDFRewriteResponse {
-  result: string;
+  rewritten_text: string;
 }
 
 @Injectable()
@@ -24,22 +24,33 @@ export class LessonExplanationService {
     input: CreateLessonExplanationInput,
   ): Promise<LessonExplanationResponse> {
     try {
-      // Call the PDF rewrite API
-      const response = await firstValueFrom(
-        this.httpService.post<PDFRewriteResponse>(
-          `${process.env.AI_URL}/rewrite-pdf-emotion`,
-          {
-            emotion: input.emotion,
-            course_id: input.courseId,
-            lesson_id: input.lessonId,
+      // Xử lý URL đúng cách
+      const baseUrl = process.env.AI_URL?.endsWith('/')
+        ? process.env.AI_URL.slice(0, -1)
+        : process.env.AI_URL;
+      
+      // Sử dụng axios trực tiếp thay vì httpService
+      const response = await axios.post<PDFRewriteResponse>(
+        `${baseUrl}/rewrite-pdf-emotion`,
+        {
+          emotion: input.emotion,
+          course_id: input.courseId,
+          lesson_id: input.lessonId,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
           },
-        ),
+          timeout: 60000,
+        }
       );
-
+      
+      console.log(response.data.rewritten_text);
+      
       // Create explanation with the API response
       const explanation =
         await this.lessonExplanationDAO.createLessonExplanation({
-          content: response.data.result,
+          content: response.data.rewritten_text,
           emotion: input.emotion,
           lessonId: input.lessonId,
           userId: input.userId,
