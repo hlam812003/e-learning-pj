@@ -12,4 +12,8 @@
   + "npm run start" to run the program
 
 - 🔶 How to use:
+  + Chọn khóa học muốn học
+  + enroll vào khóa học
+  + Chọn lesson muốn học trong khóa học
+  + start lesson để vào môi trường 3D học với giảng viên AI
   
