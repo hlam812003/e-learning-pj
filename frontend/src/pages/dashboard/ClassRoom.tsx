@@ -118,11 +118,11 @@ export default function ClassRoomPage() {
               onClick={handleGoBack}
               variant="outline"
               className={cn(
-                'rounded-full bg-white/20 backdrop-blur-[16px] border-white/30 hover:bg-white/30 text-white hover:text-white size-12 drop-shadow-lg',
+                'rounded-full bg-white/20 backdrop-blur-[16px] border-white/30 hover:bg-white/30 text-white !p-0 hover:text-white size-12 drop-shadow-lg',
                 isThinking && 'pointer-events-none opacity-70'
               )}
             >
-              <Icon icon="lucide:arrow-left" className="text-[1.5rem] drop-shadow-lg" />
+              <Icon icon="lucide:arrow-left" className="!size-[1.5rem] drop-shadow-lg" />
             </Button>
           </Tooltip>
         </div>

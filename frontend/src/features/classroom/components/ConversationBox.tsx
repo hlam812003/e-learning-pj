@@ -238,10 +238,10 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
               ref={collapseButtonRef}
               onClick={toggleConversationBox}
               variant="outline"
-              className="rounded-full !p-0 bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white size-9 drop-shadow-lg"
+              className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 text-white hover:text-white !p-0 size-9 drop-shadow-lg"
               disabled={isMutating}
             >
-              <Icon icon="tabler:minimize" className="text-[1.4rem] drop-shadow-lg" />
+              <Icon icon="tabler:minimize" className="!size-[1.4rem] drop-shadow-lg" />
             </Button>
           </Tooltip>
         </div>
@@ -406,13 +406,13 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
               <Button 
                 variant="default"
                 className={cn(
-                  'w-full bg-primary/80 hover:bg-primary text-white rounded-full h-16 text-[1.3rem]',
+                  'w-full bg-primary/80 hover:bg-primary text-white rounded-full h-16 text-[1.3rem] !p-0 drop-shadow-lg',
                   isMutating && 'opacity-70 pointer-events-none'
                 )}
                 onClick={toggleCreateForm}
               >
                 Create new
-                <Icon icon="lucide:plus" className="text-[1.4rem]" /> 
+                <Icon icon="lucide:plus" className="!size-[1.4rem]" /> 
               </Button>
             </div>
           )}
