@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { Icon } from '@iconify/react'
 import { cn, useGSAP } from '@/lib'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -32,7 +32,7 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
   onVisibilityChange
 }, ref) => {
   const { user: authUser } = useAuthStore()
-  const { selectedConversationId, setSelectedConversationId } = useClassroomStore()
+  const { selectedConversationId, setSelectedConversationId, isLessonStarted, isExplanationVisible } = useClassroomStore()
   
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false)
   const [newConversationName, setNewConversationName] = useState<string>('')
@@ -216,6 +216,14 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
     deleteConversationMutation.isPending || 
     updateConversationMutation.isPending
   
+  useEffect(() => {
+    if (isLessonStarted && !isExplanationVisible) {
+      if (isVisible) {
+        hideConversationBox()
+      }
+    }
+  }, [isLessonStarted, isVisible, hideConversationBox, isExplanationVisible])
+  
   return (
     <div ref={containerRef} className="absolute top-1/2 -translate-y-1/2 right-[1.65rem] flex items-center justify-center z-50">
       <div 
@@ -248,8 +256,11 @@ const ConversationBox = forwardRef<ConversationBoxHandle, ConversationBoxProps>(
         
         <div 
           ref={expandIconRef}
-          className="flex items-center justify-center size-full cursor-pointer relative" 
-          onClick={showConversationBox}
+          className={cn(
+            'flex items-center justify-center size-full relative',
+            isExplanationVisible ? 'cursor-pointer' : 'pointer-events-none'
+          )}
+          onClick={isExplanationVisible ? showConversationBox : undefined}
         >
           <Icon icon="mdi:conversation-plus-outline" className="text-[1.75rem] text-white drop-shadow-lg" />
           

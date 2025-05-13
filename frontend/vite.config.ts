@@ -100,7 +100,8 @@ export default defineConfig({
       'class-variance-authority',
       'axios',
       '@tanstack/react-query',
-      '@iconify/react'
+      '@iconify/react',
+      'react-markdown'
     ],
     esbuildOptions: {
       target: 'es2020'

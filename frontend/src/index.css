@@ -230,6 +230,18 @@
     stroke-dashoffset: 0;
     stroke-linecap: round;
   }
+
+  .content__container::-webkit-scrollbar {
+    @apply w-5;
+  }
+
+  .content__container::-webkit-scrollbar-track {
+    @apply bg-white/30;
+  }
+
+  .content__container::-webkit-scrollbar-thumb {
+    @apply bg-white/50 rounded-full;
+  }
   
   @keyframes ld-ripple {
     0% {

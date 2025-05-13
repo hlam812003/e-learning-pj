@@ -17,11 +17,11 @@ const getCookie = (name: string): string | null => {
   return match ? match[2] : null
 }
 
-export const deleteCookie = (name: string) => {
+const deleteCookie = (name: string) => {
   document.cookie = `${name}=; Max-Age=-99999999; path=/; SameSite=Strict; Secure`
 }
 
-export const isTokenValid = (token: string): boolean => {
+const isTokenValid = (token: string): boolean => {
   try {
     const decoded: DecodedToken = jwtDecode(token)
     const currentTime = Date.now() / 1000
@@ -157,5 +157,7 @@ const useAuthStore = create<AuthStore>()(
 
 export {
   useAuthStore,
-  getCookie
+  getCookie,
+  deleteCookie,
+  isTokenValid
 }

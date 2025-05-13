@@ -46,6 +46,8 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
   const setTeacherMode = useClassroomStore((state) => state.setTeacherMode)
   const currentMessage = useClassroomStore((state) => state.currentMessage)
   const selectedConversationId = useClassroomStore((state) => state.selectedConversationId)
+  const isLessonStarted = useClassroomStore((state) => state.isLessonStarted)
+  const isExplanationVisible = useClassroomStore((state) => state.isExplanationVisible)
 
   const [message, setMessage] = useState<string>('')
   const [_, setSdkError] = useState<string | null>(null)
@@ -190,6 +192,14 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
       setSdkError(null)
     }
   }, [azureError])
+
+  useEffect(() => {
+    if (isLessonStarted && !isExplanationVisible) {
+      if (isVisible) {
+        hideMessageBox()
+      }
+    }
+  }, [isLessonStarted, isExplanationVisible, isVisible, hideMessageBox])
 
   useImperativeHandle(ref, () => ({
     show: showMessageBox,
@@ -337,10 +347,13 @@ const MessageBox = forwardRef<MessageBoxHandle, MessageBoxProps>(({
         </div>
         <div 
           ref={expandIconRef}
-          className="flex items-center justify-center size-full cursor-pointer relative" 
-          onClick={showMessageBox}
+          className={cn(
+            'flex items-center justify-center size-full relative',
+            isExplanationVisible ? 'cursor-pointer' : 'pointer-events-none'
+          )}
+          onClick={isExplanationVisible ? showMessageBox : undefined}
         >
-          <Icon icon="fluent:chat-28-regular" className="text-[1.75rem] text-white drop-shadow-lg" />
+          <Icon icon="fluent:chat-28-regular" className="!size-[1.75rem] text-white drop-shadow-lg" />
           
           <Tooltip 
             content="Ask your teacher"

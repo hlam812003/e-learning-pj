@@ -54,5 +54,44 @@ export const lessonService = {
       variables: { id }
     })
     return response.data.data.getLessonById
+  },
+  createLessonExplanation: async (emotion: string, lessonId: string, userId: string, courseId: string): Promise<any> => {
+    const response = await apiConfig.post('', {
+      query: `
+        mutation CreateLessonExplanation($data: CreateLessonExplanationInput!) {
+          createLessonExplanation(data: $data) {
+            id
+            content
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { 
+        data: {
+          emotion,
+          lessonId,
+          userId,
+          courseId
+        }
+      }
+    })
+    return response.data.data.createLessonExplanation
+  },
+  getLessonExplanationByLessonAndUser: async (lessonId: string, userId: string): Promise<any> => {
+    const response = await apiConfig.post('', {
+      query: `
+        query LessonExplanationByLessonAndUser($lessonId: String!, $userId: String!) {
+          lessonExplanationByLessonAndUser(lessonId: $lessonId, userId: $userId) {
+            id
+            content
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { lessonId, userId }
+    })
+    return response.data.data.lessonExplanationByLessonAndUser
   }
 }
